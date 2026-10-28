@@ -11,9 +11,9 @@
     window.NOSTRANO_ROOT = location.pathname.replace(/\/(modifica|admin)(\/.*)?$/, '/').replace(/[^/]*$/, '')
     document.write([
       '<link rel="icon" href="ROOT/assets/logo.svg" type="image/svg+xml">',
-      '<link rel="stylesheet" href="ROOT/assets/style.css">',
-      '<script src="ROOT/config.js"><\/script>',
-      '<script type="module" src="ROOT/assets/app.js"><\/script>',
+      '<link rel="stylesheet" href="ROOT/assets/style.css?v=mvrq3rjk">',
+      '<script src="ROOT/config.js?v=mvrq3rjk"><\/script>',
+      '<script type="module" src="ROOT/assets/app.js?v=mvrq3rjk"><\/script>',
     ].map((tag) => tag.replaceAll('ROOT/', window.NOSTRANO_ROOT)).join(''))
   </script>
   <title>Nostrano · Area produttore</title>

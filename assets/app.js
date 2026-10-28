@@ -1,9 +1,9 @@
 // Pagina del produttore: si apre dal link personale https://nostrano.app/modifica/<token>.
 // Fa le stesse cose dell'area produttore dell'app, con le stesse funzioni del database.
-import { ROOT, linkCode, rpc } from './api.js'
-import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js'
-import { WEEK, fromClock, todayRome } from './days.js'
-import * as views from './views.js'
+import { ROOT, linkCode, rpc } from './api.js?v=mvrq3rjk'
+import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=mvrq3rjk'
+import { WEEK, fromClock, todayRome } from './days.js?v=mvrq3rjk'
+import * as views from './views.js?v=mvrq3rjk'
 
 const root = document.querySelector('#app')
 const languageSelect = document.querySelector('#lang')
