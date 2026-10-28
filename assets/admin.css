@@ -77,7 +77,7 @@ fieldset.plain.grid .wide { grid-column: 1 / -1; }
 fieldset.plain.grid legend { font-weight: 700; }
 @media (max-width: 560px) { fieldset.plain.grid { grid-template-columns: 1fr; } }
 fieldset.plain input:not([type="checkbox"]), fieldset.plain select, fieldset.plain textarea { width: 100%; }
-.grow-input { flex: 1; }
+.grow-input { flex: 1 1 180px; }
 .checks { display: flex; flex-wrap: wrap; gap: 8px 18px; }
 
 .photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
