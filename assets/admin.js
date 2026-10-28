@@ -13,7 +13,7 @@ const publicUrl = (config.publicUrl ?? location.origin + ROOT).replace(/\/$/, ''
 const a = {
   route: { name: '', param: null, query: new URLSearchParams() },
   overview: null, farms: [], farm: null, reports: [], suggestions: [], custom: [], catalog: [], devices: [],
-  filter: 'all', search: '', invite: null, newCode: null, fromSuggestion: null, uploading: false, busy: false,
+  filter: 'all', search: '', invite: null, newCode: null, personalLink: null, fromSuggestion: null, uploading: false, busy: false,
 }
 
 // Disegno e messaggi --------------------------------------------------------------------------
@@ -100,6 +100,7 @@ async function show() {
   if (route.name !== a.route.name || route.param !== a.route.param) {
     a.invite = null
     a.newCode = null
+    a.personalLink = null
   }
   a.route = route
   try {
@@ -320,6 +321,12 @@ root.addEventListener('click', (event) => {
     }
     case 'report':
       return act(() => rpc('admin_report_set', { p_id: Number(id), p_status: status }), status === 'handled' ? 'Segnata come gestita' : 'Riaperta')
+    case 'personal-link':
+      if (!window.confirm('Creare un link personale nuovo? Quello di prima smette di funzionare; i dispositivi già abilitati restano.')) return
+      return act(async () => {
+        const code = await rpc('admin_create_key', { p_label: 'Link personale' })
+        a.personalLink = `${publicUrl}/admin/#link=${encodeURIComponent(code)}`
+      }, 'Link personale pronto: salvalo')
     case 'device-remove':
       if (!window.confirm(me === 'true' ? 'Togliere questo browser? Per rientrare servirà un link nuovo.' : 'Togliere questo dispositivo?')) return
       return act(() => rpc('admin_device_remove', { p_user: id }), 'Accesso tolto')
@@ -390,7 +397,7 @@ root.addEventListener('submit', async (event) => {
       const label = String(data.get('label')).trim()
       return act(async () => {
         const code = await rpc('admin_create_code', { p_label: label })
-        a.newCode = { label, link: `${publicUrl}/admin/${encodeURIComponent(code)}` }
+        a.newCode = { label, link: `${publicUrl}/admin/#link=${encodeURIComponent(code)}` }
       })
     }
   }
@@ -405,6 +412,17 @@ document.addEventListener('visibilitychange', () => {
   }
 })
 
+/** "iPhone · Safari", "Mac · Chrome": per riconoscere i dispositivi in «Accessi». */
+function deviceName() {
+  const ua = navigator.userAgent
+  const device = /iPhone/.test(ua) ? 'iPhone'
+    : /iPad/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) ? 'iPad'
+    : /Android/.test(ua) ? 'Android' : /Macintosh/.test(ua) ? 'Mac' : /Windows/.test(ua) ? 'Windows' : 'Computer'
+  const browser = /Edg/.test(ua) ? 'Edge' : /CriOS|Chrome/.test(ua) ? 'Chrome' : /FxiOS|Firefox/.test(ua) ? 'Firefox'
+    : /Safari/.test(ua) ? 'Safari' : 'browser'
+  return `${device} · ${browser}`
+}
+
 // Avvio ---------------------------------------------------------------------------------------
 
 async function boot() {
@@ -412,7 +430,7 @@ async function boot() {
   const code = linkCode()
   try {
     if (code) {
-      await rpc('admin_claim', { p_code: code })
+      await rpc('admin_claim', { p_code: code, p_device: deviceName() })
       // Il codice vale una volta sola: non deve restare nella barra degli indirizzi.
       history.replaceState(null, '', `${ROOT}admin/${location.hash.startsWith('#/') ? location.hash : ''}`)
     }

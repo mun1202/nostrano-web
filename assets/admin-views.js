@@ -76,9 +76,8 @@ export function notAdmin() {
     <div class="message">
       <img src="${ROOT}assets/logo.svg" alt="" width="48" height="60">
       <h1>Questo browser non è abilitato</h1>
-      <p class="muted">Sul Mac, nella cartella del progetto, lancia il comando qui sotto e apri il link che compare. Vale 24 ore e una volta sola.</p>
-      <pre class="code">npm run admin:link</pre>
-      <p class="muted small">Da un browser già abilitato puoi aggiungerne un altro in «Accessi».</p>
+      <p class="muted">Apri il tuo link personale del pannello, quello che hai salvato nelle Note o nei preferiti: da lì questo browser resta abilitato.</p>
+      <p class="muted small">Se non ce l'hai, crealo da un dispositivo già abilitato in «Accessi». Dal Mac c'è anche <code>npm run admin:link</code>.</p>
     </div>`
 }
 
@@ -86,7 +85,7 @@ export const invalidLink = () => `
   <div class="message">
     <img src="${ROOT}assets/logo.svg" alt="" width="48" height="60">
     <h1>Link di accesso non valido</h1>
-    <p class="muted">È già stato usato o è scaduto. Creane uno nuovo con <code>npm run admin:link</code>.</p>
+    <p class="muted">È già stato usato, è scaduto o è stato sostituito da un link personale nuovo. Usa il link personale più recente.</p>
   </div>`
 
 // Panoramica ----------------------------------------------------------------------------------
@@ -532,13 +531,23 @@ export function products(a) {
 export function devices(a) {
   return `
     <h1>Accessi</h1>
-    <p class="muted">I browser che possono usare questo pannello. Niente password: ognuno è entrato con un link valido una volta sola.</p>
+    <p class="muted">I browser che possono usare questo pannello. Niente password: ognuno è entrato con il link personale o con un link valido una volta sola.</p>
     <div class="card list">${a.devices.map((d) => `
       <div class="row">
         <span><strong>${esc(d.label || 'Senza nome')}</strong>${d.me ? ' <span class="pill green">questo browser</span>' : ''}<br><small class="muted">dal ${dateText(d.created_at)}</small></span>
         <button class="link danger small" data-action="device-remove" data-id="${esc(d.user_id)}" data-me="${d.me}">Togli</button>
       </div>`).join('')}</div>
-    <h2>Aggiungi un dispositivo</h2>
+    <h2>Link personale</h2>
+    <div class="card stack">
+      <p class="small">Un link solo tuo che apre il pannello su qualsiasi dispositivo, tutte le volte che serve. Salvalo nelle Note o nei preferiti e non mandarlo a nessuno: chi lo ha entra nel pannello.</p>
+      ${a.personalLink ? `
+        <pre class="code">${esc(a.personalLink)}</pre>
+        <button class="primary" data-action="copy" data-text="${esc(a.personalLink)}">Copia il link personale</button>
+        <p class="muted small">Si vede solo adesso. Se lo perdi ne crei uno nuovo da qui.</p>` : `
+        <button class="secondary" data-action="personal-link">Crea un link personale nuovo</button>
+        <p class="muted small">Quello di prima smette di funzionare; i dispositivi qui sopra restano abilitati.</p>`}
+    </div>
+    <h2>Aggiungi un dispositivo, una volta sola</h2>
     <form data-form="device" class="card row add">
       <input name="label" required maxlength="60" placeholder="Per esempio: iPhone di Anna">
       <button type="submit" class="secondary">Crea il link</button>
