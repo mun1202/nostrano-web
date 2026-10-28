@@ -1,8 +1,8 @@
 // Pannello admin: si apre con un link di accesso (https://nostrano.app/admin/<codice>), poi il browser resta abilitato.
 // Da qui si creano le schede in bozza, si invitano i masi su WhatsApp e si pubblica.
-import { ROOT, linkCode, removeUploaded, rpc, upload } from './api.js?v=mvrq3rjk'
-import { MUNICIPALITY_CODES, municipalityName } from './i18n.js?v=mvrq3rjk'
-import * as views from './admin-views.js?v=mvrq3rjk'
+import { ROOT, linkCode, removeUploaded, rpc, upload } from './api.js?v=mvrq5ht4'
+import { MUNICIPALITY_CODES, municipalityName } from './i18n.js?v=mvrq5ht4'
+import * as views from './admin-views.js?v=mvrq5ht4'
 
 const root = document.querySelector('#app')
 const navigation = document.querySelector('#nav')
@@ -188,6 +188,20 @@ function farmData(form) {
   }
 }
 
+/** "Sono al maso": la posizione del telefono, quando si crea la scheda sul posto. */
+function fillHere(form) {
+  if (!navigator.geolocation) return toast('Questo browser non dà la posizione.', true)
+  toast('Cerco la posizione…')
+  navigator.geolocation.getCurrentPosition(
+    ({ coords }) => {
+      form.elements.coordinates.value = `${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)}`
+      toast(`Posizione presa (precisione ${Math.round(coords.accuracy)} m)`)
+    },
+    () => toast('Posizione non disponibile: controlla il permesso in Impostazioni › Safari › Posizione.', true),
+    { enableHighAccuracy: true, timeout: 15000 },
+  )
+}
+
 // Invito su WhatsApp --------------------------------------------------------------------------
 
 /** Numero per wa.me: solo cifre con il prefisso internazionale. Un cellulare italiano senza prefisso prende il +39. */
@@ -291,6 +305,8 @@ root.addEventListener('click', (event) => {
   switch (action) {
     case 'invite':
       return prepareInvite()
+    case 'here':
+      return fillHere(element.closest('form'))
     case 'copy':
       return copy(text)
     case 'copy-message':

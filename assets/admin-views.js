@@ -1,7 +1,7 @@
 // Le schermate del pannello admin, come HTML. Solo in italiano: lo usa chi gestisce Nostrano.
-import { esc } from './views.js?v=mvrq3rjk'
-import { CATEGORY_CODES, MUNICIPALITY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=mvrq3rjk'
-import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=mvrq3rjk'
+import { esc } from './views.js?v=mvrq5ht4'
+import { CATEGORY_CODES, MUNICIPALITY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=mvrq5ht4'
+import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=mvrq5ht4'
 
 const ROOT = window.NOSTRANO_ROOT ?? '/'
 const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1)
@@ -187,9 +187,10 @@ function farmFields(f, isNew) {
       <label class="stack small">Indirizzo *
         <input name="address" required maxlength="160" value="${esc(f.address)}" placeholder="Per esempio: Via Monte 12, Missiano">
       </label>
-      <label class="stack small wide">Posizione * <span class="muted">— su Google Maps tieni premuto sul maso e copia i numeri, oppure incolla il link</span>
+      <label class="stack small wide">Posizione * <span class="muted">— se sei al maso tocca «Sono al maso»; altrimenti su Google Maps tieni premuto sul maso e copia i numeri</span>
         <span class="row">
           <input name="coordinates" required value="${esc(coords)}" placeholder="46.4983, 11.2611" class="grow-input">
+          <button type="button" class="secondary small" data-action="here">📍 Sono al maso</button>
           ${coords ? `<a class="button secondary small" target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(coords.replace(' ', ''))}">Vedi sulla mappa</a>` : ''}
         </span>
       </label>
