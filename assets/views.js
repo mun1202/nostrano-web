@@ -1,6 +1,6 @@
 // Le parti della pagina, come HTML. Ogni testo che arriva dal database o dai clienti passa da esc().
-import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=mvsjux13'
-import { WEEK, addDays, formatDay, formatInstant, openDays, toClock, todayRome, weekdayName } from './days.js?v=mvsjux13'
+import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=mvskez7e'
+import { WEEK, addDays, formatDay, formatInstant, openDays, toClock, todayRome, weekdayName } from './days.js?v=mvskez7e'
 
 export const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
@@ -50,18 +50,26 @@ const confirmedToday = (farm) =>
 
 // Testata e conferma -------------------------------------------------------------------------
 
+// I titoli delle pagine del menu, oltre alla panoramica.
+const PAGE_TITLES = { richieste: 'requests', prodotti: 'products', orari: 'hoursPage', novita: 'notice', maso: 'farm' }
+
 export function header(s) {
   const { farm } = s
-  const status = farm.status === 'hidden' ? 'hiddenFarm' : farm.status === 'draft' ? (farm.ready_at ? 'inReview' : 'draft') : null
+  const status = farm.status === 'hidden' ? 'hiddenFarm' : farm.status === 'draft' ? (farm.ready_at ? 'inReview' : 'draft') : 'published'
+  const title = PAGE_TITLES[s.route]
   return `
     ${s.appLink ? `
       <div class="card banner row">
         <span>${t(s.lang, 'appBanner')}</span>
         <a class="button secondary small" href="${esc(s.appLink)}">${t(s.lang, 'appBannerButton')}</a>
       </div>` : ''}
-    <h1>${esc(farm.name)}</h1>
-    <p class="muted">${esc(municipalityName(s.lang, farm.municipality))} · ${esc(farm.address)}</p>
-    ${status ? `<p class="pill amber">${t(s.lang, status)}</p>` : ''}`
+    <div class="page-title">
+      <div>
+        <p class="eyebrow">${title ? esc(farm.name) : `${esc(municipalityName(s.lang, farm.municipality))} · ${esc(farm.address)}`}</p>
+        <h1>${title ? t(s.lang, title) : esc(farm.name)}</h1>
+      </div>
+      <span class="badge ${status === 'published' ? 'ok' : 'warn'}">${t(s.lang, status)}</span>
+    </div>`
 }
 
 /** Per la scheda in bozza: cosa manca, il consenso e l'invio per la pubblicazione. */
@@ -70,13 +78,13 @@ export function onboarding(s) {
   if (farm.status !== 'draft' || farm.ready_at) return ''
   const missing = new Set(farm.missing)
   const steps = [
-    ['products', 'stepProducts', 's-products'],
-    ...(farm.has_farm_shop ? [['hours', 'stepHours', 's-hours']] : []),
-    ['description', 'stepDescription', 's-farm'],
-    ['consent', 'stepConsent', 's-onboarding'],
+    ['products', 'stepProducts', '/prodotti'],
+    ...(farm.has_farm_shop ? [['hours', 'stepHours', '/orari']] : []),
+    ['description', 'stepDescription', '/maso'],
+    ['consent', 'stepConsent', '/'],
   ]
   return `
-    <div class="card soft-green">
+    <div class="card">
       <h2>${t(s.lang, 'welcome')}</h2>
       <p>${t(s.lang, 'welcomeText')}</p>
       <ol class="checklist">
@@ -86,7 +94,7 @@ export function onboarding(s) {
       ${missing.has('consent') ? `
         <div class="consent">
           <p class="small">${t(s.lang, 'consentText')}</p>
-          <button class="secondary" data-action="consent">✓ ${t(s.lang, 'giveConsent')}</button>
+          <button class="secondary" data-action="consent">${t(s.lang, 'giveConsent')}</button>
         </div>` : ''}
       <button class="primary wide" data-action="request-publish" ${missing.size ? 'disabled' : ''}>${t(s.lang, 'requestPublish')}</button>
       ${missing.size ? `<p class="muted small">${t(s.lang, 'requestPublishMissing')}</p>` : ''}
@@ -126,12 +134,12 @@ export function confirm(s) {
   if (s.farm.status !== 'published') return ''
   const done = confirmedToday(s.farm)
   return `
-    <div class="card soft-green">
+    <div class="card">
       <h2>${t(s.lang, 'allGood')}</h2>
       <p>${t(s.lang, 'allGoodText')}</p>
       <p class="muted small">${t(s.lang, 'lastChecked', formatInstant(s.farm.last_checked_at, s.lang))}</p>
       <button class="primary wide" data-action="confirm" ${done ? 'disabled' : ''}>
-        ✓ ${t(s.lang, done ? 'confirmedToday' : 'confirm')}
+        ${t(s.lang, done ? 'confirmedToday' : 'confirm')}
       </button>
     </div>`
 }
@@ -163,15 +171,15 @@ function requestCard(s, request) {
   return `
     <article class="card request">
       <div class="row">
-        <div><strong>${esc(request.name)}</strong><br><span class="green">${esc(formatDay(request.day, s.lang))}</span></div>
+        <div><strong>${esc(request.name)}</strong><br><span class="muted small">${esc(capitalize(formatDay(request.day, s.lang)))}</span></div>
         <button class="link danger small" data-action="block" data-id="${esc(request.id)}">${t(s.lang, 'block')}</button>
       </div>
       ${linesHtml(s, request)}
       ${request.note ? `<p class="muted"><em>“${esc(request.note)}”</em></p>` : ''}
       ${s.proposing === request.id ? proposalForm(s, request) : `
         <div class="actions three">
-          <button class="primary yes" data-action="answer" data-status="accepted" data-id="${esc(request.id)}">✓ ${t(s.lang, 'keep')}</button>
-          <button class="secondary" data-action="answer" data-status="declined" data-id="${esc(request.id)}">✕ ${t(s.lang, 'dontHave')}</button>
+          <button class="primary yes" data-action="answer" data-status="accepted" data-id="${esc(request.id)}">${t(s.lang, 'keep')}</button>
+          <button class="secondary" data-action="answer" data-status="declined" data-id="${esc(request.id)}">${t(s.lang, 'dontHave')}</button>
           <button class="secondary" data-action="propose" data-id="${esc(request.id)}">${t(s.lang, 'otherDay')}</button>
         </div>`}
     </article>`
@@ -184,7 +192,7 @@ function collectCard(s, request) {
       ${linesHtml(s, request)}
       ${request.note ? `<p class="muted"><em>“${esc(request.note)}”</em></p>` : ''}
       <div class="actions">
-        <button class="primary yes" data-action="answer" data-status="picked_up" data-id="${esc(request.id)}">✓ ${t(s.lang, 'pickedUp')}</button>
+        <button class="primary yes" data-action="answer" data-status="picked_up" data-id="${esc(request.id)}">${t(s.lang, 'pickedUp')}</button>
         <button class="secondary" data-action="answer" data-status="no_show" data-id="${esc(request.id)}">${t(s.lang, 'noShow')}</button>
       </div>
     </article>`
@@ -197,7 +205,7 @@ export function requests(s) {
   const collecting = s.requests.filter(isToCollect)
   const answered = s.requests.filter((r) => !isWaiting(r) && !isToCollect(r))
   return `
-    <h2>${t(s.lang, 'requests')}${waiting.length ? ` <span class="count">${waiting.length}</span>` : ''}</h2>
+    <h2>${t(s.lang, 'requests')}</h2>
     <div class="card">
       <label class="row">
         <span><strong>${t(s.lang, 'acceptRequests')}</strong><br><small class="muted">${t(s.lang, 'acceptRequestsText')}</small></span>
@@ -255,10 +263,26 @@ function notifyCard(s) {
     </div>`
 }
 
+/** Nella panoramica: le richieste da rispondere (le prime tre) e quante sono da ritirare. */
+export function inbox(s) {
+  if (!s.farm.has_farm_shop) return ''
+  const waiting = s.requests.filter(isWaiting)
+  const collecting = s.requests.filter(isToCollect).length
+  return `
+    <div class="section-head">
+      <h2>${t(s.lang, 'requestsWaiting')}</h2>
+      <a class="more" href="#/richieste">${t(s.lang, 'seeAll')}</a>
+    </div>
+    ${!s.farm.accepts_requests ? `<p class="muted">${t(s.lang, 'requestsOffNote')}</p>`
+      : waiting.length ? waiting.slice(0, 3).map((r) => requestCard(s, r)).join('') : `<div class="card empty"><p class="muted">${t(s.lang, 'requestsNone')}</p></div>`}
+    ${waiting.length > 3 ? `<p class="small"><a class="more" href="#/richieste">${t(s.lang, 'moreRequests', waiting.length - 3)}</a></p>` : ''}
+    ${collecting ? `<p class="small muted">${t(s.lang, 'toCollectCount', collecting)}</p>` : ''}`
+}
+
 // Numeri e domanda ---------------------------------------------------------------------------
 
 const tile = (value, label, note = '') =>
-  `<div class="tile"><strong>${value}</strong><span>${label}</span>${note ? `<small class="green">${note}</small>` : ''}</div>`
+  `<div class="tile"><span>${label}</span><strong>${value}</strong>${note ? `<small>${note}</small>` : ''}</div>`
 
 export function stats(s) {
   if (s.farm.status !== 'published') return ''

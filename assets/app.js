@@ -1,28 +1,36 @@
 // Pagina del produttore: si apre dal link personale https://nostrano.app/modifica/<token>.
 // Fa le stesse cose dell'area produttore dell'app, con le stesse funzioni del database.
-import { ROOT, linkCode, rpc } from './api.js?v=mvsjux13'
-import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=mvsjux13'
-import { WEEK, fromClock, todayRome } from './days.js?v=mvsjux13'
-import * as views from './views.js?v=mvsjux13'
-import * as notify from './notify.js?v=mvsjux13'
+import { ROOT, linkCode, rpc } from './api.js?v=mvskez7e'
+import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=mvskez7e'
+import { WEEK, fromClock, todayRome } from './days.js?v=mvskez7e'
+import * as views from './views.js?v=mvskez7e'
+import * as notify from './notify.js?v=mvskez7e'
+import { icon } from './icons.js?v=mvskez7e'
 
 const root = document.querySelector('#app')
 const nav = document.querySelector('#nav')
 const languageSelect = document.querySelector('#lang')
-// La bozza segue l'ordine di chi compila la scheda; quella pubblicata mette davanti richieste e numeri.
-// È l'ordine sul telefono; dal computer i numeri stanno in cima e le altre parti in due colonne (COLUMNS).
-const DRAFT = ['header', 'onboarding', 'products', 'hours', 'farm', 'demand', 'closures', 'notice', 'requests', 'footer']
-const PUBLISHED = ['header', 'requests', 'confirm', 'stats', 'demand', 'products', 'hours', 'closures', 'notice', 'farm', 'footer']
-const COLUMNS = {
-  draft: [['onboarding', 'products', 'demand'], ['hours', 'farm', 'closures', 'notice', 'requests']],
-  published: [['requests', 'confirm', 'demand', 'notice'], ['products', 'hours', 'closures', 'farm']],
+// Le pagine del menu, come nel pannello admin: #/ è la panoramica, le altre una parte della scheda ciascuna.
+// La panoramica della bozza parte da cosa manca; quella pubblicata da numeri, conferma e richieste.
+const PAGES = [
+  { route: '', icon: 'overview', label: 'nav_overview' },
+  { route: 'richieste', icon: 'inbox', label: 'nav_requests', sections: ['requests'], shopOnly: true },
+  { route: 'prodotti', icon: 'package', label: 'nav_products', sections: ['products'] },
+  { route: 'orari', icon: 'clock', label: 'nav_hours', sections: ['hours', 'closures'] },
+  { route: 'novita', icon: 'megaphone', label: 'nav_notice', sections: ['notice'] },
+  { route: 'maso', icon: 'home', label: 'nav_farm', sections: ['farm', 'footer'] },
+]
+
+const currentRoute = () => location.hash.match(/^#\/([a-z]*)/)?.[1] ?? ''
+
+function pageSections() {
+  const page = PAGES.find((p) => p.route === s.route)
+  if (page?.sections) return page.sections
+  return s.farm.status === 'draft' ? ['onboarding', 'demand'] : ['stats', 'inbox', 'confirm', 'demand']
 }
-// Il menu: le parti a cui si salta, nell'ordine della pagina.
-const NAV = ['requests', 'stats', 'demand', 'products', 'hours', 'closures', 'notice', 'farm']
-const sections = () => (s.farm.status === 'draft' ? DRAFT : PUBLISHED)
 
 const s = {
-  lang: initialLanguage(), farm: null, area: null, requests: [], catalog: [],
+  lang: initialLanguage(), farm: null, area: null, requests: [], catalog: [], route: currentRoute(),
   proposing: null, editing: null, customOpen: false, appLink: null, busy: false, message: null,
   push: null, pushHelp: false,
 }
@@ -37,50 +45,36 @@ function rememberOpen() {
 
 function render() {
   s.message = null
+  // Una pagina che questo maso non ha (le richieste senza negozio) torna alla panoramica.
+  if (!PAGES.some((p) => p.route === s.route && !(p.shopOnly && !s.farm.has_farm_shop))) s.route = ''
   rememberOpen()
-  const order = sections()
-  // Sul telefono le colonne si sciolgono e conta "order": le parti tornano nell'ordine di sopra.
-  const section = (name) => `<section id="s-${name}" style="order: ${order.indexOf(name)}">${views[name](s)}</section>`
-  const [left, right] = COLUMNS[s.farm.status === 'draft' ? 'draft' : 'published']
-  root.innerHTML = `
-    ${section('header')}
-    <div class="layout">
-      ${s.farm.status === 'draft' ? '' : section('stats')}
-      <div class="column">${left.map(section).join('')}</div>
-      <div class="column">${right.map(section).join('')}</div>
-    </div>
-    ${section('footer')}`
+  const section = (name) => `<section id="s-${name}">${views[name](s)}</section>`
+  const names = pageSections()
+  // Nella panoramica dal computer: i numeri sopra, poi richieste a sinistra e conferma e domanda a destra.
+  const body = s.route === '' && s.farm.status !== 'draft'
+    ? `${section('stats')}<div class="split-view"><div>${section('inbox')}</div><div>${section('confirm')}${section('demand')}</div></div>`
+    : names.map(section).join('')
+  root.innerHTML = `${section('header')}<div class="page ${names.length === 1 || names[1] === 'footer' ? 'single' : ''}">${body}</div>`
   renderNav()
 }
 
 function renderNav() {
   const waiting = s.requests.filter(views.isWaiting).length
-  nav.innerHTML = NAV.filter((name) => root.querySelector(`#s-${name}`)?.innerHTML.trim()).map((name) => `
-    <a href="#s-${name}" data-nav="${name}"><span class="dot"></span>${t(s.lang, `nav_${name}`)}${
-      name === 'requests' && waiting ? ` <span class="count">${waiting}</span>` : ''}</a>`).join('')
-  watchSections()
-}
-
-/** Nel menu si accende la parte che si sta guardando. */
-let watcher
-function watchSections() {
-  watcher?.disconnect()
-  watcher = new IntersectionObserver((entries) => {
-    for (const entry of entries) {
-      if (!entry.isIntersecting) continue
-      for (const link of nav.querySelectorAll('a')) {
-        link.setAttribute('aria-current', String(link.dataset.nav === entry.target.id.slice(2)))
-      }
-    }
-  }, { rootMargin: '-15% 0px -75% 0px' })
-  for (const link of nav.querySelectorAll('a')) watcher.observe(root.querySelector(`#s-${link.dataset.nav}`))
+  nav.innerHTML = PAGES.filter((p) => !(p.shopOnly && !s.farm.has_farm_shop)).map((p) => `
+    <a href="#/${p.route}" ${p.route === s.route ? 'aria-current="page"' : ''}>${icon(p.icon)}<span>${t(s.lang, p.label)}</span>${
+      p.route === 'richieste' && waiting ? `<span class="count">${waiting}</span>` : ''}</a>`).join('')
 }
 
 function renderSection(name) {
   rememberOpen()
   const section = root.querySelector(`#s-${name}`)
   if (section) section.innerHTML = views[name](s)
-  if (name === 'requests') renderNav()
+  if (name === 'requests') {
+    // Le richieste stanno anche nella panoramica, e il numero nel menu.
+    const inbox = root.querySelector('#s-inbox')
+    if (inbox) inbox.innerHTML = views.inbox(s)
+    renderNav()
+  }
 }
 
 /** Schermata con un solo messaggio: caricamento, link non valido, telefono non collegato. */
@@ -236,12 +230,17 @@ async function changePush(action, success) {
 
 // Tocchi e moduli ----------------------------------------------------------------------------
 
-// Il menu scorre alla parte senza cambiare l'indirizzo, che su iPhone può tenere il link per la schermata Home.
-nav.addEventListener('click', (event) => {
-  const link = event.target.closest('a[data-nav]')
-  if (!link) return
-  event.preventDefault()
-  root.querySelector(`#s-${link.dataset.nav}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+// Cambio di pagina dal menu: si ridisegna e si torna in cima.
+window.addEventListener('hashchange', () => {
+  const route = currentRoute()
+  if (route === s.route && !location.hash.startsWith('#/')) return
+  s.route = route
+  s.editing = null
+  s.proposing = null
+  if (s.farm && !s.message) {
+    render()
+    window.scrollTo({ top: 0 })
+  }
 })
 
 root.addEventListener('click', (event) => {

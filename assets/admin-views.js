@@ -1,25 +1,26 @@
 // Le schermate del pannello admin, come HTML. Solo in italiano: lo usa chi gestisce Nostrano.
-import { esc } from './views.js?v=mvsjux13'
-import { CATEGORY_CODES, MUNICIPALITY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=mvsjux13'
-import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=mvsjux13'
+import { esc } from './views.js?v=mvskez7e'
+import { CATEGORY_CODES, MUNICIPALITY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=mvskez7e'
+import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=mvskez7e'
+import { icon } from './icons.js?v=mvskez7e'
 
 const ROOT = window.NOSTRANO_ROOT ?? '/'
 const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1)
 
 export const NAV = [
-  ['', 'Panoramica'],
-  ['masi', 'Masi'],
-  ['segnalazioni', 'Segnalazioni'],
-  ['suggeriti', 'Suggeriti'],
-  ['prodotti', 'Prodotti'],
-  ['accessi', 'Accessi'],
+  ['', 'Panoramica', 'overview'],
+  ['masi', 'Masi', 'list'],
+  ['segnalazioni', 'Segnalazioni', 'flag'],
+  ['suggeriti', 'Suggeriti', 'bulb'],
+  ['prodotti', 'Prodotti', 'package'],
+  ['accessi', 'Accessi', 'key'],
 ]
 
 export function nav(a) {
   const counts = { segnalazioni: a.overview?.reports_open, suggeriti: a.overview?.suggestions_open, prodotti: a.overview?.custom_products }
   const current = a.route.name === 'maso' || a.route.name === 'nuovo' ? 'masi' : a.route.name
-  return NAV.map(([name, label]) => `
-    <a href="#/${name}" ${current === name ? 'aria-current="page"' : ''}>${label}${counts[name] ? ` <span class="count small">${counts[name]}</span>` : ''}</a>`).join('')
+  return NAV.map(([name, label, symbol]) => `
+    <a href="#/${name}" ${current === name ? 'aria-current="page"' : ''}>${icon(symbol)}<span>${label}</span>${counts[name] ? `<span class="count">${counts[name]}</span>` : ''}</a>`).join('')
 }
 
 // Date e piccoli pezzi ------------------------------------------------------------------------
