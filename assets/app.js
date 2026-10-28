@@ -1,9 +1,9 @@
 // Pagina del produttore: si apre dal link personale https://nostrano.app/modifica/<token>.
 // Fa le stesse cose dell'area produttore dell'app, con le stesse funzioni del database.
-import { ROOT, linkCode, rpc } from './api.js?v=mvrq5sf3'
-import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=mvrq5sf3'
-import { WEEK, fromClock, todayRome } from './days.js?v=mvrq5sf3'
-import * as views from './views.js?v=mvrq5sf3'
+import { ROOT, linkCode, rpc } from './api.js?v=mvsde8mi'
+import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=mvsde8mi'
+import { WEEK, fromClock, todayRome } from './days.js?v=mvsde8mi'
+import * as views from './views.js?v=mvsde8mi'
 
 const root = document.querySelector('#app')
 const languageSelect = document.querySelector('#lang')
@@ -93,13 +93,13 @@ async function act(action, success) {
 
 const save = (patch, success) => act(() => rpc('producer_save', { p_data: patch }), success)
 
-const PRODUCT_FIELDS = ['kind', 'available', 'price_min', 'price_max', 'price_quantity', 'price_unit', 'detail']
+const PRODUCT_FIELDS = ['kind', 'available', 'on_request', 'price_min', 'price_max', 'price_quantity', 'price_unit', 'detail']
 const productList = () => s.farm.products.map((p) => Object.fromEntries(PRODUCT_FIELDS.map((f) => [f, p[f] ?? null])))
 
 /** Aggiunge un prodotto con l'unità solita del catalogo e apre subito il prezzo. */
 async function addProduct(kind) {
   if (!kind || s.farm.products.some((p) => p.kind === kind)) return
-  const product = { kind, available: true, price_min: null, price_max: null, price_quantity: 1, price_unit: views.defaultUnit(s, kind), detail: null }
+  const product = { kind, available: true, on_request: false, price_min: null, price_max: null, price_quantity: 1, price_unit: views.defaultUnit(s, kind), detail: null }
   await save({ products: [...productList(), product] }, t(s.lang, 'saved'))
   if (s.farm.products.some((p) => p.kind === kind)) openEditor(kind)
 }
@@ -124,6 +124,7 @@ function productFromForm(form) {
     price_quantity: quantity,
     price_unit: form.elements.unit.value,
     detail: form.elements.detail.value.trim() || null,
+    on_request: form.elements.on_request.checked,
   }
 }
 
@@ -169,7 +170,7 @@ async function addCustom(name, category, unit) {
   if (!kind) return
   root.querySelector('details.custom')?.removeAttribute('open')
   if (s.farm.products.some((p) => p.kind === kind)) return openEditor(kind)
-  const product = { kind, available: true, price_min: null, price_max: null, price_quantity: 1, price_unit: unit, detail: null }
+  const product = { kind, available: true, on_request: false, price_min: null, price_max: null, price_quantity: 1, price_unit: unit, detail: null }
   await save({ products: [...productList(), product] }, t(s.lang, 'saved'))
   if (s.farm.products.some((p) => p.kind === kind)) openEditor(kind)
 }
@@ -184,7 +185,8 @@ root.addEventListener('click', (event) => {
     case 'confirm':
       return save({}, t(s.lang, 'confirmedToast'))
     case 'answer':
-      return act(() => rpc('producer_answer', { p_id: id, p_status: status }), t(s.lang, 'answerSent'))
+      return act(() => rpc('producer_answer', { p_id: id, p_status: status }),
+        t(s.lang, status === 'picked_up' || status === 'no_show' ? 'pickupMarked' : 'answerSent'))
     case 'propose':
       s.proposing = id
       return renderSection('requests')

@@ -288,3 +288,8 @@ details.custom form { margin-top: 8px; }
 
 fieldset.plain { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 18px; }
 fieldset.plain legend { padding: 0; margin-bottom: 6px; width: 100%; }
+
+.lines { margin: 6px 0; padding-left: 18px; }
+.lines li { font-weight: 600; }
+.card.collect { background: var(--green-soft); border-color: transparent; }
+.pill.small { padding: 2px 8px; font-size: 12px; vertical-align: 1px; }

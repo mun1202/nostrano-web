@@ -1,6 +1,6 @@
 // Le parti della pagina, come HTML. Ogni testo che arriva dal database o dai clienti passa da esc().
-import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=mvrq5sf3'
-import { WEEK, addDays, formatDay, formatInstant, openDays, toClock, todayRome, weekdayName } from './days.js?v=mvrq5sf3'
+import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=mvsde8mi'
+import { WEEK, addDays, formatDay, formatInstant, openDays, toClock, todayRome, weekdayName } from './days.js?v=mvsde8mi'
 
 export const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
@@ -12,10 +12,34 @@ export function productName(s, kind) {
   return entry ? (s.lang === 'de' ? entry.name_de : entry.name_it) : kind
 }
 
-function itemsText(s, items) {
-  const names = items.map((kind) => productName(s, kind))
-  return capitalize((s.lang === 'it' ? names.map((n) => n.toLowerCase()) : names).join(', '))
+const quantityText = (value) => {
+  const rounded = Math.round(Number(value) * 100) / 100
+  return Number.isInteger(rounded) ? String(rounded) : String(rounded).replace('.', ',')
 }
+
+/** "12 uova", "2 kg mele": una riga della richiesta, con la quantità e l'unità copiate all'invio. */
+function lineText(s, line) {
+  const name = s.lang === 'de' ? line.name_de : line.name_it
+  const shown = s.lang === 'it' ? name.toLowerCase() : name
+  if (line.quantity === null || line.quantity === undefined) return shown
+  const quantity = Number(line.quantity)
+  return line.unit === 'pezzo'
+    ? `${quantityText(quantity)} ${shown}`
+    : `${quantityText(quantity)} ${unitName(s.lang, line.unit, quantity !== 1)} ${shown}`
+}
+
+function linesHtml(s, request) {
+  if (!request.lines?.length) return ''
+  return `<ul class="lines">${request.lines.map((l) => `<li>${esc(capitalize(lineText(s, l)))}</li>`).join('')}</ul>`
+}
+
+const linesSummary = (s, request) => capitalize(request.lines?.map((l) => lineText(s, l)).join(' · ') || request.note || '')
+
+const pickupDay = (request) => (request.status === 'other_day' ? request.other_day : request.day)
+
+/** Confermata e il giorno del ritiro è oggi o passato: il maso segna se il cliente è venuto. */
+export const isToCollect = (request) =>
+  ['accepted', 'other_day'].includes(request.status) && pickupDay(request) <= todayRome()
 
 export function isWaiting(request) {
   return request.status === 'waiting' && request.day >= todayRome()
@@ -115,7 +139,7 @@ export function confirm(s) {
 // Richieste ----------------------------------------------------------------------------------
 
 function statusText(s, request) {
-  if (request.status === 'waiting') return t(s.lang, 'status_expired')
+  if (request.status === 'waiting' || request.status === 'expired') return t(s.lang, 'status_expired')
   if (request.status === 'other_day') return t(s.lang, 'status_other_day', formatDay(request.other_day, s.lang))
   return t(s.lang, `status_${request.status}`)
 }
@@ -142,7 +166,7 @@ function requestCard(s, request) {
         <div><strong>${esc(request.name)}</strong><br><span class="green">${esc(formatDay(request.day, s.lang))}</span></div>
         <button class="link danger small" data-action="block" data-id="${esc(request.id)}">${t(s.lang, 'block')}</button>
       </div>
-      <p>${esc(itemsText(s, request.items))}</p>
+      ${linesHtml(s, request)}
       ${request.note ? `<p class="muted"><em>“${esc(request.note)}”</em></p>` : ''}
       ${s.proposing === request.id ? proposalForm(s, request) : `
         <div class="actions three">
@@ -153,11 +177,25 @@ function requestCard(s, request) {
     </article>`
 }
 
+function collectCard(s, request) {
+  return `
+    <article class="card collect">
+      <strong>${esc(request.name)} · ${esc(formatDay(pickupDay(request), s.lang))}</strong>
+      ${linesHtml(s, request)}
+      ${request.note ? `<p class="muted"><em>“${esc(request.note)}”</em></p>` : ''}
+      <div class="actions">
+        <button class="primary" data-action="answer" data-status="picked_up" data-id="${esc(request.id)}">✓ ${t(s.lang, 'pickedUp')}</button>
+        <button class="secondary" data-action="answer" data-status="no_show" data-id="${esc(request.id)}">${t(s.lang, 'noShow')}</button>
+      </div>
+    </article>`
+}
+
 export function requests(s) {
   const { farm } = s
   if (!farm.has_farm_shop) return ''
   const waiting = s.requests.filter(isWaiting)
-  const answered = s.requests.filter((r) => !isWaiting(r))
+  const collecting = s.requests.filter(isToCollect)
+  const answered = s.requests.filter((r) => !isWaiting(r) && !isToCollect(r))
   return `
     <h2>${t(s.lang, 'requests')}${waiting.length ? ` <span class="count">${waiting.length}</span>` : ''}</h2>
     <div class="card">
@@ -177,13 +215,15 @@ export function requests(s) {
     </div>
     <h3>${t(s.lang, 'requestsWaiting')}</h3>
     ${waiting.length ? waiting.map((r) => requestCard(s, r)).join('') : `<p class="muted">${t(s.lang, 'requestsNone')}</p>`}
+    <p class="muted small">${t(s.lang, 'answerWithin')}</p>
+    ${collecting.length ? `<h3>${t(s.lang, 'toCollect')}</h3>${collecting.map((r) => collectCard(s, r)).join('')}` : ''}
     ${answered.length ? `
       <h3>${t(s.lang, 'answered')}</h3>
       <div class="card list">
         ${answered.map((r) => `
           <div class="answered">
             <strong>${esc(r.name)} · ${esc(formatDay(r.day, s.lang))}</strong>
-            <small class="muted">${esc(itemsText(s, r.items))}</small>
+            <small class="muted">${esc(linesSummary(s, r))}</small>
             <span class="pill">${esc(statusText(s, r))}</span>
           </div>`).join('')}
       </div>` : ''}`
@@ -259,6 +299,8 @@ function productForm(s, p) {
           <select name="unit">${unitOptions(s.lang, unit)}</select>
         </label>
       </div>
+      <label class="inline small"><input type="checkbox" name="on_request" ${p.on_request ? 'checked' : ''}> ${t(s.lang, 'onRequest')}</label>
+      <small class="muted">${t(s.lang, 'onRequestHelp')}</small>
       <p class="small green preview">${previewText(s, p)}</p>
       <p class="muted small">${t(s.lang, 'priceHelp')}</p>
       <div class="actions">
@@ -291,7 +333,7 @@ export function products(s) {
         <div>
           <div class="product">
             <div class="grow">
-              <strong>${name}</strong>
+              <strong>${name}${p.on_request && p.available ? ` <span class="pill amber small">${t(s.lang, 'onRequest')}</span>` : ''}</strong>
               ${p.detail ? `<small class="muted">${esc(p.detail)}</small>` : ''}
               <small class="${price ? 'green' : 'muted'}">${esc(price || t(s.lang, 'noPrice'))}</small>
               ${!p.available && p.waiting > 0 ? `<small class="terracotta">${t(s.lang, 'waitingFor', p.waiting)}</small>` : ''}
