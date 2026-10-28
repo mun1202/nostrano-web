@@ -1,9 +1,10 @@
 // Pagina del produttore: si apre dal link personale https://nostrano.app/modifica/<token>.
 // Fa le stesse cose dell'area produttore dell'app, con le stesse funzioni del database.
-import { ROOT, linkCode, rpc } from './api.js?v=mvsde8mi'
-import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=mvsde8mi'
-import { WEEK, fromClock, todayRome } from './days.js?v=mvsde8mi'
-import * as views from './views.js?v=mvsde8mi'
+import { ROOT, linkCode, rpc } from './api.js?v=mvshkb53'
+import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=mvshkb53'
+import { WEEK, fromClock, todayRome } from './days.js?v=mvshkb53'
+import * as views from './views.js?v=mvshkb53'
+import * as notify from './notify.js?v=mvshkb53'
 
 const root = document.querySelector('#app')
 const languageSelect = document.querySelector('#lang')
@@ -15,6 +16,7 @@ const sections = () => (s.farm.status === 'draft' ? DRAFT : PUBLISHED)
 const s = {
   lang: initialLanguage(), farm: null, area: null, requests: [], catalog: [],
   proposing: null, editing: null, customOpen: false, appLink: null, busy: false, message: null,
+  push: null, pushHelp: false,
 }
 
 // Disegno ------------------------------------------------------------------------------------
@@ -175,6 +177,18 @@ async function addCustom(name, category, unit) {
   if (s.farm.products.some((p) => p.kind === kind)) openEditor(kind)
 }
 
+/** Accende o spegne le notifiche del browser; il permesso lo chiede enablePush, subito dopo il tocco. */
+async function changePush(action, success) {
+  try {
+    s.push = await action()
+    renderSection('requests')
+    if (s.push === 'denied') toast(t(s.lang, 'pushBlocked'), true)
+    else toast(t(s.lang, success))
+  } catch (error) {
+    toast(errorText(s.lang, error), true)
+  }
+}
+
 // Tocchi e moduli ----------------------------------------------------------------------------
 
 root.addEventListener('click', (event) => {
@@ -237,6 +251,19 @@ root.addEventListener('click', (event) => {
       return
     case 'reset':
       return act(() => rpc('demo_reset'), t(s.lang, 'resetDone'))
+    case 'push-on':
+      return changePush(() => notify.enablePush(s.lang), 'pushOnDone')
+    case 'push-off':
+      return changePush(notify.disablePush, 'pushOffDone')
+    case 'push-test':
+      return notify.testPush().then(() => toast(t(s.lang, 'pushTestSent')), (error) => toast(errorText(s.lang, error), true))
+    case 'push-home': {
+      let token = null
+      try { token = sessionStorage.getItem(TOKEN_KEY) } catch { /* navigazione privata */ }
+      notify.prepareHomeScreen(token)
+      s.pushHelp = true
+      return renderSection('requests')
+    }
   }
 })
 
@@ -332,6 +359,7 @@ languageSelect.addEventListener('change', () => {
   applyLanguage()
   if (s.message) showMessage(s.message.titleKey, s.message.textKey)
   else if (s.farm) render()
+  if (s.push === 'on') notify.updateLanguage(s.lang).catch(() => { /* resta la lingua di prima */ })
 })
 
 // Richieste nuove: ogni 30 secondi, e tutto da capo quando si torna sulla pagina.
@@ -342,6 +370,15 @@ setInterval(async () => {
     renderSection('requests')
   } catch { /* riprova al prossimo giro */ }
 }, 30_000)
+
+// Notifica arrivata con la pagina aperta: le richieste si aggiornano subito.
+notify.onPush(async () => {
+  if (!s.farm || s.busy || s.proposing) return
+  try {
+    s.requests = await rpc('producer_requests')
+    renderSection('requests')
+  } catch { /* riprova al prossimo giro */ }
+})
 
 document.addEventListener('visibilitychange', async () => {
   if (document.visibilityState !== 'visible' || !s.farm || s.busy || s.editing) return
@@ -379,6 +416,7 @@ async function boot() {
     s.appLink = appLink()
     s.catalog = await rpc('product_catalog')
     await reload()
+    s.push = await notify.pushState().catch(() => null)
     render()
   } catch (error) {
     if (error.code === 'invalid_link') showMessage('invalidLink')

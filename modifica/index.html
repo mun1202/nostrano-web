@@ -6,14 +6,20 @@
   <meta name="referrer" content="no-referrer">
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#ffffff">
+  <!-- Aggiunta alla schermata Home: su iPhone è l'unico modo di ricevere le notifiche del browser. -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Nostrano">
   <script>
     // Il sito può stare in una sottocartella (su GitHub Pages /nostrano-web/): gli indirizzi partono da lì.
     window.NOSTRANO_ROOT = location.pathname.replace(/\/(modifica|admin)(\/.*)?$/, '/').replace(/[^/]*$/, '')
     document.write([
       '<link rel="icon" href="ROOT/assets/logo.svg" type="image/svg+xml">',
-      '<link rel="stylesheet" href="ROOT/assets/style.css?v=mvsde8mi">',
-      '<script src="ROOT/config.js?v=mvsde8mi"><\/script>',
-      '<script type="module" src="ROOT/assets/app.js?v=mvsde8mi"><\/script>',
+      '<link rel="apple-touch-icon" href="ROOT/assets/icon-180.png">',
+      '<link rel="manifest" href="ROOT/modifica/manifest.webmanifest">',
+      '<link rel="stylesheet" href="ROOT/assets/style.css?v=mvshkb53">',
+      '<script src="ROOT/config.js?v=mvshkb53"><\/script>',
+      '<script type="module" src="ROOT/assets/app.js?v=mvshkb53"><\/script>',
     ].map((tag) => tag.replaceAll('ROOT/', window.NOSTRANO_ROOT)).join(''))
   </script>
   <title>Nostrano · Area produttore</title>

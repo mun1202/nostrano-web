@@ -1,7 +1,7 @@
 // Le schermate del pannello admin, come HTML. Solo in italiano: lo usa chi gestisce Nostrano.
-import { esc } from './views.js?v=mvsde8mi'
-import { CATEGORY_CODES, MUNICIPALITY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=mvsde8mi'
-import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=mvsde8mi'
+import { esc } from './views.js?v=mvshkb53'
+import { CATEGORY_CODES, MUNICIPALITY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=mvshkb53'
+import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=mvshkb53'
 
 const ROOT = window.NOSTRANO_ROOT ?? '/'
 const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1)

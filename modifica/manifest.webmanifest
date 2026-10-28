@@ -1,0 +1,13 @@
+{
+  "name": "Nostrano · Il tuo maso",
+  "short_name": "Nostrano",
+  "description": "Aggiorna la scheda del tuo maso e rispondi alle richieste.",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    { "src": "../assets/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "../assets/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

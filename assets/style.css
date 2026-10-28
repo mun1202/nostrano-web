@@ -91,6 +91,7 @@ p { margin: 8px 0; }
 }
 
 .stack { display: flex; flex-direction: column; gap: 10px; }
+ol.steps { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
 .grow { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
 
 .pill {

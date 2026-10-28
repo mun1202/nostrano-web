@@ -1,6 +1,6 @@
 // Le parti della pagina, come HTML. Ogni testo che arriva dal database o dai clienti passa da esc().
-import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=mvsde8mi'
-import { WEEK, addDays, formatDay, formatInstant, openDays, toClock, todayRome, weekdayName } from './days.js?v=mvsde8mi'
+import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=mvshkb53'
+import { WEEK, addDays, formatDay, formatInstant, openDays, toClock, todayRome, weekdayName } from './days.js?v=mvshkb53'
 
 export const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
@@ -213,6 +213,7 @@ export function requests(s) {
           </span>
         </div>` : ''}
     </div>
+    ${notifyCard(s)}
     <h3>${t(s.lang, 'requestsWaiting')}</h3>
     ${waiting.length ? waiting.map((r) => requestCard(s, r)).join('') : `<p class="muted">${t(s.lang, 'requestsNone')}</p>`}
     <p class="muted small">${t(s.lang, 'answerWithin')}</p>
@@ -227,6 +228,31 @@ export function requests(s) {
             <span class="pill">${esc(statusText(s, r))}</span>
           </div>`).join('')}
       </div>` : ''}`
+}
+
+/** Notifiche del browser per le richieste nuove; s.push dice come stanno (vedi notify.js). */
+function notifyCard(s) {
+  if (!s.push || !s.farm.accepts_requests) return ''
+  const steps = ['pushHome1', 'pushHome2', 'pushHome3']
+  const body = {
+    on: `
+      <p class="green small">${t(s.lang, 'pushOn')}</p>
+      <div class="actions">
+        <button class="secondary small" data-action="push-test">${t(s.lang, 'pushTest')}</button>
+        <button class="link danger small" data-action="push-off">${t(s.lang, 'pushOff')}</button>
+      </div>`,
+    off: `<button class="primary wide" data-action="push-on">${t(s.lang, 'pushEnable')}</button>`,
+    denied: `<p class="amber-text small">${t(s.lang, 'pushBlocked')}</p>`,
+    home: s.pushHelp
+      ? `<ol class="steps small">${steps.map((k) => `<li>${t(s.lang, k)}</li>`).join('')}</ol>`
+      : `<button class="secondary small" data-action="push-home">${t(s.lang, 'pushHomeHow')}</button>`,
+    unsupported: `<p class="muted small">${t(s.lang, 'pushUnsupported')}</p>`,
+  }[s.push]
+  return `
+    <div class="card stack">
+      <span><strong>${t(s.lang, 'pushTitle')}</strong><br><small class="muted">${t(s.lang, 'pushText')}</small></span>
+      ${body}
+    </div>`
 }
 
 // Numeri e domanda ---------------------------------------------------------------------------
