@@ -1,6 +1,6 @@
 // Notifiche del browser per le richieste nuove. Le manda il server (funzione push), anche a pagina chiusa;
 // qui il browser si abbona e il server riceve l'abbonamento, legato al maso di questo browser.
-import { ApiError, ROOT, rpc } from './api.js?v=mvshkb53'
+import { ApiError, ROOT, rpc } from './api.js?v=mvshxub5'
 
 const SCOPE = `${ROOT}modifica/`
 const apple = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
@@ -67,9 +67,9 @@ export async function testPush() {
   if (!devices) throw new ApiError('push_off', 0)
 }
 
-/** Quando arriva una notifica con la pagina aperta. */
+/** Quando arriva una notifica con la pagina aperta ({ type: 'push', title }) o se ne tocca una ({ type: 'open' }). */
 export function onPush(handler) {
-  if (supported) navigator.serviceWorker.addEventListener('message', (event) => { if (event.data === 'push') handler() })
+  if (supported) navigator.serviceWorker.addEventListener('message', (event) => handler(event.data ?? {}))
 }
 
 /**

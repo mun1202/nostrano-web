@@ -1,10 +1,10 @@
 // Pagina del produttore: si apre dal link personale https://nostrano.app/modifica/<token>.
 // Fa le stesse cose dell'area produttore dell'app, con le stesse funzioni del database.
-import { ROOT, linkCode, rpc } from './api.js?v=mvshkb53'
-import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=mvshkb53'
-import { WEEK, fromClock, todayRome } from './days.js?v=mvshkb53'
-import * as views from './views.js?v=mvshkb53'
-import * as notify from './notify.js?v=mvshkb53'
+import { ROOT, linkCode, rpc } from './api.js?v=mvshxub5'
+import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=mvshxub5'
+import { WEEK, fromClock, todayRome } from './days.js?v=mvshxub5'
+import * as views from './views.js?v=mvshxub5'
+import * as notify from './notify.js?v=mvshxub5'
 
 const root = document.querySelector('#app')
 const languageSelect = document.querySelector('#lang')
@@ -372,7 +372,9 @@ setInterval(async () => {
 }, 30_000)
 
 // Notifica arrivata con la pagina aperta: le richieste si aggiornano subito.
-notify.onPush(async () => {
+notify.onPush(async (message) => {
+  // Si vede anche se il sistema nasconde le notifiche di Chrome: così si capisce dove si fermano.
+  if (message.type === 'push') toast(t(s.lang, 'pushArrived', message.title ?? 'Nostrano'))
   if (!s.farm || s.busy || s.proposing) return
   try {
     s.requests = await rpc('producer_requests')

@@ -8,12 +8,14 @@ self.addEventListener('push', (event) => {
     await self.registration.showNotification(message.title ?? 'Nostrano', {
       body: message.body ?? '',
       tag: message.tag ?? undefined,
+      // Con la stessa etichetta (le prove, la stessa richiesta) la nuova sostituisce la vecchia: deve avvisare lo stesso.
+      renotify: Boolean(message.tag),
       icon: new URL('../assets/icon-192.png', self.registration.scope).href,
       badge: new URL('../assets/icon-192.png', self.registration.scope).href,
       data: { open: message.open },
     })
-    // Se la pagina è aperta, ricarica subito le richieste.
-    for (const client of await self.clients.matchAll({ type: 'window' })) client.postMessage('push')
+    // Se la pagina è aperta, ricarica subito le richieste e dice che la notifica è arrivata a questo browser.
+    for (const client of await self.clients.matchAll({ type: 'window' })) client.postMessage({ type: 'push', title: message.title })
   })())
 })
 
@@ -23,7 +25,7 @@ self.addEventListener('notificationclick', (event) => {
     const page = self.registration.scope
     for (const client of await self.clients.matchAll({ type: 'window', includeUncontrolled: true })) {
       if (client.url.startsWith(page)) {
-        client.postMessage('push')
+        client.postMessage({ type: 'open' })
         return client.focus()
       }
     }
