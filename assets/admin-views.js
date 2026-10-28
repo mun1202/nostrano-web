@@ -1,7 +1,7 @@
 // Le schermate del pannello admin, come HTML. Solo in italiano: lo usa chi gestisce Nostrano.
-import { esc } from './views.js?v=mvshxub5'
-import { CATEGORY_CODES, MUNICIPALITY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=mvshxub5'
-import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=mvshxub5'
+import { esc } from './views.js?v=mvsj0ye0'
+import { CATEGORY_CODES, MUNICIPALITY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=mvsj0ye0'
+import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=mvsj0ye0'
 
 const ROOT = window.NOSTRANO_ROOT ?? '/'
 const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1)
@@ -149,9 +149,9 @@ export function farms(a) {
           <a class="chip ${key === filter[0] ? 'on' : ''}" href="#/masi?f=${key}">${label} <small>${a.farms.filter(test).length}</small></a>`).join('')}
       </div>
     </div>
-    <div class="card list farms">
+    <div class="farms">
       ${list.length ? list.map((f) => `
-        <a class="farm-row" href="#/maso/${encodeURIComponent(f.slug)}">
+        <a class="farm-row card ${stage(f)[1] || 'plain'}" href="#/maso/${encodeURIComponent(f.slug)}">
           <span class="grow">
             <strong>${esc(f.name)}</strong>
             <small class="muted">${esc(municipalityName('it', f.municipality))}${f.contact_name ? ` · ${esc(f.contact_name)}` : ''}${f.contact_phone ? ` · ${esc(f.contact_phone)}` : ''}</small>
@@ -382,13 +382,21 @@ function changeSummary(entry) {
   return entry.changed_by === 'admin' ? 'ha aggiornato i dati della scheda' : 'ha confermato che è tutto giusto'
 }
 
+// Le prime sei si vedono subito; le altre restano chiuse, per non allungare la colonna.
 function historyBox(f) {
+  const row = (h) => `
+    <div class="small"><strong>${esc(WHO[h.changed_by] ?? h.changed_by)}</strong> ${esc(changeSummary(h))}<br>
+      <span class="muted">${dateText(h.created_at, true)}</span></div>`
+  const [first, rest] = [f.history.slice(0, 6), f.history.slice(6)]
   return `
     <div class="card">
       <h2>Modifiche recenti</h2>
-      ${f.history.length ? `<div class="list">${f.history.map((h) => `
-        <div class="small"><strong>${esc(WHO[h.changed_by] ?? h.changed_by)}</strong> ${esc(changeSummary(h))}<br>
-          <span class="muted">${dateText(h.created_at, true)}</span></div>`).join('')}</div>` : '<p class="muted small">Ancora nessuna modifica.</p>'}
+      ${f.history.length ? `<div class="list">${first.map(row).join('')}</div>` : '<p class="muted small">Ancora nessuna modifica.</p>'}
+      ${rest.length ? `
+        <details class="more">
+          <summary>Le altre ${rest.length}</summary>
+          <div class="list">${rest.map(row).join('')}</div>
+        </details>` : ''}
     </div>`
 }
 
@@ -405,7 +413,7 @@ export function farm(a) {
   const f = a.farm
   return `
     <a class="back" href="#/masi">← Masi</a>
-    <div class="row wrap">
+    <div class="page-head row wrap">
       <div>
         <h1>${esc(f.name)}</h1>
         <p class="muted">${esc(municipalityName('it', f.municipality))} · ${esc(f.address)}</p>

@@ -1,16 +1,21 @@
 // Pagina del produttore: si apre dal link personale https://nostrano.app/modifica/<token>.
 // Fa le stesse cose dell'area produttore dell'app, con le stesse funzioni del database.
-import { ROOT, linkCode, rpc } from './api.js?v=mvshxub5'
-import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=mvshxub5'
-import { WEEK, fromClock, todayRome } from './days.js?v=mvshxub5'
-import * as views from './views.js?v=mvshxub5'
-import * as notify from './notify.js?v=mvshxub5'
+import { ROOT, linkCode, rpc } from './api.js?v=mvsj0ye0'
+import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=mvsj0ye0'
+import { WEEK, fromClock, todayRome } from './days.js?v=mvsj0ye0'
+import * as views from './views.js?v=mvsj0ye0'
+import * as notify from './notify.js?v=mvsj0ye0'
 
 const root = document.querySelector('#app')
 const languageSelect = document.querySelector('#lang')
 // La bozza segue l'ordine di chi compila la scheda; quella pubblicata mette davanti richieste e numeri.
+// È l'ordine sul telefono; dal computer le parti stanno in due colonne (COLUMNS), una accanto all'altra.
 const DRAFT = ['header', 'onboarding', 'products', 'hours', 'farm', 'demand', 'closures', 'notice', 'requests', 'footer']
 const PUBLISHED = ['header', 'requests', 'confirm', 'stats', 'demand', 'products', 'hours', 'closures', 'notice', 'farm', 'footer']
+const COLUMNS = {
+  draft: [['onboarding', 'products', 'demand'], ['hours', 'farm', 'closures', 'notice', 'requests']],
+  published: [['requests', 'confirm', 'stats', 'demand', 'notice'], ['products', 'hours', 'closures', 'farm']],
+}
 const sections = () => (s.farm.status === 'draft' ? DRAFT : PUBLISHED)
 
 const s = {
@@ -30,7 +35,17 @@ function rememberOpen() {
 function render() {
   s.message = null
   rememberOpen()
-  root.innerHTML = sections().map((name) => `<section id="s-${name}">${views[name](s)}</section>`).join('')
+  const order = sections()
+  // Sul telefono le colonne si sciolgono e conta "order": le parti tornano nell'ordine di sopra.
+  const section = (name) => `<section id="s-${name}" style="order: ${order.indexOf(name)}">${views[name](s)}</section>`
+  const [left, right] = COLUMNS[s.farm.status === 'draft' ? 'draft' : 'published']
+  root.innerHTML = `
+    ${section('header')}
+    <div class="layout">
+      <div class="column">${left.map(section).join('')}</div>
+      <div class="column">${right.map(section).join('')}</div>
+    </div>
+    ${section('footer')}`
 }
 
 function renderSection(name) {

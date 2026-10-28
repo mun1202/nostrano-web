@@ -1,5 +1,6 @@
 /* Pannello admin: stessa base della pagina del produttore, più largo sul Mac. */
 body.admin main { max-width: 1080px; }
+@media (min-width: 1200px) { body.admin main { max-width: 1240px; padding: 24px 32px 64px; } }
 body.admin h1 { font-size: 26px; }
 
 .topbar .tag {
@@ -65,8 +66,38 @@ a.tile:hover { border-color: rgba(31, 42, 30, 0.25); }
 .chip.on { background: var(--green); color: #fff; }
 .chip.on small { color: rgba(255, 255, 255, 0.8); }
 
-.farm-row { display: flex; align-items: center; gap: 12px; color: var(--ink); text-decoration: none; }
+/* Elenco dei masi: una scheda per maso, con il bordo del colore del suo stato; dal computer in griglia. */
+.farms { display: grid; grid-template-columns: 1fr; gap: 10px; }
+@media (min-width: 900px) { .farms { grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 12px; } }
+.farm-row { display: flex; align-items: center; gap: 12px; margin: 0; color: var(--ink); text-decoration: none; border-left: 5px solid #d9dbd5; }
+.farm-row.green { border-left-color: var(--green); }
+.farm-row.amber { border-left-color: #d9a23a; }
+.farm-row.blue { border-left-color: #5b84b8; }
+.farm-row.terracotta { border-left-color: var(--terracotta); }
+.farm-row:hover { box-shadow: 0 2px 4px rgba(31, 42, 30, 0.08), 0 10px 24px rgba(31, 42, 30, 0.1); }
 .farm-row:hover strong { color: var(--green); }
+
+/* Intestazione della scheda di un maso, verde come nella pagina del produttore. */
+.page-head {
+  margin: 8px 0 12px;
+  padding: 20px 22px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+  color: #fff;
+  box-shadow: var(--shadow);
+}
+.page-head h1 { margin-top: 0; color: #fff; }
+.page-head .muted { color: rgba(255, 255, 255, 0.82); margin-bottom: 0; }
+.page-head .pill { background: rgba(255, 255, 255, 0.92); }
+
+details.more summary { cursor: pointer; color: var(--green); font-weight: 600; font-size: 14px; padding: 10px 0 0; }
+details.more .list { margin-top: 10px; }
+
+/* I numeri della panoramica: un colore anche quando non c'è niente da fare. */
+.tiles.four .tile { border-top: 4px solid #e3e5df; }
+.tiles.four .tile.green { border-top-color: var(--green); }
+.tiles.four .tile.amber { border-top-color: #d9a23a; }
+.tiles.four .tile.terracotta { border-top-color: var(--terracotta); }
 
 .columns { display: grid; grid-template-columns: 1.15fr 1fr; gap: 0 20px; align-items: start; }
 @media (max-width: 860px) { .columns { grid-template-columns: 1fr; } }
