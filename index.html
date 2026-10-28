@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#ffffff">
+  <script>
+    // Il sito può stare in una sottocartella (su GitHub Pages /nostrano-web/): gli indirizzi partono da lì.
+    window.NOSTRANO_ROOT = location.pathname.replace(/\/(modifica|admin)(\/.*)?$/, '/').replace(/[^/]*$/, '')
+    document.write([
+      '<link rel="icon" href="ROOT/assets/logo.svg" type="image/svg+xml">',
+      '<link rel="stylesheet" href="ROOT/assets/style.css">',
+      '<script src="ROOT/config.js"><\/script>',
+    ].map((tag) => tag.replaceAll('ROOT/', window.NOSTRANO_ROOT)).join(''))
+  </script>
+  <title>Nostrano · Per i produttori</title>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" data-root-href=""><img data-root-src="assets/logo.svg" alt="" width="26" height="32"><span>nostrano</span></a>
+  </header>
+  <main>
+    <div class="message">
+      <img data-root-src="assets/logo.svg" alt="" width="48" height="60">
+      <h1>Per i produttori</h1>
+      <p class="muted">Apri il link personale che ti abbiamo mandato su WhatsApp: da lì aggiorni prodotti, orari e novità, senza account e senza password.</p>
+      <p class="muted" lang="de">Öffne den persönlichen Link, den wir dir auf WhatsApp geschickt haben: Damit aktualisierst du Produkte, Öffnungszeiten und Neuigkeiten, ohne Konto und ohne Passwort.</p>
+      <p id="demo"></p>
+    </div>
+  </main>
+  <script>
+    // Solo in prova: un link alla scheda demo di Maso Ventolino.
+    const token = window.NOSTRANO_CONFIG?.demoToken
+    if (token) {
+      const link = document.createElement('a')
+      link.href = `${window.NOSTRANO_ROOT}modifica/${encodeURIComponent(token)}`
+      link.textContent = 'Prova con un maso di esempio'
+      link.className = 'green'
+      document.querySelector('#demo').append(link)
+    }
+  </script>
+  <script>
+    for (const el of document.querySelectorAll('[data-root-src]')) el.src = window.NOSTRANO_ROOT + el.dataset.rootSrc
+    for (const el of document.querySelectorAll('[data-root-href]')) el.href = window.NOSTRANO_ROOT + el.dataset.rootHref
+  </script>
+</body>
+</html>

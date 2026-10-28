@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Nostrano</title>
+  <script>
+    // Su GitHub Pages i link /modifica/<token> e /admin/<codice> non sono file: GitHub risponde con questa pagina.
+    // Qui si passa alla pagina giusta con il codice dopo il #, che il browser non manda a nessun server.
+    const match = location.pathname.match(/^(.*?\/)(modifica|admin)\/([^/]+)\/?$/)
+    if (match) location.replace(`${match[1]}${match[2]}/#link=${match[3]}`)
+  </script>
+  <style>
+    body { margin: 0; font: 16px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; color: #1f2a1e; background: #fff; }
+    main { max-width: 480px; margin: 0 auto; padding: 96px 24px; text-align: center; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Pagina non trovata</h1>
+    <p>Controlla il link che hai ricevuto su WhatsApp.</p>
+    <p lang="de">Seite nicht gefunden. Prüfe den Link, den du auf WhatsApp bekommen hast.</p>
+  </main>
+</body>
+</html>

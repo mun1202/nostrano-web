@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#ffffff">
+  <script>window.NOSTRANO_SESSION_KEY = 'nostrano.admin.session'</script>
+  <script>
+    // Il sito può stare in una sottocartella (su GitHub Pages /nostrano-web/): gli indirizzi partono da lì.
+    window.NOSTRANO_ROOT = location.pathname.replace(/\/(modifica|admin)(\/.*)?$/, '/').replace(/[^/]*$/, '')
+    document.write([
+      '<link rel="icon" href="ROOT/assets/logo.svg" type="image/svg+xml">',
+      '<link rel="stylesheet" href="ROOT/assets/style.css">',
+      '<link rel="stylesheet" href="ROOT/assets/admin.css">',
+      '<script src="ROOT/config.js"><\/script>',
+      '<script type="module" src="ROOT/assets/admin.js"><\/script>',
+    ].map((tag) => tag.replaceAll('ROOT/', window.NOSTRANO_ROOT)).join(''))
+  </script>
+  <title>Nostrano · Admin</title>
+</head>
+<body class="admin">
+  <header class="topbar">
+    <a class="brand" href="#/"><img data-root-src="assets/logo.svg" alt="" width="26" height="32"><span>nostrano</span><small class="tag">admin</small></a>
+    <nav id="nav" aria-label="Sezioni"></nav>
+  </header>
+  <main id="app"></main>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script>
+    for (const el of document.querySelectorAll('[data-root-src]')) el.src = window.NOSTRANO_ROOT + el.dataset.rootSrc
+    for (const el of document.querySelectorAll('[data-root-href]')) el.href = window.NOSTRANO_ROOT + el.dataset.rootHref
+  </script>
+</body>
+</html>
