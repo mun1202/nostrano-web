@@ -1,6 +1,6 @@
 // Le parti della pagina, come HTML. Ogni testo che arriva dal database o dai clienti passa da esc().
-import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=mvsj0ye0'
-import { WEEK, addDays, formatDay, formatInstant, openDays, toClock, todayRome, weekdayName } from './days.js?v=mvsj0ye0'
+import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=mvsjux13'
+import { WEEK, addDays, formatDay, formatInstant, openDays, toClock, todayRome, weekdayName } from './days.js?v=mvsjux13'
 
 export const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
@@ -170,7 +170,7 @@ function requestCard(s, request) {
       ${request.note ? `<p class="muted"><em>“${esc(request.note)}”</em></p>` : ''}
       ${s.proposing === request.id ? proposalForm(s, request) : `
         <div class="actions three">
-          <button class="primary" data-action="answer" data-status="accepted" data-id="${esc(request.id)}">✓ ${t(s.lang, 'keep')}</button>
+          <button class="primary yes" data-action="answer" data-status="accepted" data-id="${esc(request.id)}">✓ ${t(s.lang, 'keep')}</button>
           <button class="secondary" data-action="answer" data-status="declined" data-id="${esc(request.id)}">✕ ${t(s.lang, 'dontHave')}</button>
           <button class="secondary" data-action="propose" data-id="${esc(request.id)}">${t(s.lang, 'otherDay')}</button>
         </div>`}
@@ -184,7 +184,7 @@ function collectCard(s, request) {
       ${linesHtml(s, request)}
       ${request.note ? `<p class="muted"><em>“${esc(request.note)}”</em></p>` : ''}
       <div class="actions">
-        <button class="primary" data-action="answer" data-status="picked_up" data-id="${esc(request.id)}">✓ ${t(s.lang, 'pickedUp')}</button>
+        <button class="primary yes" data-action="answer" data-status="picked_up" data-id="${esc(request.id)}">✓ ${t(s.lang, 'pickedUp')}</button>
         <button class="secondary" data-action="answer" data-status="no_show" data-id="${esc(request.id)}">${t(s.lang, 'noShow')}</button>
       </div>
     </article>`

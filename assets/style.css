@@ -1,4 +1,5 @@
-/* Pagina del produttore: stessi colori dell'app. Una colonna sul telefono, due dal computer. */
+/* Pagina del produttore: stessi colori dell'app. Una colonna sul telefono; dal computer una dashboard
+   con il menu a sinistra. Il verde resta per il marchio e per "sì"; i pulsanti sono scuri. */
 :root {
   --green: #3e6b3a;
   --green-dark: #2c4f29;
@@ -12,9 +13,11 @@
   --fill: #f2f3f1;
   --blue: #2f5687;
   --blue-soft: #e3ecf7;
-  --page: #f5f3ec;
+  --plum: #6e4a7e;
+  --plum-soft: #f1eaf4;
+  --line: #e7e7e3;
   --hairline: rgba(0, 0, 0, 0.08);
-  --shadow: 0 1px 2px rgba(31, 42, 30, 0.06), 0 6px 18px rgba(31, 42, 30, 0.06);
+  --shadow: 0 1px 2px rgba(31, 42, 30, 0.05);
   color-scheme: light;
 }
 
@@ -22,7 +25,7 @@
 
 body {
   margin: 0;
-  background: var(--page);
+  background: #fff;
   color: var(--ink);
   font: 16px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   -webkit-text-size-adjust: 100%;
@@ -72,15 +75,14 @@ p { margin: 8px 0; }
 .amber-text { color: var(--amber); }
 
 .card {
-  border: 1px solid transparent;
-  border-radius: 18px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
   padding: 14px 16px;
   margin: 10px 0;
   background: #fff;
-  box-shadow: var(--shadow);
 }
 
-.card.soft-green { background: var(--green-soft); border-color: transparent; box-shadow: none; }
+.card.soft-green { background: var(--green-soft); border-color: transparent; }
 .card.soft-green h2 { margin-top: 0; }
 .card.request { background: #fdf6ec; border-color: #f1e2c8; }
 
@@ -135,7 +137,9 @@ button {
 }
 
 button:disabled { opacity: 0.55; cursor: default; }
-button.primary { background: var(--green); color: #fff; }
+button.primary { background: var(--ink); color: #fff; }
+/* "Sì" resta verde: te lo tengo, ritirata. */
+button.primary.yes { background: var(--green); }
 button.secondary { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1.5px rgba(31, 42, 30, 0.2); }
 button.small { padding: 8px 14px; font-size: 14px; }
 button.wide { width: 100%; margin-top: 8px; }
@@ -195,16 +199,17 @@ input.switch:checked::after { transform: translateX(20px); }
 .stepper output { min-width: 24px; text-align: center; font-weight: 700; }
 
 .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.tile { border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; background: #fff; box-shadow: var(--shadow); }
+.tile { border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; background: #fff; border: 1px solid var(--line); }
 /* I quattro numeri della settimana, ognuno con il suo colore. */
-#s-stats .tiles > .tile:nth-child(4n + 1) { background: var(--green-soft); box-shadow: none; }
+#s-stats .tiles > .tile { border-color: transparent; }
+#s-stats .tiles > .tile:nth-child(4n + 1) { background: var(--green-soft); }
 #s-stats .tiles > .tile:nth-child(4n + 1) strong { color: var(--green); }
-#s-stats .tiles > .tile:nth-child(4n + 2) { background: var(--blue-soft); box-shadow: none; }
+#s-stats .tiles > .tile:nth-child(4n + 2) { background: var(--blue-soft); }
 #s-stats .tiles > .tile:nth-child(4n + 2) strong { color: var(--blue); }
-#s-stats .tiles > .tile:nth-child(4n + 3) { background: var(--terracotta-soft); box-shadow: none; }
+#s-stats .tiles > .tile:nth-child(4n + 3) { background: var(--terracotta-soft); }
 #s-stats .tiles > .tile:nth-child(4n + 3) strong { color: var(--terracotta); }
-#s-stats .tiles > .tile:nth-child(4n + 4) { background: var(--amber-soft); box-shadow: none; }
-#s-stats .tiles > .tile:nth-child(4n + 4) strong { color: var(--amber); }
+#s-stats .tiles > .tile:nth-child(4n + 4) { background: var(--plum-soft); }
+#s-stats .tiles > .tile:nth-child(4n + 4) strong { color: var(--plum); }
 .tile strong { font-size: 26px; }
 .tile span { color: var(--muted); font-size: 13px; }
 
@@ -269,7 +274,7 @@ a.button {
 }
 a.button.small { padding: 8px 14px; font-size: 14px; }
 a.button.secondary { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1.5px rgba(31, 42, 30, 0.2); }
-a.button.primary { background: var(--green); color: #fff; }
+a.button.primary { background: var(--ink); color: #fff; }
 
 .card.banner { background: var(--fill); border-color: transparent; padding: 10px 14px; }
 
@@ -299,7 +304,7 @@ label.stack.small { gap: 4px; color: var(--muted); }
 label.stack.small input, label.stack.small select { color: var(--ink); font-size: 16px; }
 
 details.custom { margin: 10px 0; }
-details.custom summary { cursor: pointer; color: var(--green); font-weight: 600; padding: 6px 0; }
+details.custom summary { cursor: pointer; color: var(--blue); font-weight: 600; padding: 6px 0; }
 details.custom form { margin-top: 8px; }
 
 fieldset.plain { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 18px; }
@@ -307,47 +312,58 @@ fieldset.plain legend { padding: 0; margin-bottom: 6px; width: 100%; }
 
 .lines { margin: 6px 0; padding-left: 18px; }
 .lines li { font-weight: 600; }
-.card.collect { background: var(--green-soft); border-color: transparent; box-shadow: none; }
+.card.collect { background: var(--blue-soft); border-color: transparent; }
 .pill.small { padding: 2px 8px; font-size: 12px; vertical-align: 1px; }
 
-/* Impaginazione ------------------------------------------------------------------------------ */
+/* Dashboard --------------------------------------------------------------------------------- */
 
+html { scroll-behavior: smooth; }
 section:empty { display: none; }
+main section { scroll-margin-top: 110px; }
+
+/* Il menu delle parti: sul telefono una riga che scorre sotto il logo, dal computer la colonna a sinistra. */
+#nav { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+#nav:empty { display: none; }
+#nav a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+#nav a:hover { background: var(--fill); }
+#nav a[aria-current="true"] { background: var(--fill); }
+#nav .dot { width: 8px; height: 8px; border-radius: 3px; background: var(--muted); flex: none; }
+#nav .count { min-width: 20px; height: 20px; font-size: 12px; margin-left: auto; }
+
+/* Ogni parte ha il suo colore: nel menu e nel quadratino prima del titolo. */
+main h2 { display: flex; align-items: center; gap: 10px; }
+main h2::before { content: ""; flex: none; width: 8px; height: 20px; border-radius: 3px; background: var(--muted); }
+.card.soft-green h2::before { display: none; }
+#s-requests h2::before, #nav [data-nav="requests"] .dot { background: var(--terracotta); }
+#s-stats h2::before, #nav [data-nav="stats"] .dot, #s-demand h2::before, #nav [data-nav="demand"] .dot { background: var(--blue); }
+#s-products h2::before, #nav [data-nav="products"] .dot { background: var(--green); }
+#s-hours h2::before, #nav [data-nav="hours"] .dot, #s-closures h2::before, #nav [data-nav="closures"] .dot { background: #c98a1b; }
+#s-notice h2::before, #nav [data-nav="notice"] .dot { background: var(--plum); }
 
 /* Sul telefono le colonne non esistono: le parti seguono "order", cioè l'ordine pensato per il telefono. */
 .layout { display: flex; flex-direction: column; }
 .layout > .column { display: contents; }
 
-/* Ogni parte ha il suo colore, nel quadratino prima del titolo. */
-main h2 { display: flex; align-items: center; gap: 10px; }
-main h2::before {
-  content: "";
-  flex: none;
-  width: 10px;
-  height: 22px;
-  border-radius: 4px;
-  background: var(--green);
-}
-#s-requests h2::before { background: var(--terracotta); }
-#s-stats h2::before, #s-demand h2::before { background: var(--blue); }
-#s-hours h2::before, #s-closures h2::before { background: var(--amber); }
-#s-notice h2::before { background: #b07a2a; }
-.card.soft-green h2::before { display: none; }
+#s-header h1 { margin-top: 4px; }
+#s-header p.muted { margin-top: 0; }
+#s-footer { margin-top: 28px; padding-top: 12px; border-top: 1px solid var(--line); }
 
-/* In cima: il nome del maso su una fascia verde. */
-#s-header {
-  margin: 0 -16px 8px;
-  padding: 22px 16px 20px;
-  background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
-  color: #fff;
+@media (max-width: 959px) {
+  body:not(.admin) .topbar { flex-wrap: wrap; row-gap: 6px; }
+  body:not(.admin) #nav { order: 3; width: calc(100% + 32px); margin: 0 -16px -4px; padding: 0 12px 2px; }
 }
-#s-header h1 { margin-top: 0; color: #fff; }
-#s-header .muted { color: rgba(255, 255, 255, 0.82); }
-#s-header .pill.amber { background: #fbe7b5; color: #6d4604; }
-#s-header .card.banner { background: rgba(255, 255, 255, 0.14); color: #fff; box-shadow: none; margin-top: 0; }
-#s-header .card.banner a.button.secondary { box-shadow: none; }
-
-#s-footer { margin-top: 28px; padding-top: 12px; border-top: 1px solid var(--hairline); }
 
 /* Orari: dal tablet in su un giorno sta in due righe, mattina e pomeriggio una accanto all'altra. */
 @media (min-width: 600px) {
@@ -359,13 +375,31 @@ main h2::before {
   .times input { padding: 7px 8px; width: 100%; }
 }
 
+/* Dal computer: menu a sinistra, i numeri della settimana in cima, poi due colonne. */
 @media (min-width: 960px) {
-  main { max-width: 1180px; padding: 24px 32px 64px; }
-  #s-header { margin: 0 0 8px; padding: 28px 32px; border-radius: 22px; box-shadow: var(--shadow); }
-  #s-header h1 { font-size: 34px; }
-  .layout { flex-direction: row; align-items: flex-start; gap: 32px; }
-  .layout > .column { display: block; flex: 1 1 0; min-width: 0; }
-  .layout > .column:first-child { flex-grow: 1.08; }
+  body { display: grid; grid-template-columns: 236px minmax(0, 1fr); min-height: 100vh; }
+  .topbar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 22px;
+    padding: 22px 14px;
+    box-shadow: none;
+    border-right: 1px solid var(--line);
+  }
+  .topbar .brand { padding: 0 8px; }
+  .topbar > select { margin-top: auto; }
+  #nav { flex-direction: column; overflow: visible; }
+  #nav a { border-radius: 10px; padding: 9px 12px; font-size: 15px; }
+  main { max-width: 1180px; width: 100%; margin: 0; padding: 28px 40px 64px; }
+  main section { scroll-margin-top: 20px; }
+  #s-header h1 { font-size: 32px; }
+  .layout { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); gap: 0 32px; align-items: start; }
+  .layout > .column { display: block; grid-row: 2; }
+  .layout > #s-stats { grid-column: 1 / -1; grid-row: 1; }
   #s-stats .tiles { grid-template-columns: repeat(4, 1fr); }
-  #toast { bottom: 32px; }
+  #toast { left: calc(50% + 118px); bottom: 32px; }
 }

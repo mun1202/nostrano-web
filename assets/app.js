@@ -1,21 +1,24 @@
 // Pagina del produttore: si apre dal link personale https://nostrano.app/modifica/<token>.
 // Fa le stesse cose dell'area produttore dell'app, con le stesse funzioni del database.
-import { ROOT, linkCode, rpc } from './api.js?v=mvsj0ye0'
-import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=mvsj0ye0'
-import { WEEK, fromClock, todayRome } from './days.js?v=mvsj0ye0'
-import * as views from './views.js?v=mvsj0ye0'
-import * as notify from './notify.js?v=mvsj0ye0'
+import { ROOT, linkCode, rpc } from './api.js?v=mvsjux13'
+import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=mvsjux13'
+import { WEEK, fromClock, todayRome } from './days.js?v=mvsjux13'
+import * as views from './views.js?v=mvsjux13'
+import * as notify from './notify.js?v=mvsjux13'
 
 const root = document.querySelector('#app')
+const nav = document.querySelector('#nav')
 const languageSelect = document.querySelector('#lang')
 // La bozza segue l'ordine di chi compila la scheda; quella pubblicata mette davanti richieste e numeri.
-// È l'ordine sul telefono; dal computer le parti stanno in due colonne (COLUMNS), una accanto all'altra.
+// È l'ordine sul telefono; dal computer i numeri stanno in cima e le altre parti in due colonne (COLUMNS).
 const DRAFT = ['header', 'onboarding', 'products', 'hours', 'farm', 'demand', 'closures', 'notice', 'requests', 'footer']
 const PUBLISHED = ['header', 'requests', 'confirm', 'stats', 'demand', 'products', 'hours', 'closures', 'notice', 'farm', 'footer']
 const COLUMNS = {
   draft: [['onboarding', 'products', 'demand'], ['hours', 'farm', 'closures', 'notice', 'requests']],
-  published: [['requests', 'confirm', 'stats', 'demand', 'notice'], ['products', 'hours', 'closures', 'farm']],
+  published: [['requests', 'confirm', 'demand', 'notice'], ['products', 'hours', 'closures', 'farm']],
 }
+// Il menu: le parti a cui si salta, nell'ordine della pagina.
+const NAV = ['requests', 'stats', 'demand', 'products', 'hours', 'closures', 'notice', 'farm']
 const sections = () => (s.farm.status === 'draft' ? DRAFT : PUBLISHED)
 
 const s = {
@@ -42,21 +45,48 @@ function render() {
   root.innerHTML = `
     ${section('header')}
     <div class="layout">
+      ${s.farm.status === 'draft' ? '' : section('stats')}
       <div class="column">${left.map(section).join('')}</div>
       <div class="column">${right.map(section).join('')}</div>
     </div>
     ${section('footer')}`
+  renderNav()
+}
+
+function renderNav() {
+  const waiting = s.requests.filter(views.isWaiting).length
+  nav.innerHTML = NAV.filter((name) => root.querySelector(`#s-${name}`)?.innerHTML.trim()).map((name) => `
+    <a href="#s-${name}" data-nav="${name}"><span class="dot"></span>${t(s.lang, `nav_${name}`)}${
+      name === 'requests' && waiting ? ` <span class="count">${waiting}</span>` : ''}</a>`).join('')
+  watchSections()
+}
+
+/** Nel menu si accende la parte che si sta guardando. */
+let watcher
+function watchSections() {
+  watcher?.disconnect()
+  watcher = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue
+      for (const link of nav.querySelectorAll('a')) {
+        link.setAttribute('aria-current', String(link.dataset.nav === entry.target.id.slice(2)))
+      }
+    }
+  }, { rootMargin: '-15% 0px -75% 0px' })
+  for (const link of nav.querySelectorAll('a')) watcher.observe(root.querySelector(`#s-${link.dataset.nav}`))
 }
 
 function renderSection(name) {
   rememberOpen()
   const section = root.querySelector(`#s-${name}`)
   if (section) section.innerHTML = views[name](s)
+  if (name === 'requests') renderNav()
 }
 
 /** Schermata con un solo messaggio: caricamento, link non valido, telefono non collegato. */
 function showMessage(titleKey, textKey) {
   s.message = { titleKey, textKey }
+  nav.innerHTML = ''
   root.innerHTML = `
     <div class="message">
       <img src="${ROOT}assets/logo.svg" alt="" width="48" height="60">
@@ -205,6 +235,14 @@ async function changePush(action, success) {
 }
 
 // Tocchi e moduli ----------------------------------------------------------------------------
+
+// Il menu scorre alla parte senza cambiare l'indirizzo, che su iPhone può tenere il link per la schermata Home.
+nav.addEventListener('click', (event) => {
+  const link = event.target.closest('a[data-nav]')
+  if (!link) return
+  event.preventDefault()
+  root.querySelector(`#s-${link.dataset.nav}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+})
 
 root.addEventListener('click', (event) => {
   const element = event.target.closest('button[data-action]')

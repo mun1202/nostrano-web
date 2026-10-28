@@ -1,13 +1,14 @@
-/* Pannello admin: stessa base della pagina del produttore, più largo sul Mac. */
+/* Pannello admin: stessa base della pagina del produttore; dal computer il menu sta a sinistra. */
 body.admin main { max-width: 1080px; }
-@media (min-width: 1200px) { body.admin main { max-width: 1240px; padding: 24px 32px 64px; } }
+@media (min-width: 960px) { body.admin main { max-width: 1280px; } }
 body.admin h1 { font-size: 26px; }
 
 .topbar .tag {
   margin-left: 2px;
   padding: 2px 8px;
   border-radius: 999px;
-  background: var(--green-soft);
+  background: var(--fill);
+  color: var(--ink);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0;
@@ -23,17 +24,28 @@ body.admin h1 { font-size: 26px; }
   text-decoration: none;
   white-space: nowrap;
 }
-#nav a[aria-current="page"] { background: var(--green-soft); color: var(--green); }
+#nav a[aria-current="page"] { background: var(--fill); color: var(--ink); }
+#nav a[aria-current="page"]::before { background: var(--ink); }
+/* Un quadratino colorato per ogni voce, come nella pagina del maso. */
+body.admin #nav a { display: flex; align-items: center; gap: 8px; }
+body.admin #nav a::before { content: ""; width: 8px; height: 8px; border-radius: 3px; background: #c9cbc5; flex: none; }
+body.admin #nav a[href="#/masi"]::before { background: var(--green); }
+body.admin #nav a[href="#/segnalazioni"]::before { background: var(--terracotta); }
+body.admin #nav a[href="#/suggeriti"]::before { background: var(--blue); }
+body.admin #nav a[href="#/prodotti"]::before { background: #c98a1b; }
+body.admin #nav a[href="#/accessi"]::before { background: var(--plum); }
+body.admin #nav .count { margin-left: auto; }
 #nav .count { min-width: 20px; height: 20px; font-size: 12px; vertical-align: 1px; }
 
-@media (max-width: 760px) {
+@media (max-width: 959px) {
   body.admin .topbar { flex-direction: column; align-items: stretch; gap: 6px; }
-  #nav { margin: 0 -16px; padding: 0 12px; }
+  body.admin #nav { margin: 0 -16px; padding: 0 12px; }
 }
 
 .row.wrap { flex-wrap: wrap; align-items: flex-start; }
 .side { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
-.back { display: inline-block; margin-top: 8px; color: var(--green); font-weight: 600; text-decoration: none; }
+.back { display: inline-block; margin-top: 8px; color: var(--muted); font-weight: 600; text-decoration: none; }
+.back:hover { color: var(--ink); }
 .faded { opacity: 0.55; }
 
 .pill.green { background: var(--green-soft); color: var(--green); }
@@ -63,38 +75,30 @@ a.tile:hover { border-color: rgba(31, 42, 30, 0.25); }
   text-decoration: none;
 }
 .chip small { color: var(--muted); font-weight: 500; }
-.chip.on { background: var(--green); color: #fff; }
+.chip.on { background: var(--ink); color: #fff; }
 .chip.on small { color: rgba(255, 255, 255, 0.8); }
 
 /* Elenco dei masi: una scheda per maso, con il bordo del colore del suo stato; dal computer in griglia. */
 .farms { display: grid; grid-template-columns: 1fr; gap: 10px; }
 @media (min-width: 900px) { .farms { grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 12px; } }
-.farm-row { display: flex; align-items: center; gap: 12px; margin: 0; color: var(--ink); text-decoration: none; border-left: 5px solid #d9dbd5; }
+.farm-row { display: flex; align-items: center; gap: 12px; margin: 0; color: var(--ink); text-decoration: none; border-left: 4px solid #d9dbd5; transition: border-color 0.15s, background 0.15s; }
 .farm-row.green { border-left-color: var(--green); }
 .farm-row.amber { border-left-color: #d9a23a; }
 .farm-row.blue { border-left-color: #5b84b8; }
 .farm-row.terracotta { border-left-color: var(--terracotta); }
-.farm-row:hover { box-shadow: 0 2px 4px rgba(31, 42, 30, 0.08), 0 10px 24px rgba(31, 42, 30, 0.1); }
-.farm-row:hover strong { color: var(--green); }
+.farm-row:hover { background: #fafaf8; }
 
-/* Intestazione della scheda di un maso, verde come nella pagina del produttore. */
-.page-head {
-  margin: 8px 0 12px;
-  padding: 20px 22px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
-  color: #fff;
-  box-shadow: var(--shadow);
-}
-.page-head h1 { margin-top: 0; color: #fff; }
-.page-head .muted { color: rgba(255, 255, 255, 0.82); margin-bottom: 0; }
-.page-head .pill { background: rgba(255, 255, 255, 0.92); }
+/* Intestazione della scheda di un maso. */
+.page-head { margin: 4px 0 8px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.page-head h1 { margin-top: 0; }
+.page-head .muted { margin-bottom: 0; }
 
-details.more summary { cursor: pointer; color: var(--green); font-weight: 600; font-size: 14px; padding: 10px 0 0; }
+details.more summary { cursor: pointer; color: var(--blue); font-weight: 600; font-size: 14px; padding: 10px 0 0; }
 details.more .list { margin-top: 10px; }
 
 /* I numeri della panoramica: un colore anche quando non c'è niente da fare. */
-.tiles.four .tile { border-top: 4px solid #e3e5df; }
+.tiles.four .tile { border-top: 4px solid #e3e5df; transition: background 0.15s; }
+.tiles.four a.tile:hover { background: #fafaf8; }
 .tiles.four .tile.green { border-top-color: var(--green); }
 .tiles.four .tile.amber { border-top-color: #d9a23a; }
 .tiles.four .tile.terracotta { border-top-color: var(--terracotta); }
@@ -102,6 +106,7 @@ details.more .list { margin-top: 10px; }
 .columns { display: grid; grid-template-columns: 1.15fr 1fr; gap: 0 20px; align-items: start; }
 @media (max-width: 860px) { .columns { grid-template-columns: 1fr; } }
 .columns .card h2 { margin-top: 0; }
+.columns .card h2::before { display: none; }
 
 fieldset.plain.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
 fieldset.plain.grid .wide { grid-column: 1 / -1; }
