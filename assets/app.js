@@ -1,11 +1,11 @@
 // Pagina del produttore: si apre dal link personale https://nostrano.app/modifica/<token>.
 // Fa le stesse cose dell'area produttore dell'app, con le stesse funzioni del database.
-import { ROOT, linkCode, rpc } from './api.js?v=3fe2d0297b'
-import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=3fe2d0297b'
-import { WEEK, fromClock, todayRome } from './days.js?v=3fe2d0297b'
-import * as views from './views.js?v=3fe2d0297b'
-import * as notify from './notify.js?v=3fe2d0297b'
-import { icon } from './icons.js?v=3fe2d0297b'
+import { ROOT, linkCode, rpc } from './api.js?v=47e750b66f'
+import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=47e750b66f'
+import { WEEK, fromClock, todayRome } from './days.js?v=47e750b66f'
+import * as views from './views.js?v=47e750b66f'
+import * as notify from './notify.js?v=47e750b66f'
+import { icon } from './icons.js?v=47e750b66f'
 
 const root = document.querySelector('#app')
 const nav = document.querySelector('#nav')
@@ -101,7 +101,7 @@ function toast(text, isError = false) {
 
 function applyLanguage() {
   document.documentElement.lang = s.lang
-  document.title = `Nostrano · ${t(s.lang, 'title')}`
+  document.title = `Il mio contadino · ${t(s.lang, 'title')}`
   languageSelect.value = s.lang
   languageSelect.setAttribute('aria-label', t(s.lang, 'language'))
 }
@@ -426,7 +426,7 @@ setInterval(async () => {
 // Notifica arrivata con la pagina aperta: le richieste si aggiornano subito.
 notify.onPush(async (message) => {
   // Si vede anche se il sistema nasconde le notifiche di Chrome: così si capisce dove si fermano.
-  if (message.type === 'push') toast(t(s.lang, 'pushArrived', message.title ?? 'Nostrano'))
+  if (message.type === 'push') toast(t(s.lang, 'pushArrived', message.title ?? 'Il mio contadino'))
   if (!s.farm || s.busy || s.proposing) return
   try {
     s.requests = await rpc('producer_requests')

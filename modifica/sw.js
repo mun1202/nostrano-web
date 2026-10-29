@@ -5,7 +5,7 @@ self.addEventListener('push', (event) => {
   let message = {}
   try { message = event.data?.json() ?? {} } catch { /* notifica senza testo */ }
   event.waitUntil((async () => {
-    await self.registration.showNotification(message.title ?? 'Nostrano', {
+    await self.registration.showNotification(message.title ?? 'Il mio contadino', {
       body: message.body ?? '',
       tag: message.tag ?? undefined,
       // Con la stessa etichetta (le prove, la stessa richiesta) la nuova sostituisce la vecchia: deve avvisare lo stesso.

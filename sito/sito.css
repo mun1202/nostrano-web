@@ -75,6 +75,13 @@ button, a, [role="option"] { touch-action: manipulation; }
 .top .wrap { position: relative; height: var(--top); display: flex; align-items: center; gap: 12px; }
 .brand { display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 700; letter-spacing: -0.02em; text-decoration: none; }
 .brand svg { width: 20px; height: 25px; }
+/* "Il mio contadino" su una riga sola anche sul telefono: più piccolo, e la ricerca compatta resta solo l'icona. */
+.brand { white-space: nowrap; }
+@media (max-width: 420px) {
+  .brand { gap: 6px; font-size: 16px; letter-spacing: -0.025em; }
+  .top .mini-search .mini-breve { display: none; }
+  .top .mini-search { width: 40px; padding: 0; justify-content: center; }
+}
 .top nav { margin-left: auto; display: flex; align-items: center; gap: 6px; }
 .top nav > a { padding: 8px 10px; border-radius: var(--radius-sm); color: var(--text); font-size: 14px; font-weight: 500; text-decoration: none; }
 .lang { display: flex; padding: 2px; border-radius: 9px; background: var(--fill); font-size: 13px; font-weight: 600; }
@@ -168,7 +175,8 @@ button, a, [role="option"] { touch-action: manipulation; }
 }
 .chips::-webkit-scrollbar { display: none; }
 /* Sfumatura a destra solo quando ci sono altri filtri da scoprire scorrendo. */
-.chips.more { mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent); }
+/* margin: la classe "more" altrove ("Tutti i prodotti") ha un margine sopra che qui non va. */
+.chips.more { margin: -4px; mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent); }
 .chips .sep { flex: none; width: 1px; margin: 6px 2px; background: var(--line); }
 .chip {
   display: inline-flex;
@@ -294,6 +302,8 @@ button, a, [role="option"] { touch-action: manipulation; }
 /* La prima volta le schede entrano una dopo l'altra; filtrando invece cambiano subito. */
 .farm.enter { animation: entra 360ms var(--ease-out) both; animation-delay: calc(var(--i) * 40ms); }
 @keyframes entra { from { opacity: 0; transform: translateY(10px); } }
+/* Tornando indietro da un maso le schede sono già lì: niente ingresso, che sembrerebbe un salto (vedi pagine.mjs). */
+.ritorno .farm.enter { animation: none; }
 
 .empty { margin: 8px 0 0; padding: 40px 20px; border: 1px dashed var(--line-strong); border-radius: var(--radius); text-align: center; }
 .empty h3 { margin: 0 0 4px; font-size: 17px; }
@@ -402,6 +412,14 @@ button, a, [role="option"] { touch-action: manipulation; }
 .sheet footer:not(.dialog-foot) .btn.primary { flex: 1; }
 /* Sul computer una finestra al centro, che appare come quella della ricerca: opacità e poca scala, 200 ms,
    e si chiude più in fretta. Filtri è larga come la ricerca, con i due gruppi affiancati. */
+/* Sul telefono, le finestre con un campo da scrivere subito (Accedi) stanno al centro: con la tastiera aperta un
+pannello dal basso lascerebbe vedere la pagina dietro a pezzi. */
+@media (max-width: 759px) {
+  .sheet.centro { width: calc(100% - 32px); max-height: min(80dvh, 560px); margin: auto; border-radius: 20px; box-shadow: 0 24px 64px rgb(24 24 27 / 0.2); transform: scale(0.98); opacity: 0; transition: transform 150ms var(--ease-out), opacity 150ms var(--ease-out), overlay 150ms allow-discrete, display 150ms allow-discrete; }
+  .sheet.centro[open] { transform: none; opacity: 1; transition-duration: 200ms; transition-timing-function: var(--ease-out); }
+  @starting-style { .sheet.centro[open] { transform: scale(0.98); opacity: 0; } }
+  .sheet.centro .grabber { visibility: hidden; height: 16px; }
+}
 @media (min-width: 760px) {
   .sheet { max-width: 520px; margin: auto; border-radius: 20px; box-shadow: 0 24px 64px rgb(24 24 27 / 0.2); transform: scale(0.98); opacity: 0; transition: transform 150ms var(--ease-out), opacity 150ms var(--ease-out), overlay 150ms allow-discrete, display 150ms allow-discrete; }
   .sheet[open] { transform: none; opacity: 1; transition-duration: 200ms; transition-timing-function: var(--ease-out); }
@@ -1420,6 +1438,8 @@ a.chip { text-decoration: none; }
 /* Cartina (vista "Mappa", web/sito/cartina.js): grigi come il sito, il verde solo per i masi aperti. Sul telefono
 prende lo schermo sotto i filtri, sul computer un riquadro alto. */
 #risultati { scroll-margin-top: calc(var(--top) + 60px); }
+/* Con una finestra o un pannello aperti la pagina dietro resta ferma. */
+html:has(dialog[open]) { overflow: hidden; }
 .cartina { position: relative; height: clamp(420px, calc(100svh - var(--top) - 190px), 760px); margin-top: 8px; overflow: hidden; border: 1px solid var(--line); border-radius: 18px; background: #f5f4ef; }
 @media (max-width: 759px) {
   /* Sul telefono: a tutto schermo sotto i filtri fissi, e la pagina sotto non scorre (si torna con "Elenco"). */

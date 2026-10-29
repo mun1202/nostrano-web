@@ -1,8 +1,8 @@
-// Le schermate del pannello admin, come HTML. Solo in italiano: lo usa chi gestisce Nostrano.
-import { esc } from './views.js?v=3fe2d0297b'
-import { CATEGORY_CODES, MUNICIPALITY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=3fe2d0297b'
-import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=3fe2d0297b'
-import { icon } from './icons.js?v=3fe2d0297b'
+// Le schermate del pannello admin, come HTML. Solo in italiano: lo usa chi gestisce Il mio contadino.
+import { esc } from './views.js?v=47e750b66f'
+import { CATEGORY_CODES, MUNICIPALITY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=47e750b66f'
+import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=47e750b66f'
+import { icon } from './icons.js?v=47e750b66f'
 
 const ROOT = window.NOSTRANO_ROOT ?? '/'
 const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1)
@@ -290,7 +290,7 @@ function publishBox(f) {
       <h2>Pubblicazione</h2>
       <p class="small">${consent
         ? `<span class="green">✓ Consenso</span> del ${dateText(f.consent_at)}${f.consent_note ? ` — ${esc(f.consent_note)}` : ''}`
-        : '<span class="terracotta">Manca il consenso a comparire su Nostrano.</span>'}</p>
+        : '<span class="terracotta">Manca il consenso a comparire su Il mio contadino.</span>'}</p>
       ${f.status === 'draft' ? `
         <p class="small">${f.missing.length ? `Manca ancora: <strong>${esc(missingText(f.missing))}</strong>.` : '<span class="green">La scheda è completa.</span>'}
           ${f.ready_at ? ` Il maso ha chiesto la pubblicazione il ${dateText(f.ready_at, true)}.` : ''}</p>` : ''}

@@ -1,8 +1,8 @@
 // Pannello admin: si apre con un link di accesso (https://nostrano.app/admin/<codice>), poi il browser resta abilitato.
 // Da qui si creano le schede in bozza, si invitano i masi su WhatsApp e si pubblica.
-import { ROOT, linkCode, removeUploaded, rpc, upload } from './api.js?v=3fe2d0297b'
-import { MUNICIPALITY_CODES, municipalityName } from './i18n.js?v=3fe2d0297b'
-import * as views from './admin-views.js?v=3fe2d0297b'
+import { ROOT, linkCode, removeUploaded, rpc, upload } from './api.js?v=47e750b66f'
+import { MUNICIPALITY_CODES, municipalityName } from './i18n.js?v=47e750b66f'
+import * as views from './admin-views.js?v=47e750b66f'
 
 const root = document.querySelector('#app')
 const navigation = document.querySelector('#nav')
@@ -217,12 +217,12 @@ function inviteMessage(invite, link, published) {
   const name = invite.contact_name ? ` ${invite.contact_name}` : ''
   if (invite.language === 'de') {
     return published
-      ? `Hallo${name}! Hier ist der neue Link, um das Profil von ${invite.name} auf Nostrano zu aktualisieren:\n\n${link}\n\nDer alte Link funktioniert nicht mehr. Der Link ist persönlich: Bitte nicht weiterleiten.`
-      : `Hallo${name}! Ich schreibe dir für Nostrano, die kostenlose App, mit der man Südtiroler Höfe mit Direktverkauf findet.\n\nWir haben das Profil von ${invite.name} vorbereitet. Über diesen Link kannst du es in wenigen Minuten prüfen und ergänzen: Produkte und Preise, Öffnungszeiten, ein paar Zeilen über den Hof. Ohne Konto und ohne Passwort.\n\n${link}\n\nWenn es fertig ist, veröffentlichen wir es. Der Link ist persönlich: Bitte nicht weiterleiten.`
+      ? `Hallo${name}! Hier ist der neue Link, um das Profil von ${invite.name} auf Il mio contadino zu aktualisieren:\n\n${link}\n\nDer alte Link funktioniert nicht mehr. Der Link ist persönlich: Bitte nicht weiterleiten.`
+      : `Hallo${name}! Ich schreibe dir für Il mio contadino, die kostenlose App, mit der man Südtiroler Höfe mit Direktverkauf findet.\n\nWir haben das Profil von ${invite.name} vorbereitet. Über diesen Link kannst du es in wenigen Minuten prüfen und ergänzen: Produkte und Preise, Öffnungszeiten, ein paar Zeilen über den Hof. Ohne Konto und ohne Passwort.\n\n${link}\n\nWenn es fertig ist, veröffentlichen wir es. Der Link ist persönlich: Bitte nicht weiterleiten.`
   }
   return published
-    ? `Ciao${name}! Ecco il link nuovo per aggiornare la scheda di ${invite.name} su Nostrano:\n\n${link}\n\nQuello di prima non funziona più. Il link è personale: non inoltrarlo.`
-    : `Ciao${name}! Ti scrivo per Nostrano, l'app gratuita che fa trovare i masi dell'Alto Adige che vendono direttamente.\n\nAbbiamo preparato la scheda di ${invite.name}. Da questo link puoi controllarla e completarla in pochi minuti: prodotti e prezzi, orari, due righe sul maso. Niente account e niente password.\n\n${link}\n\nQuando è pronta la pubblichiamo noi. Il link è personale: non inoltrarlo.`
+    ? `Ciao${name}! Ecco il link nuovo per aggiornare la scheda di ${invite.name} su Il mio contadino:\n\n${link}\n\nQuello di prima non funziona più. Il link è personale: non inoltrarlo.`
+    : `Ciao${name}! Ti scrivo per Il mio contadino, l'app gratuita che fa trovare i masi dell'Alto Adige che vendono direttamente.\n\nAbbiamo preparato la scheda di ${invite.name}. Da questo link puoi controllarla e completarla in pochi minuti: prodotti e prezzi, orari, due righe sul maso. Niente account e niente password.\n\n${link}\n\nQuando è pronta la pubblichiamo noi. Il link è personale: non inoltrarlo.`
 }
 
 const whatsappLink = (phone, text) => `https://wa.me/${whatsappNumber(phone)}?text=${encodeURIComponent(text)}`

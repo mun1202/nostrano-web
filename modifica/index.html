@@ -9,7 +9,7 @@
   <!-- Aggiunta alla schermata Home: su iPhone è l'unico modo di ricevere le notifiche del browser. -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Nostrano">
+  <meta name="apple-mobile-web-app-title" content="Il mio contadino">
   <script>
     // Il sito può stare in una sottocartella (su GitHub Pages /nostrano-web/): gli indirizzi partono da lì.
     window.NOSTRANO_ROOT = location.pathname.replace(/\/(modifica|admin)(\/.*)?$/, '/').replace(/[^/]*$/, '')
@@ -17,16 +17,16 @@
       '<link rel="icon" href="ROOT/assets/logo.svg" type="image/svg+xml">',
       '<link rel="apple-touch-icon" href="ROOT/assets/icon-180.png">',
       '<link rel="manifest" href="ROOT/modifica/manifest.webmanifest">',
-      '<link rel="stylesheet" href="ROOT/assets/style.css?v=3fe2d0297b">',
-      '<script src="ROOT/config.js?v=3fe2d0297b"><\/script>',
-      '<script type="module" src="ROOT/assets/app.js?v=3fe2d0297b"><\/script>',
+      '<link rel="stylesheet" href="ROOT/assets/style.css?v=47e750b66f">',
+      '<script src="ROOT/config.js?v=47e750b66f"><\/script>',
+      '<script type="module" src="ROOT/assets/app.js?v=47e750b66f"><\/script>',
     ].map((tag) => tag.replaceAll('ROOT/', window.NOSTRANO_ROOT)).join(''))
   </script>
-  <title>Nostrano · Area produttore</title>
+  <title>Il mio contadino · Area produttore</title>
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" data-root-href=""><img data-root-src="assets/logo.svg" alt="" width="26" height="32"><span>Nostrano</span></a>
+    <a class="brand" data-root-href=""><img data-root-src="assets/logo.svg" alt="" width="26" height="32"><span>Il mio contadino</span></a>
     <nav id="nav" aria-label="Sezioni"></nav>
     <select id="lang" aria-label="Lingua">
       <option value="it">Italiano</option>

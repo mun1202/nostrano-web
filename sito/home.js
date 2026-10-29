@@ -6,16 +6,16 @@
 import {
   aperto, categoria, esc, giorno, icona, leggiRicerca, nuovaRicerca, ordina, origine, passa, riassunto, riassuntoCosa,
   riassuntoDove, riassuntoQuando, scheda, scriviRicerca, stato, statoScheda, stessaRicerca,
-} from './comune.js?v=3fe2d0297b'
-import { adesso, aggiornaDom, barra, foglio, frammento, ogniMinuto, pagina } from './browser.js?v=3fe2d0297b'
+} from './comune.js?v=47e750b66f'
+import { adesso, aggiornaDom, barra, foglio, frammento, ogniMinuto, pagina } from './browser.js?v=47e750b66f'
 import {
   chips, comuniDi, daDove, elencoComuni, ordinaMercati, pannello, passiFinestra, passiTelefono, quandoMercato,
   scelteFinestra,
-} from './viste.js?v=3fe2d0297b'
-import { mostraCuori, preferiti, toccaCuore } from './preferiti.js?v=3fe2d0297b'
-import { account } from './accedi.js?v=3fe2d0297b'
-import { suggerisci } from './suggerisci.js?v=3fe2d0297b'
-import { creaCartina } from './cartina.js?v=3fe2d0297b'
+} from './viste.js?v=47e750b66f'
+import { mostraCuori, preferiti, toccaCuore } from './preferiti.js?v=47e750b66f'
+import { account } from './accedi.js?v=47e750b66f'
+import { suggerisci } from './suggerisci.js?v=47e750b66f'
+import { creaCartina } from './cartina.js?v=47e750b66f'
 
 const $ = (id) => document.getElementById(id)
 const { dati, c } = pagina(document.body.dataset.base ?? './')
@@ -29,7 +29,7 @@ const EASE_OUT = 'cubic-bezier(0.23, 1, 0.32, 1)'
 // I preferiti di questo browser (null se non si possono ricordare: allora niente cuori).
 const pref = preferiti()
 c.preferiti = pref?.set ?? new Set()
-// Contano solo i masi che ci sono ancora: uno tolto da Nostrano resta salvato (può tornare) ma non fa comparire la pillola.
+// Contano solo i masi che ci sono ancora: uno tolto da Il mio contadino resta salvato (può tornare) ma non fa comparire la pillola.
 const quantiPreferiti = () => FARMS.filter((f) => c.preferiti.has(f.slug)).length
 let stati = new Map()
 let posizione = null
@@ -96,6 +96,16 @@ function mostra({ entra = false, dallaRicerca = false } = {}) {
   if ($('pannello').open) mostraPannello()
   mostraCartina({ anima: dallaRicerca })
   salva()
+  inizioRisultati()
+}
+
+// Con una ricerca nuova l'elenco riparte dal primo maso: se si era scesi più in basso, si torna all'inizio dei
+// risultati (sotto intestazione e filtri, che restano in alto).
+function inizioRisultati() {
+  if (inMappa()) return
+  const alto = $('filtri').offsetHeight + parseFloat(getComputedStyle($('filtri')).top)
+  const inizio = scrollY + $('risultati').getBoundingClientRect().top - alto
+  if (scrollY > inizio + 1) scrollTo({ top: inizio, behavior: 'instant' })
 }
 
 // Le schede già nella pagina restano dove sono: cambiano solo lo stato e il conteggio, così foto e animazione
@@ -482,8 +492,12 @@ function bottoneVista() {
   b.innerHTML = `${icona(mappa ? 'list' : 'map')}<span>${esc(mappa ? T.elenco : T.mappa)}</span>`
 }
 
+// Dove era la pagina prima di aprire la mappa: tornando all'elenco si riparte da lì, non dall'inizio.
+let scrollPrimaDellaMappa = null
+
 function scegliVista(v) {
   const mappa = v === 'mappa'
+  if (mappa && !inMappa()) scrollPrimaDellaMappa = scrollY
   for (const x of $('vista').querySelectorAll('button')) x.setAttribute('aria-pressed', String(x.dataset.vista === v))
   $('elenco').hidden = mappa
   if ($('cartina')) $('cartina').hidden = !mappa
@@ -508,6 +522,10 @@ function scegliVista(v) {
   $('elenco').className = `farms ${v}`
   try { localStorage.setItem('nostrano.vista', v) } catch {}
   bottoneVista()
+  if (scrollPrimaDellaMappa !== null) {
+    scrollTo({ top: scrollPrimaDellaMappa, behavior: 'instant' })
+    scrollPrimaDellaMappa = null
+  }
 }
 
 // Mercati, ordinati dal prossimo: si spostano gli elementi che ci sono, senza ricaricare le foto.

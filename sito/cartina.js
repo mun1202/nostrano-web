@@ -1,24 +1,25 @@
 // La vista "Mappa" della home e delle pagine dei paesi e dei prodotti: MapLibre (in sito/vendor/maplibre, caricato
 // solo quando si apre la vista) con le tessere di mappa/zona.pmtiles lette a pezzi dal nostro sito. Niente servizi di
 // mappe e niente account: i dati sono di OpenStreetMap, ritagliati da npm run mappa:prepara.
-// Colori naturali ma tenui (boschi verdi, acqua azzurra, strade bianche): i segnaposti dei masi restano in primo piano.
-import { aperto, categoria, esc, icona, scheda, stato } from './comune.js?v=3fe2d0297b'
-import { GZIP, archivio } from './pmtiles.js?v=3fe2d0297b'
+// Colori naturali e vivi (boschi verdi, acqua azzurra, strade principali gialle): i segnaposti bianchi restano in primo piano.
+import { aperto, categoria, esc, icona, scheda, stato } from './comune.js?v=47e750b66f'
+import { GZIP, archivio } from './pmtiles.js?v=47e750b66f'
 
 const CHIARO = {
-  terra: '#f5f4ef',
-  bosco: '#dde8d6',
-  campi: '#eef0e3',
-  citta: '#ebe9e6',
-  ghiaccio: '#f6f9fb',
-  acqua: '#c3dbe8',
-  edifici: '#e2e2e4',
-  confini: '#c7c7cc',
-  bordoStrade: '#d4d4da',
-  bordoAutostrade: '#b8b8c1',
+  terra: '#f2efe4',
+  bosco: '#c4dcb4',
+  campi: '#e4ecc8',
+  citta: '#e6e1d8',
+  ghiaccio: '#f4f8fb',
+  acqua: '#9cc9e6',
+  edifici: '#d9d3c8',
+  confini: '#b9a9c9',
+  bordoStrade: '#d0ccc2',
+  bordoAutostrade: '#e0b24a',
   strade: '#ffffff',
-  sentieri: '#cfcfd4',
-  ferrovia: '#c8c8cd',
+  principali: '#ffe9a3',
+  sentieri: '#bfb6a6',
+  ferrovia: '#b3b0aa',
   testo: '#3f3f46',
   testoTenue: '#71717a',
   alone: '#ffffff',
@@ -111,7 +112,8 @@ function stile(cartina, lang, colori = CHIARO) {
         'line-color': colori.strade, 'line-width': larghezza([12, 0.5, 15, 5]),
       } },
       { id: 'principali', type: 'line', source: 'zona', 'source-layer': 'roads', minzoom: 8, filter: tipo('major_road', 'highway'), layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: {
-        'line-color': colori.strade, 'line-width': larghezza([8, 0.5, 15, ['match', ['get', 'kind'], 'highway', 9, 7.5]]),
+        // Strade principali e autostrade in giallo chiaro, come sulle mappe di tutti i giorni: ci si orienta prima.
+        'line-color': colori.principali, 'line-width': larghezza([8, 0.5, 15, ['match', ['get', 'kind'], 'highway', 9, 7.5]]),
       } },
       { id: 'nomi-strade', type: 'symbol', source: 'zona', 'source-layer': 'roads', minzoom: 14, filter: tipo('major_road', 'minor_road'), layout: {
         'symbol-placement': 'line', 'text-field': nome, 'text-font': ['Noto Sans Regular'], 'text-size': 11,

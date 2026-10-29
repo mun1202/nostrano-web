@@ -4,7 +4,7 @@
 
 // Il nome del sito e dell'app, in un punto solo: cambierà quasi certamente in "Il mio contadino".
 // Lo usano i testi qui sotto, il generatore (web/genera/impostazioni.mjs lo prende da qui) e le pagine.
-export const NOME = 'Nostrano'
+export const NOME = 'Il mio contadino'
 
 const piu = (n, uno, tanti) => `${n} ${n === 1 ? uno : tanti}`
 

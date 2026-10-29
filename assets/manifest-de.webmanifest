@@ -1,6 +1,6 @@
 {
-  "name": "Nostrano · Höfe mit Direktverkauf",
-  "short_name": "Nostrano",
+  "name": "Il mio contadino · Höfe mit Direktverkauf",
+  "short_name": "Contadino",
   "description": "Die Höfe in Südtirol mit Direktverkauf: Öffnungszeiten, Produkte und Preise, von den Höfen selbst gepflegt.",
   "lang": "de",
   "dir": "ltr",
@@ -10,8 +10,23 @@
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
