@@ -1,8 +1,8 @@
 // Pannello admin: si apre con un link di accesso (https://nostrano.app/admin/<codice>), poi il browser resta abilitato.
 // Da qui si creano le schede in bozza, si invitano i masi su WhatsApp e si pubblica.
-import { ROOT, linkCode, removeUploaded, rpc, upload } from './api.js?v=mvskez7e'
-import { MUNICIPALITY_CODES, municipalityName } from './i18n.js?v=mvskez7e'
-import * as views from './admin-views.js?v=mvskez7e'
+import { ROOT, linkCode, removeUploaded, rpc, upload } from './api.js?v=3fe2d0297b'
+import { MUNICIPALITY_CODES, municipalityName } from './i18n.js?v=3fe2d0297b'
+import * as views from './admin-views.js?v=3fe2d0297b'
 
 const root = document.querySelector('#app')
 const navigation = document.querySelector('#nav')

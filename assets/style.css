@@ -1,10 +1,12 @@
 /* Pagina del produttore e pannello admin. Stile sobrio: bianco, grigi neutri, un solo accento (il verde
-   del marchio) per i "sì" e le cose a posto. Sul telefono una colonna; dal computer il menu a sinistra. */
+   del marchio) per i "sì" e le cose a posto. Sul telefono una colonna; dal computer il menu a sinistra.
+   Misure, bottoni e movimento sono quelli del sito pubblico (web/sito/sito.css). */
 :root {
   --green: #2f6b3a;
   --green-soft: #ecf5ee;
-  --terracotta: #b4441f;
-  --terracotta-soft: #fcefea;
+  /* Come nel sito niente terracotta: quello che resta (avvisi del pannello admin) è ambra. */
+  --terracotta: #925f08;
+  --terracotta-soft: #fdf5e4;
   --amber: #925f08;
   --amber-soft: #fdf5e4;
   --blue: #2f5687;
@@ -15,13 +17,17 @@
   --line: #e4e4e7;
   --fill: #f4f4f5;
   --side: #fafafa;
-  --radius: 10px;
-  --radius-sm: 8px;
+  --faint: #a1a1aa;
+  --line-strong: #d4d4d8;
+  --radius: 12px;
+  --radius-sm: 10px;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --shadow: 0 1px 2px rgba(24, 24, 27, 0.04);
   color-scheme: light;
 }
 
 * { box-sizing: border-box; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 
 html { scroll-behavior: smooth; }
 
@@ -92,7 +98,7 @@ body.busy main { opacity: 0.6; pointer-events: none; transition: opacity 0.15s; 
   height: 20px;
   padding: 0 6px;
   border-radius: 10px;
-  background: var(--terracotta);
+  background: var(--ink);
   color: #fff;
   font-size: 11px;
   font-weight: 700;
@@ -143,7 +149,7 @@ a.more::after { content: " →"; }
 }
 .card.empty { box-shadow: none; background: var(--side); border-style: dashed; text-align: center; }
 .card.soft-green { background: var(--green-soft); border-color: transparent; box-shadow: none; }
-.card.request { border-left: 3px solid var(--terracotta); }
+.card.request { border-left: 3px solid var(--ink); }
 .card.collect { border-left: 3px solid var(--green); }
 .card.banner { background: var(--fill); border-color: transparent; box-shadow: none; padding: 10px 14px; }
 .card h2 { margin-top: 0; }
@@ -183,7 +189,7 @@ ol.steps { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
   height: 22px;
   padding: 0 6px;
   border-radius: 11px;
-  background: var(--terracotta);
+  background: var(--ink);
   color: #fff;
   font-size: 12px;
   font-weight: 700;
@@ -196,13 +202,17 @@ button {
   font-size: 14px;
   font-weight: 600;
   border: 0;
-  border-radius: var(--radius-sm);
-  padding: 9px 14px;
+  border-radius: 11px;
+  min-height: 40px;
+  padding: 9px 16px;
   cursor: pointer;
   touch-action: manipulation;
-  transition: background 0.15s, box-shadow 0.15s, opacity 0.15s, transform 0.05s;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 150ms ease, box-shadow 150ms ease, opacity 150ms ease, transform 160ms var(--ease-out);
 }
-button:active:not(:disabled) { transform: translateY(1px); }
+/* Come i bottoni del sito: si stringono un poco quando li premi. */
+button:active:not(:disabled) { transform: scale(0.97); }
+@media (prefers-reduced-motion: reduce) { button:active:not(:disabled) { transform: none; } }
 button:disabled { opacity: 0.5; cursor: default; }
 button.primary { background: var(--ink); color: #fff; }
 button.primary:hover:not(:disabled) { background: #27272a; }
@@ -210,12 +220,12 @@ button.primary.yes { background: var(--green); }
 button.primary.yes:hover:not(:disabled) { background: #265a30; }
 button.secondary { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1px var(--line), var(--shadow); }
 button.secondary:hover:not(:disabled) { background: var(--side); }
-button.small { padding: 6px 10px; font-size: 13px; }
-button.wide { width: 100%; margin-top: 8px; padding: 11px 14px; }
-button.link { background: none; padding: 4px 0; color: var(--ink); text-align: left; }
+button.small { min-height: 34px; padding: 6px 12px; font-size: 13px; }
+button.wide { width: 100%; min-height: 46px; margin-top: 8px; padding: 11px 16px; }
+button.link { min-height: 0; background: none; padding: 4px 0; color: var(--ink); text-align: left; }
 button.link:hover { text-decoration: underline; }
-button.link.danger { color: var(--terracotta); }
-button.icon { background: none; padding: 6px; color: var(--muted); }
+button.link.danger { color: var(--text); text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 3px; }
+button.icon { min-height: 0; background: none; padding: 6px; color: var(--muted); }
 button.icon:hover { color: var(--ink); background: var(--fill); }
 
 .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
@@ -230,7 +240,7 @@ a.button {
   text-decoration: none;
   white-space: nowrap;
 }
-a.button.small { padding: 6px 10px; font-size: 13px; }
+a.button.small { min-height: 34px; padding: 6px 12px; font-size: 13px; }
 a.button.secondary { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1px var(--line), var(--shadow); }
 a.button.primary { background: var(--ink); color: #fff; }
 
@@ -281,7 +291,7 @@ input.switch:checked { background: var(--green); }
 input.switch:checked::after { transform: translateX(16px); }
 
 .stepper { display: inline-flex; align-items: center; gap: 2px; border: 1px solid var(--line); border-radius: var(--radius-sm); }
-.stepper button { background: none; padding: 4px 12px; font-size: 16px; border-radius: 0; }
+.stepper button { min-height: 0; background: none; padding: 4px 12px; font-size: 16px; border-radius: 0; }
 .stepper output { min-width: 24px; text-align: center; font-weight: 700; }
 
 /* Numeri della settimana: etichetta piccola sopra, numero grande. */
@@ -348,7 +358,7 @@ fieldset.day.no-split .times.second { display: none; }
   transition: opacity 0.2s, transform 0.2s;
 }
 #toast.show { opacity: 1; transform: translate(-50%, 0); }
-#toast.error { background: var(--terracotta); }
+#toast.error { background: var(--ink); }
 
 /* Lista di cosa manca nella bozza. */
 .checklist { list-style: none; padding: 0; margin: 12px 0; display: flex; flex-direction: column; gap: 8px; }
