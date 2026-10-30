@@ -1,8 +1,8 @@
 // "Suggerisci un maso", su ogni pagina con il piè di pagina: come "Segnala un maso" nell'app (suggestion_create),
 // con lo stesso accesso anonimo chiesto solo al momento dell'invio. Il pannello lo scrive il generatore
 // (web/genera/pagine.mjs) con indirizzo del progetto e chiave publishable; i bottoni hanno data-suggerisci.
-import { chiamaAnonimo, foglio, mostraErrore } from './browser.js?v=47e750b66f'
-import { TESTI } from './testi.js?v=47e750b66f'
+import { chiamaAnonimo, foglio, mostraErrore } from './browser.js?v=dc65e12611'
+import { TESTI } from './testi.js?v=dc65e12611'
 
 export function suggerisci() {
   const pannello = document.getElementById('suggerisci')
