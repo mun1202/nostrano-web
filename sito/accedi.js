@@ -2,11 +2,11 @@
 // account, Esci), il pannello "Accedi" (email → codice di 6 cifre → fatto) e il pallino quando un maso ha cambiato
 // lo stato di una richiesta dall'ultima visita. Al primo accesso i preferiti del browser si uniscono a quelli
 // dell'account; dopo, quelli dell'account valgono su ogni dispositivo. La sessione la tiene sessione.js.
-import { esc, icona } from './comune.js?v=dc65e12611'
-import { foglio, mostraErrore } from './browser.js?v=dc65e12611'
-import { preferiti } from './preferiti.js?v=dc65e12611'
-import { apriSessione, puoRicordare } from './sessione.js?v=dc65e12611'
-import { TESTI } from './testi.js?v=dc65e12611'
+import { esc, icona } from './comune.js?v=28861c4766'
+import { foglio, mostraErrore } from './browser.js?v=28861c4766'
+import { preferiti } from './preferiti.js?v=28861c4766'
+import { apriSessione, puoRicordare } from './sessione.js?v=28861c4766'
+import { TESTI } from './testi.js?v=28861c4766'
 
 const T = TESTI[document.documentElement.lang === 'de' ? 'de' : 'it']
 const $ = (id) => document.getElementById(id)
@@ -74,6 +74,7 @@ function intestazione() {
   posto.innerHTML = `<button class="account-btn signed" type="button" id="conto-bottone" aria-expanded="false" aria-controls="conto-menu" aria-label="${esc(T.menuAccount)}">${icona('user')}<span class="account-dot" data-pallino hidden></span></button>
     <div class="account-menu" id="conto-menu">
       <p class="account-email">${esc(s.email)}</p>
+      <a href="${esc(posto.dataset.richieste.replace(/richieste\/$/, ''))}?preferiti=1">${icona('heart')}<span>${esc(T.preferiti)}</span></a>
       <a href="${esc(posto.dataset.richieste)}">${icona('bag')}<span>${esc(T.leMieRichieste)}</span><span class="account-dot" data-pallino hidden></span></a>
       <a href="${esc(posto.dataset.account)}">${icona('user')}<span>${esc(T.tuoAccount)}</span></a>
       <button type="button" data-esci>${icona('logout')}<span>${esc(T.esci)}</span></button>

@@ -1,6 +1,6 @@
 // Le parti della pagina, come HTML. Ogni testo che arriva dal database o dai clienti passa da esc().
-import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=dc65e12611'
-import { WEEK, addDays, formatDay, formatInstant, openDays, toClock, todayRome, weekdayName } from './days.js?v=dc65e12611'
+import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=28861c4766'
+import { WEEK, addDays, formatDay, formatInstant, openDays, toClock, todayRome, weekdayName } from './days.js?v=28861c4766'
 
 export const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
@@ -47,6 +47,18 @@ export function isWaiting(request) {
 
 const confirmedToday = (farm) =>
   new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Rome' }).format(new Date(farm.last_checked_at)) === todayRome()
+
+/**
+ * La striscia in cima quando l'admin modifica la scheda di un maso ("Modifica come il maso"): si vede che non è il
+ * maso a scrivere, e si torna alla sua scheda nel pannello. I prodotti nuovi per il catalogo si aggiungono da lì.
+ */
+export function adminBar(s, slug) {
+  return `
+    <div class="admin-bar">
+      <span><strong>Modifica come admin</strong> · ${esc(s.farm.name)}. Le modifiche restano nella cronologia come "Admin".</span>
+      <a class="button secondary small" href="${esc(window.NOSTRANO_ROOT ?? '/')}admin/#/maso/${encodeURIComponent(slug)}">Torna al pannello</a>
+    </div>`
+}
 
 // Testata e conferma -------------------------------------------------------------------------
 
@@ -198,12 +210,38 @@ function collectCard(s, request) {
     </article>`
 }
 
+/**
+ * Il calendario delle richieste: i prossimi 14 giorni con quante richieste ci sono per ciascuno (in attesa o
+ * confermate per quel giorno). Toccando un giorno l'elenco sotto mostra solo quello; di nuovo, tutti.
+ */
+const OPEN = ['waiting', 'accepted', 'other_day']
+function calendar(s) {
+  const today = todayRome()
+  const days = Array.from({ length: 14 }, (_, i) => addDays(today, i))
+  const count = (day) => s.requests.filter((r) => OPEN.includes(r.status) && pickupDay(r) === day && !(r.status === 'waiting' && r.day < today)).length
+  const short = (day, options) => new Intl.DateTimeFormat(s.lang === 'de' ? 'de-DE' : 'it-IT', { ...options, timeZone: 'UTC' }).format(new Date(`${day}T12:00:00Z`))
+  return `
+    <div class="calendar" role="group" aria-label="${esc(t(s.lang, 'calendar'))}">
+      ${days.map((day) => {
+        const n = count(day)
+        return `<button type="button" class="cal-day${n ? ' has' : ''}" data-action="day" data-day="${day}" aria-pressed="${s.day === day}"
+          aria-label="${esc(capitalize(formatDay(day, s.lang)))}: ${n}">
+          <small>${esc(day === today ? t(s.lang, 'today') : short(day, { weekday: 'short' }))}</small>
+          <strong>${esc(short(day, { day: 'numeric' }))}</strong>
+          <span class="cal-count">${n || ''}</span>
+        </button>`
+      }).join('')}
+    </div>
+    ${s.day ? `<p class="small">${esc(capitalize(formatDay(s.day, s.lang)))} · <button class="link small" data-action="day" data-day="${s.day}">${t(s.lang, 'allDays')}</button></p>` : ''}`
+}
+
 export function requests(s) {
   const { farm } = s
   if (!farm.has_farm_shop) return ''
-  const waiting = s.requests.filter(isWaiting)
-  const collecting = s.requests.filter(isToCollect)
-  const answered = s.requests.filter((r) => !isWaiting(r) && !isToCollect(r))
+  const onDay = (r) => !s.day || pickupDay(r) === s.day
+  const waiting = s.requests.filter(isWaiting).filter(onDay)
+  const collecting = s.requests.filter(isToCollect).filter(onDay)
+  const answered = s.requests.filter((r) => !isWaiting(r) && !isToCollect(r)).filter(onDay)
   return `
     <h2>${t(s.lang, 'requests')}</h2>
     <div class="card">
@@ -222,6 +260,7 @@ export function requests(s) {
         </div>` : ''}
     </div>
     ${notifyCard(s)}
+    ${calendar(s)}
     <h3>${t(s.lang, 'requestsWaiting')}</h3>
     ${waiting.length ? waiting.map((r) => requestCard(s, r)).join('') : `<p class="muted">${t(s.lang, 'requestsNone')}</p>`}
     <p class="muted small">${t(s.lang, 'answerWithin')}</p>
@@ -411,7 +450,7 @@ export function products(s) {
       </select>
       <button class="secondary" data-action="add-product">${t(s.lang, 'add')}</button>
     </div>
-    <details class="custom" ${s.customOpen ? 'open' : ''}>
+    ${s.admin ? '' : `<details class="custom" ${s.customOpen ? 'open' : ''}>
       <summary>${t(s.lang, 'customProduct')}</summary>
       <form data-form="custom" class="stack">
         <label class="stack small">${t(s.lang, 'customName')}
@@ -428,7 +467,7 @@ export function products(s) {
         <button type="submit" class="secondary">${t(s.lang, 'addCustom')}</button>
         <small class="muted">${t(s.lang, 'customNote')}</small>
       </form>
-    </details>
+    </details>`}
     <p class="muted small">${t(s.lang, 'productsNote')}</p>`
 }
 

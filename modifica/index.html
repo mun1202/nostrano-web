@@ -13,13 +13,15 @@
   <script>
     // Il sito può stare in una sottocartella (su GitHub Pages /nostrano-web/): gli indirizzi partono da lì.
     window.NOSTRANO_ROOT = location.pathname.replace(/\/(modifica|admin)(\/.*)?$/, '/').replace(/[^/]*$/, '')
+    // Aperta dal pannello admin ("Modifica come il maso", ?admin=<slug>): si entra con l'identità dell'admin.
+    if (new URLSearchParams(location.search).has('admin')) window.NOSTRANO_SESSION_KEY = 'nostrano.admin.session'
     document.write([
       '<link rel="icon" href="ROOT/assets/logo.svg" type="image/svg+xml">',
       '<link rel="apple-touch-icon" href="ROOT/assets/icon-180.png">',
       '<link rel="manifest" href="ROOT/modifica/manifest.webmanifest">',
-      '<link rel="stylesheet" href="ROOT/assets/style.css?v=dc65e12611">',
-      '<script src="ROOT/config.js?v=dc65e12611"><\/script>',
-      '<script type="module" src="ROOT/assets/app.js?v=dc65e12611"><\/script>',
+      '<link rel="stylesheet" href="ROOT/assets/style.css?v=28861c4766">',
+      '<script src="ROOT/config.js?v=28861c4766"><\/script>',
+      '<script type="module" src="ROOT/assets/app.js?v=28861c4766"><\/script>',
     ].map((tag) => tag.replaceAll('ROOT/', window.NOSTRANO_ROOT)).join(''))
   </script>
   <title>Il mio contadino · Area produttore</title>

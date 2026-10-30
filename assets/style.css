@@ -448,3 +448,23 @@ section:empty { display: none; }
   .page.single, main:has(.page.single) > #s-header { max-width: 720px; }
   #toast { left: calc(50% + 120px); bottom: 32px; }
 }
+
+/* Calendario delle richieste (pagina del maso, "Richieste"): 14 giorni che scorrono di lato, con quante richieste ci
+sono in ognuno; il giorno scelto è scuro, come le pillole del sito. */
+.calendar { display: flex; gap: 6px; margin: 16px -16px 8px; padding: 2px 16px 6px; overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; }
+.calendar::-webkit-scrollbar { display: none; }
+.cal-day {
+  display: grid; flex: none; justify-items: center; gap: 2px; width: 56px; min-height: 0; padding: 8px 0;
+  border: 1px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink); font-weight: 500;
+}
+.cal-day small { color: var(--muted); font-size: 12px; text-transform: capitalize; }
+.cal-day strong { font-size: 17px; }
+.cal-count { min-width: 20px; height: 20px; border-radius: 10px; font-size: 12px; font-weight: 700; line-height: 20px; text-align: center; }
+.cal-day.has .cal-count { background: var(--green); color: #fff; }
+.cal-day[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: #fff; }
+.cal-day[aria-pressed="true"] small { color: #d4d4d8; }
+.cal-day[aria-pressed="true"] .cal-count { background: #fff; color: var(--ink); }
+
+/* "Modifica come admin" nella pagina del maso: una striscia ambra che ricorda chi sta scrivendo. */
+.admin-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; margin: 0 0 16px; padding: 10px 14px; border-radius: var(--radius); background: var(--amber-soft); color: var(--amber); font-size: 14px; }
+.admin-bar a { text-decoration: none; }

@@ -21,10 +21,14 @@
   <link rel="manifest" href="../../assets/manifest-de.webmanifest">
   <link rel="apple-touch-icon" href="../../assets/icon-180.png">
   <meta name="apple-mobile-web-app-title" content="Il mio contadino">
-  <link rel="stylesheet" href="../../sito/sito.css?v=dc65e12611">
-  <link rel="modulepreload" href="../../sito/comune.js?v=dc65e12611">
-  <link rel="modulepreload" href="../../sito/testi.js?v=dc65e12611">
-  <link rel="modulepreload" href="../../sito/viste.js?v=dc65e12611">
+  <link rel="stylesheet" href="../../sito/sito.css?v=28861c4766">
+  <script>
+    // Tornando indietro (o avanti) con il browser niente passaggio animato tra le pagine: solo cliccando un maso.
+    addEventListener('pagereveal', (e) => { if (e.viewTransition && navigation?.activation?.navigationType === 'traverse') e.viewTransition.skipTransition() })
+  </script>
+  <link rel="modulepreload" href="../../sito/comune.js?v=28861c4766">
+  <link rel="modulepreload" href="../../sito/testi.js?v=28861c4766">
+  <link rel="modulepreload" href="../../sito/viste.js?v=28861c4766">
   <noscript><style>.farm-photo img { opacity: 1; } .search-box, .filters, .tools, #posizione, #apri-segnala { display: none; } .hero { --box-h: 0px; }</style></noscript>
   <script type="application/json" id="progetto">{"url":"https://gvdnbutkdaxcglotgwev.supabase.co","key":"sb_publishable_SGZwwvi4vcQvUj1R3aEH0w_sCw_a5ol","email":""}</script>
 </head>
@@ -150,6 +154,6 @@
       </footer>
     </div>
   </dialog>
-  <script type="module" src="../../sito/conto.js?v=dc65e12611"></script>
+  <script type="module" src="../../sito/conto.js?v=28861c4766"></script>
 </body>
 </html>

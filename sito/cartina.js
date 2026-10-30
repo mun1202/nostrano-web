@@ -2,8 +2,8 @@
 // solo quando si apre la vista) con le tessere di mappa/zona.pmtiles lette a pezzi dal nostro sito. Niente servizi di
 // mappe e niente account: i dati sono di OpenStreetMap, ritagliati da npm run mappa:prepara.
 // Colori naturali e vivi (boschi verdi, acqua azzurra, strade principali gialle): i segnaposti bianchi restano in primo piano.
-import { aperto, categoria, esc, icona, scheda, stato } from './comune.js?v=dc65e12611'
-import { GZIP, archivio } from './pmtiles.js?v=dc65e12611'
+import { aperto, categoria, esc, icona, scheda, stato } from './comune.js?v=28861c4766'
+import { GZIP, archivio } from './pmtiles.js?v=28861c4766'
 
 const CHIARO = {
   terra: '#f2efe4',

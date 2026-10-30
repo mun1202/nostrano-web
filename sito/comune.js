@@ -110,7 +110,11 @@ export function prezzo(p, c) {
   return `${valore} / ${q === 1 ? uno : `${q} ${tanti}`}`
 }
 
-export const nomeProdotto = (kind, c) => c.kinds[kind]?.[c.lang] ?? kind
+// Con la maiuscola anche se l'admin l'ha scritto minuscolo ("arance" → "Arance").
+export const nomeProdotto = (kind, c) => {
+  const nome = c.kinds[kind]?.[c.lang] ?? kind
+  return nome.charAt(0).toLocaleUpperCase(c.lang) + nome.slice(1)
+}
 
 export function prodottiInBreve(f, c) {
   const nomi = f.products.filter((p) => p.available).map((p) => nomeProdotto(p.kind, c))
@@ -291,9 +295,9 @@ export function prodottiDiStagione(farms, c, quanti = 8) {
 export function prodottiPresenti(farms, c) {
   const conti = new Map()
   for (const f of farms) for (const kind of new Set(f.products.map((p) => p.kind))) conti.set(kind, (conti.get(kind) ?? 0) + 1)
+  // In ordine alfabetico, nella lingua della pagina.
   return [...conti].map(([kind, n]) => ({ kind, n }))
-    .sort((a, b) => ORDINE_CATEGORIE.indexOf(categoria(a.kind, c)) - ORDINE_CATEGORIE.indexOf(categoria(b.kind, c))
-      || nomeProdotto(a.kind, c).localeCompare(nomeProdotto(b.kind, c), c.lang))
+    .sort((a, b) => nomeProdotto(a.kind, c).localeCompare(nomeProdotto(b.kind, c), c.lang))
 }
 
 export const categoriePresenti = (farms, c) =>

@@ -400,60 +400,18 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/comuni/terlano/"/>
   </url>
   <url>
-    <loc>https://ilmiocontadino.com/it/prodotti/cavoli/</loc>
-    <lastmod>2026-10-25</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/cavoli/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/cavoli/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/cavoli/"/>
+    <loc>https://ilmiocontadino.com/it/prodotti/burro/</loc>
+    <lastmod>2026-10-24</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/burro/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/burro/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/burro/"/>
   </url>
   <url>
-    <loc>https://ilmiocontadino.com/de/prodotti/cavoli/</loc>
-    <lastmod>2026-10-25</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/cavoli/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/cavoli/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/cavoli/"/>
-  </url>
-  <url>
-    <loc>https://ilmiocontadino.com/it/prodotti/erbe/</loc>
-    <lastmod>2026-10-25</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/erbe/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/erbe/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/erbe/"/>
-  </url>
-  <url>
-    <loc>https://ilmiocontadino.com/de/prodotti/erbe/</loc>
-    <lastmod>2026-10-25</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/erbe/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/erbe/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/erbe/"/>
-  </url>
-  <url>
-    <loc>https://ilmiocontadino.com/it/prodotti/patate/</loc>
-    <lastmod>2026-10-22</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/patate/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/patate/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/patate/"/>
-  </url>
-  <url>
-    <loc>https://ilmiocontadino.com/de/prodotti/patate/</loc>
-    <lastmod>2026-10-22</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/patate/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/patate/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/patate/"/>
-  </url>
-  <url>
-    <loc>https://ilmiocontadino.com/it/prodotti/zucca/</loc>
-    <lastmod>2026-10-25</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/zucca/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/zucca/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/zucca/"/>
-  </url>
-  <url>
-    <loc>https://ilmiocontadino.com/de/prodotti/zucca/</loc>
-    <lastmod>2026-10-25</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/zucca/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/zucca/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/zucca/"/>
+    <loc>https://ilmiocontadino.com/de/prodotti/burro/</loc>
+    <lastmod>2026-10-24</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/burro/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/burro/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/burro/"/>
   </url>
   <url>
     <loc>https://ilmiocontadino.com/it/prodotti/castagne/</loc>
@@ -470,6 +428,20 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/castagne/"/>
   </url>
   <url>
+    <loc>https://ilmiocontadino.com/it/prodotti/cavoli/</loc>
+    <lastmod>2026-10-25</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/cavoli/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/cavoli/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/cavoli/"/>
+  </url>
+  <url>
+    <loc>https://ilmiocontadino.com/de/prodotti/cavoli/</loc>
+    <lastmod>2026-10-25</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/cavoli/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/cavoli/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/cavoli/"/>
+  </url>
+  <url>
     <loc>https://ilmiocontadino.com/it/prodotti/confetture/</loc>
     <lastmod>2026-10-12</lastmod>
     <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/confetture/"/>
@@ -482,6 +454,34 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/confetture/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/confetture/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/confetture/"/>
+  </url>
+  <url>
+    <loc>https://ilmiocontadino.com/it/prodotti/erbe/</loc>
+    <lastmod>2026-10-25</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/erbe/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/erbe/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/erbe/"/>
+  </url>
+  <url>
+    <loc>https://ilmiocontadino.com/de/prodotti/erbe/</loc>
+    <lastmod>2026-10-25</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/erbe/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/erbe/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/erbe/"/>
+  </url>
+  <url>
+    <loc>https://ilmiocontadino.com/it/prodotti/formaggio/</loc>
+    <lastmod>2026-10-24</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/formaggio/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/formaggio/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/formaggio/"/>
+  </url>
+  <url>
+    <loc>https://ilmiocontadino.com/de/prodotti/formaggio/</loc>
+    <lastmod>2026-10-24</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/formaggio/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/formaggio/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/formaggio/"/>
   </url>
   <url>
     <loc>https://ilmiocontadino.com/it/prodotti/fragole/</loc>
@@ -498,6 +498,20 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/fragole/"/>
   </url>
   <url>
+    <loc>https://ilmiocontadino.com/it/prodotti/lagrein/</loc>
+    <lastmod>2026-10-17</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/lagrein/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/lagrein/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/lagrein/"/>
+  </url>
+  <url>
+    <loc>https://ilmiocontadino.com/de/prodotti/lagrein/</loc>
+    <lastmod>2026-10-17</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/lagrein/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/lagrein/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/lagrein/"/>
+  </url>
+  <url>
     <loc>https://ilmiocontadino.com/it/prodotti/mele/</loc>
     <lastmod>2026-10-29</lastmod>
     <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/mele/"/>
@@ -510,118 +524,6 @@
     <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/mele/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/mele/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/mele/"/>
-  </url>
-  <url>
-    <loc>https://ilmiocontadino.com/it/prodotti/pere/</loc>
-    <lastmod>2026-10-29</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/pere/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/pere/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/pere/"/>
-  </url>
-  <url>
-    <loc>https://ilmiocontadino.com/de/prodotti/pere/</loc>
-    <lastmod>2026-10-29</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/pere/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/pere/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/pere/"/>
-  </url>
-  <url>
-    <loc>https://ilmiocontadino.com/it/prodotti/succo-mela/</loc>
-    <lastmod>2026-10-29</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/succo-mela/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/succo-mela/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/succo-mela/"/>
-  </url>
-  <url>
-    <loc>https://ilmiocontadino.com/de/prodotti/succo-mela/</loc>
-    <lastmod>2026-10-29</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/succo-mela/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/succo-mela/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/succo-mela/"/>
-  </url>
-  <url>
-    <loc>https://ilmiocontadino.com/it/prodotti/uva/</loc>
-    <lastmod>2026-10-17</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/uva/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/uva/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/uva/"/>
-  </url>
-  <url>
-    <loc>https://ilmiocontadino.com/de/prodotti/uva/</loc>
-    <lastmod>2026-10-17</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/uva/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/uva/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/uva/"/>
-  </url>
-  <url>
-    <loc>https://ilmiocontadino.com/it/prodotti/uova/</loc>
-    <lastmod>2026-10-26</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/uova/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/uova/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/uova/"/>
-  </url>
-  <url>
-    <loc>https://ilmiocontadino.com/de/prodotti/uova/</loc>
-    <lastmod>2026-10-26</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/uova/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/uova/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/uova/"/>
-  </url>
-  <url>
-    <loc>https://ilmiocontadino.com/it/prodotti/pollo/</loc>
-    <lastmod>2026-10-26</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/pollo/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/pollo/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/pollo/"/>
-  </url>
-  <url>
-    <loc>https://ilmiocontadino.com/de/prodotti/pollo/</loc>
-    <lastmod>2026-10-26</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/pollo/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/pollo/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/pollo/"/>
-  </url>
-  <url>
-    <loc>https://ilmiocontadino.com/it/prodotti/speck/</loc>
-    <lastmod>2026-10-07</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/speck/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/speck/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/speck/"/>
-  </url>
-  <url>
-    <loc>https://ilmiocontadino.com/de/prodotti/speck/</loc>
-    <lastmod>2026-10-07</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/speck/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/speck/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/speck/"/>
-  </url>
-  <url>
-    <loc>https://ilmiocontadino.com/it/prodotti/burro/</loc>
-    <lastmod>2026-10-24</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/burro/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/burro/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/burro/"/>
-  </url>
-  <url>
-    <loc>https://ilmiocontadino.com/de/prodotti/burro/</loc>
-    <lastmod>2026-10-24</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/burro/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/burro/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/burro/"/>
-  </url>
-  <url>
-    <loc>https://ilmiocontadino.com/it/prodotti/formaggio/</loc>
-    <lastmod>2026-10-24</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/formaggio/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/formaggio/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/formaggio/"/>
-  </url>
-  <url>
-    <loc>https://ilmiocontadino.com/de/prodotti/formaggio/</loc>
-    <lastmod>2026-10-24</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/formaggio/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/formaggio/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/formaggio/"/>
   </url>
   <url>
     <loc>https://ilmiocontadino.com/it/prodotti/miele-castagno/</loc>
@@ -652,18 +554,116 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/miele/"/>
   </url>
   <url>
-    <loc>https://ilmiocontadino.com/it/prodotti/lagrein/</loc>
-    <lastmod>2026-10-17</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/lagrein/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/lagrein/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/lagrein/"/>
+    <loc>https://ilmiocontadino.com/it/prodotti/pane-segale/</loc>
+    <lastmod>2026-10-16</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/pane-segale/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/pane-segale/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/pane-segale/"/>
   </url>
   <url>
-    <loc>https://ilmiocontadino.com/de/prodotti/lagrein/</loc>
+    <loc>https://ilmiocontadino.com/de/prodotti/pane-segale/</loc>
+    <lastmod>2026-10-16</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/pane-segale/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/pane-segale/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/pane-segale/"/>
+  </url>
+  <url>
+    <loc>https://ilmiocontadino.com/it/prodotti/patate/</loc>
+    <lastmod>2026-10-22</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/patate/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/patate/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/patate/"/>
+  </url>
+  <url>
+    <loc>https://ilmiocontadino.com/de/prodotti/patate/</loc>
+    <lastmod>2026-10-22</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/patate/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/patate/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/patate/"/>
+  </url>
+  <url>
+    <loc>https://ilmiocontadino.com/it/prodotti/pere/</loc>
+    <lastmod>2026-10-29</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/pere/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/pere/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/pere/"/>
+  </url>
+  <url>
+    <loc>https://ilmiocontadino.com/de/prodotti/pere/</loc>
+    <lastmod>2026-10-29</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/pere/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/pere/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/pere/"/>
+  </url>
+  <url>
+    <loc>https://ilmiocontadino.com/it/prodotti/pollo/</loc>
+    <lastmod>2026-10-26</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/pollo/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/pollo/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/pollo/"/>
+  </url>
+  <url>
+    <loc>https://ilmiocontadino.com/de/prodotti/pollo/</loc>
+    <lastmod>2026-10-26</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/pollo/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/pollo/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/pollo/"/>
+  </url>
+  <url>
+    <loc>https://ilmiocontadino.com/it/prodotti/speck/</loc>
+    <lastmod>2026-10-07</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/speck/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/speck/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/speck/"/>
+  </url>
+  <url>
+    <loc>https://ilmiocontadino.com/de/prodotti/speck/</loc>
+    <lastmod>2026-10-07</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/speck/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/speck/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/speck/"/>
+  </url>
+  <url>
+    <loc>https://ilmiocontadino.com/it/prodotti/succo-mela/</loc>
+    <lastmod>2026-10-29</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/succo-mela/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/succo-mela/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/succo-mela/"/>
+  </url>
+  <url>
+    <loc>https://ilmiocontadino.com/de/prodotti/succo-mela/</loc>
+    <lastmod>2026-10-29</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/succo-mela/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/succo-mela/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/succo-mela/"/>
+  </url>
+  <url>
+    <loc>https://ilmiocontadino.com/it/prodotti/uova/</loc>
+    <lastmod>2026-10-26</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/uova/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/uova/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/uova/"/>
+  </url>
+  <url>
+    <loc>https://ilmiocontadino.com/de/prodotti/uova/</loc>
+    <lastmod>2026-10-26</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/uova/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/uova/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/uova/"/>
+  </url>
+  <url>
+    <loc>https://ilmiocontadino.com/it/prodotti/uva/</loc>
     <lastmod>2026-10-17</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/lagrein/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/lagrein/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/lagrein/"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/uva/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/uva/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/uva/"/>
+  </url>
+  <url>
+    <loc>https://ilmiocontadino.com/de/prodotti/uva/</loc>
+    <lastmod>2026-10-17</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/uva/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/uva/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/uva/"/>
   </url>
   <url>
     <loc>https://ilmiocontadino.com/it/prodotti/vino-nuovo/</loc>
@@ -680,18 +680,18 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/vino-nuovo/"/>
   </url>
   <url>
-    <loc>https://ilmiocontadino.com/it/prodotti/pane-segale/</loc>
-    <lastmod>2026-10-16</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/pane-segale/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/pane-segale/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/pane-segale/"/>
+    <loc>https://ilmiocontadino.com/it/prodotti/zucca/</loc>
+    <lastmod>2026-10-25</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/zucca/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/zucca/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/zucca/"/>
   </url>
   <url>
-    <loc>https://ilmiocontadino.com/de/prodotti/pane-segale/</loc>
-    <lastmod>2026-10-16</lastmod>
-    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/pane-segale/"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/pane-segale/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/pane-segale/"/>
+    <loc>https://ilmiocontadino.com/de/prodotti/zucca/</loc>
+    <lastmod>2026-10-25</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/zucca/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/zucca/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/zucca/"/>
   </url>
   <url>
     <loc>https://ilmiocontadino.com/it/mercati/mercato-laives/</loc>

@@ -5,7 +5,7 @@ import {
   dataEstesa, esc, fasce, fasceTesto, filtriAttivi, foto, giorniA, giorniDa, giorno, icona, maiuscola, nomeProdotto,
   normalizza, novita, oraScelta, orario, prezzo, prodottiPresenti, riassunto, riassuntoCosa, riassuntoDove,
   riassuntoQuando, stato, titolo,
-} from './comune.js?v=dc65e12611'
+} from './comune.js?v=28861c4766'
 
 // Home ---------------------------------------------------------------------------------------------
 
@@ -108,8 +108,7 @@ export function contenutoPasso(passo, r, c, farms, ui = {}) {
           <label class="field">${icona('search')}<span class="sr">${esc(c.T.cercaComune)}</span>
             <input type="search" data-k="cerca-comune" placeholder="${esc(c.T.cercaComune)}" value="${esc(ui.comune ?? '')}" autocomplete="off" enterkeyhint="search"></label>
           <div class="chip-row"><button class="chip" type="button" data-k="vicino" data-dove="vicino" aria-pressed="${!r.comune}">${icona('locate')}${esc(c.T.vicinoATe)}</button></div>
-          <h3 class="step-sub">${esc(c.T.comuniTitolo)}</h3>
-          <div class="towns" data-elenco="comuni">${elencoComuni(comuni, r, c)}</div>
+          <div class="towns" data-elenco="comuni">${ui.comune ? elencoComuni(comuni, r, c) : ''}</div>
           <h3 class="step-sub">${esc(c.T.distanzaMassima)}</h3>
           <div class="segmented" role="group" aria-label="${esc(c.T.distanzaMassima)}">
             ${[0, ...DISTANZE].map((km) => `<button type="button" data-k="km-${km}" data-km="${km}" aria-pressed="${r.km === km}">${esc(km ? `${km} km` : c.T.tutte)}</button>`).join('')}
@@ -245,7 +244,9 @@ export function boxNovita(f, c) {
 }
 
 /** I prodotti, prima quelli che ci sono. */
-export const prodottiOrdinati = (f) => [...f.products].sort((a, b) => b.available - a.available)
+// Prima quelli disponibili, poi i finiti; dentro, in ordine alfabetico.
+export const prodottiOrdinati = (f, c) => [...f.products]
+  .sort((a, b) => b.available - a.available || nomeProdotto(a.kind, c).localeCompare(nomeProdotto(b.kind, c), c.lang))
 
 export function quandoPrezzi(f, c) {
   const date = f.products.map((p) => p.price_updated_at).filter(Boolean)
@@ -265,7 +266,7 @@ const prezzoACapo = (testo) => testo.split(' / ').map((parte, i) => `<span>${i ?
 export function bloccoProdotti(f, c, link = () => null, { richieste = false } = {}) {
   if (!f.products.length && !richieste) return ''
   const sotto = quandoPrezzi(f, c)
-  const lista = prodottiOrdinati(f).map((p) => {
+  const lista = prodottiOrdinati(f, c).map((p) => {
     const nome = nomeProdotto(p.kind, c)
     const piu = richieste && p.available
       ? `<span class="qty" data-qty="${esc(p.kind)}" hidden><button class="qty-btn qty-plus" type="button" data-piu="${esc(p.kind)}" aria-label="${esc(c.T.piuDi(nome))}">${icona('plus')}</button></span>`

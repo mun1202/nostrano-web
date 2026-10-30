@@ -1,8 +1,8 @@
 // Le schermate del pannello admin, come HTML. Solo in italiano: lo usa chi gestisce Il mio contadino.
-import { esc } from './views.js?v=dc65e12611'
-import { CATEGORY_CODES, MUNICIPALITY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=dc65e12611'
-import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=dc65e12611'
-import { icon } from './icons.js?v=dc65e12611'
+import { esc } from './views.js?v=28861c4766'
+import { CATEGORY_CODES, MUNICIPALITY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=28861c4766'
+import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=28861c4766'
+import { icon } from './icons.js?v=28861c4766'
 
 const ROOT = window.NOSTRANO_ROOT ?? '/'
 const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1)
@@ -429,8 +429,13 @@ export function farm(a) {
           <h2>Dati della scheda</h2>
           ${farmFields(f, false)}
           <button type="submit" class="primary wide">Salva i dati</button>
-          <p class="muted small">Prodotti, prezzi, orari e novità li aggiorna il maso dal suo link.</p>
+          <p class="muted small">Prodotti, prezzi, orari e novità di solito li aggiorna il maso dal suo link.</p>
         </form>
+        <div class="card stack">
+          <h2>Modifica come il maso</h2>
+          <p class="muted small">Per correggere una segnalazione: prodotti, prezzi, orari, chiusure e novità con le stesse pagine del maso. Nella cronologia resta "Admin".</p>
+          <a class="button secondary wide" href="${esc(ROOT)}modifica/?admin=${encodeURIComponent(f.slug)}#/orari">Apri le pagine del maso</a>
+        </div>
         ${photosBox(a, f)}
       </div>
       <div>

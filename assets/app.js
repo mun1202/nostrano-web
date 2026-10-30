@@ -1,11 +1,11 @@
 // Pagina del produttore: si apre dal link personale https://ilmiocontadino.com/modifica/<token>.
 // Fa le stesse cose dell'area produttore dell'app, con le stesse funzioni del database.
-import { ROOT, linkCode, rpc } from './api.js?v=dc65e12611'
-import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=dc65e12611'
-import { WEEK, fromClock, todayRome } from './days.js?v=dc65e12611'
-import * as views from './views.js?v=dc65e12611'
-import * as notify from './notify.js?v=dc65e12611'
-import { icon } from './icons.js?v=dc65e12611'
+import { ROOT, linkCode, rpc } from './api.js?v=28861c4766'
+import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=28861c4766'
+import { WEEK, fromClock, todayRome } from './days.js?v=28861c4766'
+import * as views from './views.js?v=28861c4766'
+import * as notify from './notify.js?v=28861c4766'
+import { icon } from './icons.js?v=28861c4766'
 
 const root = document.querySelector('#app')
 const nav = document.querySelector('#nav')
@@ -23,15 +23,22 @@ const PAGES = [
 
 const currentRoute = () => location.hash.match(/^#\/([a-z]*)/)?.[1] ?? ''
 
+// "Modifica come il maso" dal pannello admin: le stesse pagine, ma i dati arrivano e si salvano con le funzioni
+// dell'admin (admin_farm, admin_farm_save), che registrano la modifica come "Admin". Niente richieste, numeri,
+// consenso o pubblicazione: quelli restano al maso e al pannello admin.
+const ADMIN_SLUG = new URLSearchParams(location.search).get('admin')
+const ADMIN_PAGES = ['prodotti', 'orari', 'novita', 'maso']
+const visiblePages = () => PAGES.filter((p) => !(p.shopOnly && !s.farm.has_farm_shop) && (!ADMIN_SLUG || ADMIN_PAGES.includes(p.route)))
+
 function pageSections() {
   const page = PAGES.find((p) => p.route === s.route)
-  if (page?.sections) return page.sections
+  if (page?.sections) return ADMIN_SLUG ? page.sections.filter((name) => name !== 'footer') : page.sections
   return s.farm.status === 'draft' ? ['onboarding', 'demand'] : ['stats', 'inbox', 'confirm', 'demand']
 }
 
 const s = {
   lang: initialLanguage(), farm: null, area: null, requests: [], catalog: [], route: currentRoute(),
-  proposing: null, editing: null, customOpen: false, appLink: null, busy: false, message: null,
+  proposing: null, day: null, editing: null, customOpen: false, appLink: null, busy: false, message: null,
   push: null, pushHelp: false,
 }
 
@@ -46,7 +53,7 @@ function rememberOpen() {
 function render() {
   s.message = null
   // Una pagina che questo maso non ha (le richieste senza negozio) torna alla panoramica.
-  if (!PAGES.some((p) => p.route === s.route && !(p.shopOnly && !s.farm.has_farm_shop))) s.route = ''
+  if (!visiblePages().some((p) => p.route === s.route)) s.route = ADMIN_SLUG ? 'prodotti' : ''
   rememberOpen()
   const section = (name) => `<section id="s-${name}">${views[name](s)}</section>`
   const names = pageSections()
@@ -54,13 +61,13 @@ function render() {
   const body = s.route === '' && s.farm.status !== 'draft'
     ? `${section('stats')}<div class="split-view"><div>${section('inbox')}</div><div>${section('confirm')}${section('demand')}</div></div>`
     : names.map(section).join('')
-  root.innerHTML = `${section('header')}<div class="page ${names.length === 1 || names[1] === 'footer' ? 'single' : ''}">${body}</div>`
+  root.innerHTML = `${ADMIN_SLUG ? views.adminBar(s, ADMIN_SLUG) : ''}${section('header')}<div class="page ${names.length === 1 || names[1] === 'footer' ? 'single' : ''}">${body}</div>`
   renderNav()
 }
 
 function renderNav() {
   const waiting = s.requests.filter(views.isWaiting).length
-  nav.innerHTML = PAGES.filter((p) => !(p.shopOnly && !s.farm.has_farm_shop)).map((p) => `
+  nav.innerHTML = visiblePages().map((p) => `
     <a href="#/${p.route}" ${p.route === s.route ? 'aria-current="page"' : ''}>${icon(p.icon)}<span>${t(s.lang, p.label)}</span>${
       p.route === 'richieste' && waiting ? `<span class="count">${waiting}</span>` : ''}</a>`).join('')
 }
@@ -109,6 +116,14 @@ function applyLanguage() {
 // Dati ---------------------------------------------------------------------------------------
 
 async function reload() {
+  if (ADMIN_SLUG) {
+    s.admin = true
+    const farm = await rpc('admin_farm', { p_slug: ADMIN_SLUG })
+    // La scheda vista dall'admin ha qualche campo con un altro nome: come quella del maso.
+    Object.assign(farm, { description_own_it: farm.description_it, description_own_de: farm.description_de })
+    Object.assign(s, { farm, area: { stats: {}, demand: [] }, requests: [] })
+    return
+  }
   const [farm, area, requests] = await Promise.all([rpc('producer_farm'), rpc('producer_area'), rpc('producer_requests')])
   Object.assign(s, { farm, area, requests })
 }
@@ -132,7 +147,9 @@ async function act(action, success) {
   }
 }
 
-const save = (patch, success) => act(() => rpc('producer_save', { p_data: patch }), success)
+const save = (patch, success) => act(() => (ADMIN_SLUG
+  ? rpc('admin_farm_save', { p_slug: ADMIN_SLUG, p_data: patch })
+  : rpc('producer_save', { p_data: patch })), success)
 
 const PRODUCT_FIELDS = ['kind', 'available', 'on_request', 'price_min', 'price_max', 'price_quantity', 'price_unit', 'detail']
 const productList = () => s.farm.products.map((p) => Object.fromEntries(PRODUCT_FIELDS.map((f) => [f, p[f] ?? null])))
@@ -258,6 +275,10 @@ root.addEventListener('click', (event) => {
       return renderSection('requests')
     case 'cancel-proposal':
       s.proposing = null
+      return renderSection('requests')
+    // Calendario delle richieste: un giorno, e toccandolo di nuovo tutti.
+    case 'day':
+      s.day = s.day === day ? null : day
       return renderSection('requests')
     case 'block':
       if (window.confirm(t(s.lang, 'blockConfirm'))) act(() => rpc('producer_block', { p_id: id }), t(s.lang, 'blocked'))
@@ -458,8 +479,9 @@ function appLink() {
 async function boot() {
   applyLanguage()
   showMessage('loading')
-  const token = linkCode()
+  const token = ADMIN_SLUG ? null : linkCode()
   try {
+    if (ADMIN_SLUG) s.route = ADMIN_PAGES.includes(s.route) ? s.route : 'prodotti'
     if (token) {
       await rpc('producer_claim', { p_token: token })
       // Il link resta su WhatsApp: qui non serve più, e non deve finire in cronologia o schermate.
@@ -470,11 +492,12 @@ async function boot() {
     s.appLink = appLink()
     s.catalog = await rpc('product_catalog')
     await reload()
-    s.push = await notify.pushState().catch(() => null)
+    s.push = ADMIN_SLUG ? null : await notify.pushState().catch(() => null)
     render()
   } catch (error) {
     if (error.code === 'invalid_link') showMessage('invalidLink')
     else if (error.code === 'not_member') showMessage('openLink', 'openLinkText')
+    else if (ADMIN_SLUG && error.code === 'not_admin') showMessage('adminOnly', 'adminOnlyText')
     else showMessage('error_generic')
   }
 }
