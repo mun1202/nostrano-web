@@ -8,7 +8,7 @@ RedirectMatch 404 /\.ht
 # Sito nascosto finché non è pronto (protezione in web/genera/impostazioni.mjs): serve nome e password.
 AuthType Basic
 AuthName "Il mio contadino - in preparazione"
-AuthUserFile "/home/u613982683/domains/ilmiocontadino.com/public_html/.htpasswd"
+AuthUserFile "/home/u613982683/domains/ilmiocontadino.com/.htpasswd"
 Require valid-user
 
 AddType text/javascript .js .mjs
