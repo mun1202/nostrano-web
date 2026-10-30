@@ -6,16 +6,16 @@
 import {
   aperto, categoria, esc, giorno, icona, leggiRicerca, nuovaRicerca, ordina, origine, passa, riassunto, riassuntoCosa,
   riassuntoDove, riassuntoQuando, scheda, scriviRicerca, stato, statoScheda, stessaRicerca,
-} from './comune.js?v=db225f0c12'
-import { adesso, aggiornaDom, barra, foglio, frammento, ogniMinuto, pagina } from './browser.js?v=db225f0c12'
+} from './comune.js?v=d942f497f0'
+import { adesso, aggiornaDom, barra, foglio, frammento, ogniMinuto, pagina } from './browser.js?v=d942f497f0'
 import {
   chips, comuniDi, daDove, elencoComuni, ordinaMercati, pannello, passiFinestra, passiTelefono, quandoMercato,
   scelteFinestra,
-} from './viste.js?v=db225f0c12'
-import { mostraCuori, preferiti, toccaCuore } from './preferiti.js?v=db225f0c12'
-import { account } from './accedi.js?v=db225f0c12'
-import { suggerisci } from './suggerisci.js?v=db225f0c12'
-import { creaCartina } from './cartina.js?v=db225f0c12'
+} from './viste.js?v=d942f497f0'
+import { mostraCuori, preferiti, toccaCuore } from './preferiti.js?v=d942f497f0'
+import { account } from './accedi.js?v=d942f497f0'
+import { suggerisci } from './suggerisci.js?v=d942f497f0'
+import { creaCartina } from './cartina.js?v=d942f497f0'
 
 const $ = (id) => document.getElementById(id)
 const { dati, c } = pagina(document.body.dataset.base ?? './')
@@ -316,8 +316,13 @@ function apriRicerca(p, tastiera = false) {
   finestra.showModal()
   rendiFinestra()
   corpo.scrollTop = 0
-  // Sul computer si comincia dal primo comando del passo; sul telefono il fuoco resta sulla X, senza tastiera aperta.
+  // Sul computer si comincia dal primo comando del passo; sul telefono il fuoco va sulla finestra stessa: niente
+  // tastiera aperta e niente contorno sulla X (Safari lo mostra al primo fuoco).
   if (largo.matches) primoComando()?.focus({ preventScroll: true })
+  else if (!tastiera) {
+    finestra.tabIndex = -1
+    finestra.focus({ preventScroll: true })
+  }
 }
 
 function chiudiRicerca(tastiera = false) {
@@ -464,6 +469,11 @@ function apriPannello(tastiera) {
   mostraPannello()
   $('pannello').classList.toggle('subito', tastiera)
   $('pannello').showModal()
+  // Come la ricerca: sul telefono il fuoco sulla finestra, non sulla X.
+  if (!tastiera) {
+    $('pannello').tabIndex = -1
+    $('pannello').focus({ preventScroll: true })
+  }
 }
 
 // Vista elenco, schede con foto o mappa: la vista iniziale la mette già lo script dentro la pagina, qui si cambia.

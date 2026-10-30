@@ -6,10 +6,10 @@
 import {
   accettaRichieste, dataEstesa, esc, fasce, fasceTesto, giornoDellaData, giornoRitiro, gruppoRichiesta, icona,
   istanteEsteso, maiuscola, nomeRiga, prezzo, quantita, richiestaInBreve, richiesteDi, siPuoAnnullare, statoRichiesta,
-} from './comune.js?v=db225f0c12'
-import { barra, foglio, mostraErrore, pagina } from './browser.js?v=db225f0c12'
-import { account, mieRichieste, segnaViste, sessioneSito } from './accedi.js?v=db225f0c12'
-import { suggerisci } from './suggerisci.js?v=db225f0c12'
+} from './comune.js?v=d942f497f0'
+import { barra, foglio, mostraErrore, pagina } from './browser.js?v=d942f497f0'
+import { account, mieRichieste, segnaViste, sessioneSito } from './accedi.js?v=d942f497f0'
+import { suggerisci } from './suggerisci.js?v=d942f497f0'
 
 const { dati, c } = pagina('../')
 const T = c.T

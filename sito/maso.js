@@ -1,13 +1,13 @@
 // Pagina di un maso. L'HTML arriva già pronto dal generatore (web/genera/pagine.mjs): qui la galleria con il
 // contatore, "Segnala un errore" e quello che dipende dall'ora, ricalcolato nel browser così resta giusto anche su
 // una pagina generata un'ora prima: stato, orari di oggi, giorni speciali, novità scadute, "aggiornata … fa".
-import { badge, distanza, km, novita, rigaStato, stato } from './comune.js?v=db225f0c12'
-import { adesso, barra, chiamaAnonimo, foglio, frammento, mostraErrore, ogniMinuto, pagina } from './browser.js?v=db225f0c12'
-import { aggiornata, oggiMaso, orariMaso, pillStato, quandoPrezzi } from './viste.js?v=db225f0c12'
-import { mostraCuori, preferiti, toccaCuore } from './preferiti.js?v=db225f0c12'
-import { suggerisci } from './suggerisci.js?v=db225f0c12'
-import { account } from './accedi.js?v=db225f0c12'
-import { richiesta } from './richiesta.js?v=db225f0c12'
+import { badge, distanza, km, novita, rigaStato, stato } from './comune.js?v=d942f497f0'
+import { adesso, barra, chiamaAnonimo, foglio, frammento, mostraErrore, ogniMinuto, pagina } from './browser.js?v=d942f497f0'
+import { aggiornata, oggiMaso, orariMaso, pillStato, quandoPrezzi } from './viste.js?v=d942f497f0'
+import { mostraCuori, preferiti, toccaCuore } from './preferiti.js?v=d942f497f0'
+import { suggerisci } from './suggerisci.js?v=d942f497f0'
+import { account } from './accedi.js?v=d942f497f0'
+import { richiesta } from './richiesta.js?v=d942f497f0'
 
 const { dati, c } = pagina('../../')
 const f = dati.f

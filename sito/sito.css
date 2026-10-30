@@ -797,7 +797,11 @@ pannello dal basso lascerebbe vedere la pagina dietro a pezzi. */
 .step-riga, .step-espandi { min-height: 0; overflow: hidden; }
 .step-riga { transition: opacity 150ms ease; }
 .step-card.open .step-riga { opacity: 0; }
+/* Safari misura una riga "0fr" con il suo contenuto: la parte chiusa deve dire anche lei di essere alta zero. */
+.step-card:not(.open) .step-espandi, .step-card.open .step-riga { height: 0; }
 .step-dentro { padding: 22px; opacity: 0; transition: opacity 200ms ease; }
+/* Sul telefono il fuoco va sulla finestra (non sulla X): niente contorno appena si apre. */
+dialog:focus { outline: none; }
 .step-card.open .step-dentro { opacity: 1; transition-delay: 50ms; }
 .step-dentro h2 { margin: 0 0 16px; font-size: 22px; letter-spacing: -0.02em; }
 .step-closed {
