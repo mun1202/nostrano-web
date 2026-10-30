@@ -1,11 +1,11 @@
 // Pagina del produttore: si apre dal link personale https://ilmiocontadino.com/modifica/<token>.
 // Fa le stesse cose dell'area produttore dell'app, con le stesse funzioni del database.
-import { ROOT, linkCode, rpc } from './api.js?v=d942f497f0'
-import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=d942f497f0'
-import { WEEK, fromClock, todayRome } from './days.js?v=d942f497f0'
-import * as views from './views.js?v=d942f497f0'
-import * as notify from './notify.js?v=d942f497f0'
-import { icon } from './icons.js?v=d942f497f0'
+import { ROOT, linkCode, rpc } from './api.js?v=5655526bff'
+import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=5655526bff'
+import { WEEK, fromClock, todayRome } from './days.js?v=5655526bff'
+import * as views from './views.js?v=5655526bff'
+import * as notify from './notify.js?v=5655526bff'
+import { icon } from './icons.js?v=5655526bff'
 
 const root = document.querySelector('#app')
 const nav = document.querySelector('#nav')

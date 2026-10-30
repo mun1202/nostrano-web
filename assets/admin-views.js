@@ -1,8 +1,8 @@
 // Le schermate del pannello admin, come HTML. Solo in italiano: lo usa chi gestisce Il mio contadino.
-import { esc } from './views.js?v=d942f497f0'
-import { CATEGORY_CODES, MUNICIPALITY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=d942f497f0'
-import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=d942f497f0'
-import { icon } from './icons.js?v=d942f497f0'
+import { esc } from './views.js?v=5655526bff'
+import { CATEGORY_CODES, MUNICIPALITY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=5655526bff'
+import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=5655526bff'
+import { icon } from './icons.js?v=5655526bff'
 
 const ROOT = window.NOSTRANO_ROOT ?? '/'
 const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1)
@@ -529,11 +529,12 @@ const SUGGESTION_STATUS = [['open', 'Da guardare'], ['contacted', 'Contattato'],
 export function suggestions(a) {
   return `
     <h1>Masi suggeriti</h1>
-    <p class="muted">Arrivano da «Conosci un maso?» nell'app. Da qui crei la bozza con un tocco.</p>
+    <p class="muted">Arrivano da «Segnala un maso» nell'app e sul sito, e da «Chiedi il tuo link» dei produttori senza invito
+      (segnati «dal maso»: sentili, poi crea la bozza e manda l'invito). Da qui crei la bozza con un tocco.</p>
     <div class="card list">${a.suggestions.length ? a.suggestions.map((s) => `
       <div class="stack ${s.status === 'open' ? '' : 'faded'}">
         <div class="row wrap">
-          <span><strong>${esc(s.name)}</strong>${s.place ? ` · ${esc(s.place)}` : ''} <span class="muted small">${dateText(s.created_at)}</span></span>
+          <span><strong>${esc(s.name)}</strong>${s.place ? ` · ${esc(s.place)}` : ''}${s.from_farm ? ' <span class="pill amber">dal maso</span>' : ''} <span class="muted small">${dateText(s.created_at)}</span></span>
           <span class="actions tight">
             <select data-action="suggestion" data-id="${s.id}" aria-label="Stato di ${esc(s.name)}">
               ${SUGGESTION_STATUS.map(([value, label]) => `<option value="${value}" ${value === s.status ? 'selected' : ''}>${label}</option>`).join('')}

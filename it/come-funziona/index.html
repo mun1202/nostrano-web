@@ -21,14 +21,14 @@
   <link rel="manifest" href="../../assets/manifest-it.webmanifest">
   <link rel="apple-touch-icon" href="../../assets/icon-180.png">
   <meta name="apple-mobile-web-app-title" content="Il mio contadino">
-  <link rel="stylesheet" href="../../sito/sito.css?v=d942f497f0">
+  <link rel="stylesheet" href="../../sito/sito.css?v=5655526bff">
   <script>
     // Tornando indietro (o avanti) con il browser niente passaggio animato tra le pagine: solo cliccando un maso.
     addEventListener('pagereveal', (e) => { if (e.viewTransition && navigation?.activation?.navigationType === 'traverse') e.viewTransition.skipTransition() })
   </script>
-  <link rel="modulepreload" href="../../sito/comune.js?v=d942f497f0">
-  <link rel="modulepreload" href="../../sito/testi.js?v=d942f497f0">
-  <link rel="modulepreload" href="../../sito/viste.js?v=d942f497f0">
+  <link rel="modulepreload" href="../../sito/comune.js?v=5655526bff">
+  <link rel="modulepreload" href="../../sito/testi.js?v=5655526bff">
+  <link rel="modulepreload" href="../../sito/viste.js?v=5655526bff">
   <noscript><style>.farm-photo img { opacity: 1; } .search-box, .filters, .tools, #posizione, #apri-segnala { display: none; } .hero { --box-h: 0px; }</style></noscript>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Tutti i masi","item":"https://ilmiocontadino.com/it/"},{"@type":"ListItem","position":2,"name":"Come funziona","item":"https://ilmiocontadino.com/it/come-funziona/"}]}</script>
   <script type="application/json" id="progetto">{"url":"https://gvdnbutkdaxcglotgwev.supabase.co","key":"sb_publishable_SGZwwvi4vcQvUj1R3aEH0w_sCw_a5ol","email":""}</script>
@@ -89,22 +89,22 @@
         <button class="icon-btn" type="button" id="suggerisci-chiudi" aria-label="Chiudi"><svg class="icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       </header>
       <form class="sheet-body report" id="suggerisci-modulo" novalidate>
-        <p class="sub">Lo contattiamo noi e lo pubblichiamo solo con il suo consenso.</p>
+        <p class="sub" id="suggerisci-sub">Lo contattiamo noi e lo pubblichiamo solo con il suo consenso.</p>
         <label class="report-field"><span>Nome del maso</span>
           <input name="nome" type="text" maxlength="120" required autocomplete="off"></label>
         <label class="report-field"><span>Comune o frazione</span>
           <input name="paese" type="text" maxlength="120" autocomplete="off"></label>
-        <label class="report-field"><span>Cosa vende?</span>
+        <label class="report-field"><span id="suggerisci-vende">Cosa vende?</span>
           <textarea name="prodotti" rows="3" maxlength="500" placeholder="Per esempio: uova, mele, formaggio…"></textarea></label>
-        <label class="report-field"><span>Email o telefono (facoltativo)</span>
+        <label class="report-field"><span id="suggerisci-contatto">Email o telefono (facoltativo)</span>
           <input name="contatto" type="text" maxlength="200" autocomplete="email" enterkeyhint="send">
-          <small>Lo usiamo solo per dirti quando il maso è su Il mio contadino.</small></label>
+          <small id="suggerisci-contatto-nota">Lo usiamo solo per dirti quando il maso è su Il mio contadino.</small></label>
         <p class="report-error" id="suggerisci-errore" role="alert" hidden></p>
       </form>
       <div class="report-done" id="suggerisci-fatto" role="status" hidden>
         <svg class="icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
-        <h3>Grazie, lo contattiamo noi</h3>
-        <p>Lo pubblichiamo solo con il consenso del produttore.</p>
+        <h3 id="suggerisci-fatto-titolo">Grazie, lo contattiamo noi</h3>
+        <p id="suggerisci-fatto-testo">Lo pubblichiamo solo con il consenso del produttore.</p>
       </div>
       <footer>
         <button class="btn" type="button" id="suggerisci-annulla">Annulla</button>
@@ -150,6 +150,6 @@
     </div>
   </dialog>
 
-  <script type="module" src="../../sito/pagina.js?v=d942f497f0"></script>
+  <script type="module" src="../../sito/pagina.js?v=5655526bff"></script>
 </body>
 </html>

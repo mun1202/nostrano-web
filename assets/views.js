@@ -1,6 +1,6 @@
 // Le parti della pagina, come HTML. Ogni testo che arriva dal database o dai clienti passa da esc().
-import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=d942f497f0'
-import { WEEK, addDays, dayRanges, formatDay, formatInstant, minuteNowRome, openDays, toClock, todayRome, weekday, weekdayName } from './days.js?v=d942f497f0'
+import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=5655526bff'
+import { WEEK, addDays, dayRanges, formatDay, formatInstant, minuteNowRome, openDays, toClock, todayRome, weekday, weekdayName } from './days.js?v=5655526bff'
 
 export const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
