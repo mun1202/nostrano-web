@@ -49,7 +49,7 @@ export function dayRanges(farm, day) {
   return exception ? exception.ranges : farm.opening_hours[String(weekday(day))] ?? []
 }
 
-function minuteNowRome() {
+export function minuteNowRome() {
   const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Rome', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
     .formatToParts(new Date())
   const value = (type) => Number(parts.find((p) => p.type === type).value)

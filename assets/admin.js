@@ -1,8 +1,8 @@
 // Pannello admin: si apre con un link di accesso (https://ilmiocontadino.com/admin/<codice>), poi il browser resta abilitato.
 // Da qui si creano le schede in bozza, si invitano i masi su WhatsApp e si pubblica.
-import { ROOT, linkCode, removeUploaded, rpc, upload } from './api.js?v=28861c4766'
-import { MUNICIPALITY_CODES, municipalityName } from './i18n.js?v=28861c4766'
-import * as views from './admin-views.js?v=28861c4766'
+import { ROOT, linkCode, removeUploaded, rpc, upload } from './api.js?v=db225f0c12'
+import { MUNICIPALITY_CODES, municipalityName } from './i18n.js?v=db225f0c12'
+import * as views from './admin-views.js?v=db225f0c12'
 
 const root = document.querySelector('#app')
 const navigation = document.querySelector('#nav')
@@ -13,6 +13,7 @@ const publicUrl = (config.publicUrl ?? location.origin + ROOT).replace(/\/$/, ''
 const a = {
   route: { name: '', param: null, query: new URLSearchParams() },
   overview: null, farms: [], farm: null, reports: [], suggestions: [], custom: [], catalog: [], devices: [],
+  calendar: [], month: null, day: null,
   filter: 'all', search: '', invite: null, newCode: null, personalLink: null, fromSuggestion: null, uploading: false, busy: false,
 }
 
@@ -59,6 +60,15 @@ function parseRoute() {
   return { name: decodeURIComponent(name), param: param && decodeURIComponent(param), query: new URLSearchParams(query) }
 }
 
+// Il calendario delle richieste nella panoramica: il mese scelto, con i conteggi di ogni maso per giorno.
+const monthNow = () => new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Rome' }).format(new Date()).slice(0, 7)
+async function loadCalendar() {
+  const month = a.month ?? monthNow()
+  const [y, m] = month.split('-').map(Number)
+  const last = new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10)
+  a.calendar = await rpc('admin_requests_calendar', { p_from: `${month}-01`, p_to: last })
+}
+
 async function load() {
   const { name, param, query } = a.route
   // I numeri nel menu servono ovunque.
@@ -66,6 +76,7 @@ async function load() {
   switch (name) {
     case '':
       a.farms = await rpc('admin_farms')
+      await loadCalendar()
       break
     case 'masi':
       a.filter = query.get('f') ?? a.filter
@@ -303,6 +314,16 @@ root.addEventListener('click', (event) => {
   const { action, id, status, index, text, me } = element.dataset
   const f = a.farm
   switch (action) {
+    // Calendario della panoramica: un giorno (di nuovo: tutti) e il mese.
+    case 'cal-day':
+      a.day = a.day === element.dataset.day ? null : element.dataset.day
+      return render()
+    case 'cal-month': {
+      const [y, m] = (a.month ?? monthNow()).split('-').map(Number)
+      a.month = new Date(Date.UTC(y, m - 1 + Number(element.dataset.delta), 1)).toISOString().slice(0, 7)
+      a.day = null
+      return loadCalendar().then(render).catch(() => toast('Calendario non caricato', true))
+    }
     case 'invite':
       return prepareInvite()
     case 'here':

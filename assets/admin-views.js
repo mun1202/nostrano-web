@@ -1,8 +1,8 @@
 // Le schermate del pannello admin, come HTML. Solo in italiano: lo usa chi gestisce Il mio contadino.
-import { esc } from './views.js?v=28861c4766'
-import { CATEGORY_CODES, MUNICIPALITY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=28861c4766'
-import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=28861c4766'
-import { icon } from './icons.js?v=28861c4766'
+import { esc } from './views.js?v=db225f0c12'
+import { CATEGORY_CODES, MUNICIPALITY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=db225f0c12'
+import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=db225f0c12'
+import { icon } from './icons.js?v=db225f0c12'
 
 const ROOT = window.NOSTRANO_ROOT ?? '/'
 const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1)
@@ -116,12 +116,68 @@ export function overview(a) {
       ${tile(o.custom_products, 'Prodotti nuovi dai masi', '#/prodotti')}
     </div>
     <p class="muted small">${o.requests_waiting} richieste «Tienimeli da parte» in attesa di risposta · ${o.phones} telefoni e browser · ${o.demo} schede demo</p>
+    <div class="columns">
+    <div>
     <h2>Da fare</h2>
     <div class="card list">
       ${ready.map((f) => todo(f, 'ha completato la scheda: controllala e pubblicala', 'Controlla')).join('')}
       ${invite.map((f) => todo(f, f.contact_phone ? 'è pronto per l\'invito su WhatsApp' : 'manca il numero WhatsApp per l\'invito', 'Invita')).join('')}
       ${waiting.filter((f) => daysSince(f.invited_at) >= 3).map((f) => todo(f, `invitato ${daysSince(f.invited_at)} giorni fa, manca: ${missingText(f.missing) || 'la richiesta di pubblicazione'}`, 'Apri')).join('')}
       ${!ready.length && !invite.length ? '<p class="muted">Niente di urgente. Aggiungi un maso nuovo o guarda i suggeriti.</p>' : ''}
+    </div>
+    </div>
+    <div>
+    <h2>Richieste per giorno</h2>
+    ${requestsCalendar(a)}
+    </div>
+    </div>`
+}
+
+/**
+ * Il calendario delle richieste di tutti i masi: per ogni giorno del mese quante ce ne sono (giorno del ritiro), con il
+ * pallino ambra se qualcuna aspetta una risposta. Toccando un giorno, sotto, i masi di quel giorno con i loro numeri.
+ */
+function requestsCalendar(a) {
+  const month = a.month ?? new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Rome' }).format(new Date()).slice(0, 7)
+  const today = todayRome()
+  const first = `${month}-01`
+  const [y, m] = month.split('-').map(Number)
+  const total = new Date(Date.UTC(y, m, 0)).getUTCDate()
+  const lead = (new Date(`${first}T12:00:00Z`).getUTCDay() + 6) % 7
+  const byDay = new Map()
+  for (const row of a.calendar) byDay.set(row.day, [...(byDay.get(row.day) ?? []), row])
+  const sum = (rows, key) => rows.reduce((n, r) => n + r[key], 0)
+  const cells = Array.from({ length: total }, (_, i) => {
+    const day = `${month}-${String(i + 1).padStart(2, '0')}`
+    const rows = byDay.get(day) ?? []
+    const n = sum(rows, 'waiting') + sum(rows, 'confirmed') + sum(rows, 'picked_up') + sum(rows, 'no_show')
+    const classes = ['cal-cell', n && 'has', sum(rows, 'waiting') && 'waiting', day < today && 'past', day === today && 'today'].filter(Boolean).join(' ')
+    return `<button type="button" class="${classes}" data-action="cal-day" data-day="${day}" aria-pressed="${a.day === day}" aria-label="${esc(formatDay(day, 'it'))}: ${n}">
+      <span class="cal-n">${i + 1}</span>${n ? `<span class="cal-count">${n}</span>` : ''}</button>`
+  }).join('')
+  const title = new Intl.DateTimeFormat('it-IT', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${first}T12:00:00Z`))
+  const selected = a.day ? byDay.get(a.day) ?? [] : []
+  const monthRows = a.calendar
+  return `
+    <div class="card month">
+      <div class="month-head">
+        <button type="button" class="icon" data-action="cal-month" data-delta="-1" aria-label="Mese prima">‹</button>
+        <strong>${esc(title.charAt(0).toUpperCase() + title.slice(1))}</strong>
+        <button type="button" class="icon" data-action="cal-month" data-delta="1" aria-label="Mese dopo">›</button>
+      </div>
+      <div class="month-grid">
+        ${['lun', 'mar', 'mer', 'gio', 'ven', 'sab', 'dom'].map((d) => `<span>${d}</span>`).join('')}
+        ${'<span></span>'.repeat(lead)}${cells}
+      </div>
+      <p class="legend small"><span class="dot-waiting"></span>da rispondere · il numero conta in attesa, confermate e ritiri</p>
+      ${a.day ? `
+        <h3>${esc(formatDay(a.day, 'it'))}</h3>
+        ${selected.length ? `<div class="list">${selected.map((r) => `
+          <a class="row small" href="#/maso/${encodeURIComponent(r.farm)}">
+            <span><strong>${esc(r.farm_name)}</strong>${r.demo ? ' <span class="pill">demo</span>' : ''}</span>
+            <span>${[r.waiting && `${r.waiting} in attesa`, r.confirmed && `${r.confirmed} confermate`, r.picked_up && `${r.picked_up} ritirate`, r.no_show && `${r.no_show} non passati`, r.other && `${r.other} chiuse`].filter(Boolean).join(' · ')}</span>
+          </a>`).join('')}</div>` : '<p class="muted small">Nessuna richiesta in questo giorno.</p>'}`
+        : `<p class="muted small">${sum(monthRows, 'waiting')} in attesa · ${sum(monthRows, 'confirmed')} confermate · ${sum(monthRows, 'picked_up')} ritirate questo mese. Tocca un giorno per vedere i masi.</p>`}
     </div>`
 }
 

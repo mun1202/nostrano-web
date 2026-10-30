@@ -1,11 +1,11 @@
 // Pagina del produttore: si apre dal link personale https://ilmiocontadino.com/modifica/<token>.
 // Fa le stesse cose dell'area produttore dell'app, con le stesse funzioni del database.
-import { ROOT, linkCode, rpc } from './api.js?v=28861c4766'
-import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=28861c4766'
-import { WEEK, fromClock, todayRome } from './days.js?v=28861c4766'
-import * as views from './views.js?v=28861c4766'
-import * as notify from './notify.js?v=28861c4766'
-import { icon } from './icons.js?v=28861c4766'
+import { ROOT, linkCode, rpc } from './api.js?v=db225f0c12'
+import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=db225f0c12'
+import { WEEK, fromClock, todayRome } from './days.js?v=db225f0c12'
+import * as views from './views.js?v=db225f0c12'
+import * as notify from './notify.js?v=db225f0c12'
+import { icon } from './icons.js?v=db225f0c12'
 
 const root = document.querySelector('#app')
 const nav = document.querySelector('#nav')
@@ -14,11 +14,12 @@ const languageSelect = document.querySelector('#lang')
 // La panoramica della bozza parte da cosa manca; quella pubblicata da numeri, conferma e richieste.
 const PAGES = [
   { route: '', icon: 'overview', label: 'nav_overview' },
-  { route: 'richieste', icon: 'inbox', label: 'nav_requests', sections: ['requests'], shopOnly: true },
-  { route: 'prodotti', icon: 'package', label: 'nav_products', sections: ['products'] },
-  { route: 'orari', icon: 'clock', label: 'nav_hours', sections: ['hours', 'closures'] },
-  { route: 'novita', icon: 'megaphone', label: 'nav_notice', sections: ['notice'] },
-  { route: 'maso', icon: 'home', label: 'nav_farm', sections: ['farm', 'footer'] },
+  // side: la colonna di destra sul computer (sul telefono sotto, o sopra con sideFirst).
+  { route: 'richieste', icon: 'inbox', label: 'nav_requests', sections: ['requests'], side: ['calendar', 'requestSettings'], sideFirst: true, shopOnly: true },
+  { route: 'prodotti', icon: 'package', label: 'nav_products', sections: ['products'], side: ['productsPreview'] },
+  { route: 'orari', icon: 'clock', label: 'nav_hours', sections: ['hours', 'closures'], side: ['hoursPreview'] },
+  { route: 'novita', icon: 'megaphone', label: 'nav_notice', sections: ['notice'], side: ['noticePreview'] },
+  { route: 'maso', icon: 'home', label: 'nav_farm', sections: ['farm', 'footer'], side: ['farmPreview'] },
 ]
 
 const currentRoute = () => location.hash.match(/^#\/([a-z]*)/)?.[1] ?? ''
@@ -38,7 +39,7 @@ function pageSections() {
 
 const s = {
   lang: initialLanguage(), farm: null, area: null, requests: [], catalog: [], route: currentRoute(),
-  proposing: null, day: null, editing: null, customOpen: false, appLink: null, busy: false, message: null,
+  proposing: null, day: null, month: null, editing: null, customOpen: false, appLink: null, busy: false, message: null,
   push: null, pushHelp: false,
 }
 
@@ -57,11 +58,16 @@ function render() {
   rememberOpen()
   const section = (name) => `<section id="s-${name}">${views[name](s)}</section>`
   const names = pageSections()
-  // Nella panoramica dal computer: i numeri sopra, poi richieste a sinistra e conferma e domanda a destra.
+  const page = PAGES.find((p) => p.route === s.route)
+  // Nella panoramica dal computer: i numeri sopra, poi richieste a sinistra e conferma e domanda a destra. Nelle altre
+  // pagine, a destra, il calendario o l'anteprima di come i clienti vedono la scheda.
   const body = s.route === '' && s.farm.status !== 'draft'
     ? `${section('stats')}<div class="split-view"><div>${section('inbox')}</div><div>${section('confirm')}${section('demand')}</div></div>`
-    : names.map(section).join('')
-  root.innerHTML = `${ADMIN_SLUG ? views.adminBar(s, ADMIN_SLUG) : ''}${section('header')}<div class="page ${names.length === 1 || names[1] === 'footer' ? 'single' : ''}">${body}</div>`
+    : page?.side
+      ? `<div class="with-side${page.sideFirst ? ' side-first' : ''}"><div class="main-col">${names.map(section).join('')}</div><aside class="side-col">${page.side.map(section).join('')}</aside></div>`
+      : names.map(section).join('')
+  const wide = page?.side ? ' wide' : ''
+  root.innerHTML = `${ADMIN_SLUG ? views.adminBar(s, ADMIN_SLUG) : ''}${section('header')}<div class="page ${names.length === 1 || names[1] === 'footer' || page?.side ? 'single' : ''}${wide}">${body}</div>`
   renderNav()
 }
 
@@ -77,9 +83,11 @@ function renderSection(name) {
   const section = root.querySelector(`#s-${name}`)
   if (section) section.innerHTML = views[name](s)
   if (name === 'requests') {
-    // Le richieste stanno anche nella panoramica, e il numero nel menu.
-    const inbox = root.querySelector('#s-inbox')
-    if (inbox) inbox.innerHTML = views.inbox(s)
+    // Le richieste stanno anche nella panoramica e nel calendario, e il numero nel menu.
+    for (const other of ['inbox', 'calendar']) {
+      const element = root.querySelector(`#s-${other}`)
+      if (element) element.innerHTML = views[other](s)
+    }
     renderNav()
   }
 }
@@ -279,7 +287,14 @@ root.addEventListener('click', (event) => {
     // Calendario delle richieste: un giorno, e toccandolo di nuovo tutti.
     case 'day':
       s.day = s.day === day ? null : day
+      if (s.day) s.month = s.day.slice(0, 7)
       return renderSection('requests')
+    case 'month': {
+      const [y, m] = (s.month ?? new Date().toISOString().slice(0, 7)).split('-').map(Number)
+      const next = new Date(Date.UTC(y, m - 1 + Number(delta), 1))
+      s.month = next.toISOString().slice(0, 7)
+      return renderSection('requests')
+    }
     case 'block':
       if (window.confirm(t(s.lang, 'blockConfirm'))) act(() => rpc('producer_block', { p_id: id }), t(s.lang, 'blocked'))
       return
@@ -372,6 +387,9 @@ root.addEventListener('input', (event) => {
   const { form, name } = event.target
   if (name === 'text') {
     form.querySelector('.counter').textContent = `${event.target.value.length}/140`
+    // L'anteprima a destra cambia mentre si scrive.
+    const preview = root.querySelector('[data-preview-notice]')
+    if (preview) preview.textContent = event.target.value || t(s.lang, 'noticePreviewEmpty')
   } else if (form?.dataset.form === 'product') {
     updatePreview(form)
   }

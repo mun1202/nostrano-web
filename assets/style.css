@@ -60,12 +60,14 @@ body.busy main { opacity: 0.6; pointer-events: none; transition: opacity 0.15s; 
   border-bottom: 1px solid var(--line);
 }
 
+/* "Il mio contadino" su una riga, anche nel menu stretto del pannello admin. */
 .brand {
   display: flex;
   align-items: center;
   gap: 8px;
+  white-space: nowrap;
   color: var(--ink);
-  font-size: 19px;
+  font-size: 17px;
   font-weight: 700;
   letter-spacing: -0.4px;
   text-decoration: none;
@@ -136,7 +138,7 @@ a.more:hover { color: var(--ink); }
 a.more::after { content: " →"; }
 
 /* Nelle pagine con una parte sola il titolo è già in alto. */
-.page.single > section:first-child > h2:first-child { display: none; }
+.page.single > section:first-child > h2:first-child, .page.single .main-col > section:first-child > h2:first-child { display: none; }
 .page.single > section:first-child { margin-top: 20px; }
 
 .card {
@@ -449,22 +451,54 @@ section:empty { display: none; }
   #toast { left: calc(50% + 120px); bottom: 32px; }
 }
 
-/* Calendario delle richieste (pagina del maso, "Richieste"): 14 giorni che scorrono di lato, con quante richieste ci
-sono in ognuno; il giorno scelto è scuro, come le pillole del sito. */
-.calendar { display: flex; gap: 6px; margin: 16px -16px 8px; padding: 2px 16px 6px; overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; }
-.calendar::-webkit-scrollbar { display: none; }
-.cal-day {
-  display: grid; flex: none; justify-items: center; gap: 2px; width: 56px; min-height: 0; padding: 8px 0;
-  border: 1px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink); font-weight: 500;
+/* Pagine con la colonna di destra (calendario, anteprime): sul computer due colonne, sul telefono una sotto l'altra. */
+.with-side { display: flex; flex-direction: column; }
+.with-side.side-first .side-col { order: -1; }
+.side-col > section:first-child > .card:first-child { margin-top: 20px; }
+@media (min-width: 1100px) {
+  .page.wide, main:has(.page.wide) > #s-header { max-width: 1060px; }
+  .with-side { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(300px, 1fr); gap: 0 36px; align-items: start; }
+  .with-side.side-first .side-col { order: 0; }
+  .side-col { position: sticky; top: 24px; }
 }
-.cal-day small { color: var(--muted); font-size: 12px; text-transform: capitalize; }
-.cal-day strong { font-size: 17px; }
-.cal-count { min-width: 20px; height: 20px; border-radius: 10px; font-size: 12px; font-weight: 700; line-height: 20px; text-align: center; }
-.cal-day.has .cal-count { background: var(--green); color: #fff; }
-.cal-day[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: #fff; }
-.cal-day[aria-pressed="true"] small { color: #d4d4d8; }
-.cal-day[aria-pressed="true"] .cal-count { background: #fff; color: var(--ink); }
 
-/* "Modifica come admin" nella pagina del maso: una striscia ambra che ricorda chi sta scrivendo. */
-.admin-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; margin: 0 0 16px; padding: 10px 14px; border-radius: var(--radius); background: var(--amber-soft); color: var(--amber); font-size: 14px; }
-.admin-bar a { text-decoration: none; }
+/* Calendario del mese (pagina del maso, "Richieste"): il numero dice quante richieste ci sono quel giorno, il pallino
+ambra che qualcuna aspetta una risposta; il giorno scelto è scuro, come le pillole del sito. */
+.month-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.month-head strong { font-size: 15px; }
+.month-head .icon { min-height: 0; width: 34px; height: 34px; padding: 0; border-radius: 10px; font-size: 20px; line-height: 1; color: var(--ink); }
+.month-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.month-grid > span { padding: 4px 0; color: var(--muted); font-size: 11px; font-weight: 600; text-align: center; text-transform: capitalize; }
+.cal-cell {
+  position: relative; display: grid; place-items: center; aspect-ratio: 1; min-height: 0; padding: 0;
+  border: 1px solid transparent; border-radius: 10px; background: var(--side); color: var(--ink); font-weight: 500;
+}
+.cal-cell .cal-n { font-size: 14px; }
+.cal-cell .cal-count { position: absolute; right: 3px; bottom: 3px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: var(--green); color: #fff; font-size: 11px; font-weight: 700; line-height: 18px; }
+.cal-cell.waiting::after { content: ""; position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; border-radius: 50%; background: var(--amber); }
+.cal-cell.closed { background: #fff; color: var(--faint); }
+.cal-cell.past { opacity: 0.55; }
+.cal-cell.today { border-color: var(--ink); }
+.cal-cell[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: #fff; opacity: 1; }
+.cal-cell[aria-pressed="true"] .cal-count { background: #fff; color: var(--ink); }
+@media (hover: hover) and (pointer: fine) { .cal-cell:hover:not([aria-pressed="true"]) { border-color: var(--line-strong); } }
+.month-foot { margin: 10px 0 0; }
+.legend { display: flex; align-items: center; gap: 6px; margin: 6px 0 0; color: var(--muted); }
+.legend .dot-waiting, .legend .dot-closed { width: 8px; height: 8px; border-radius: 50%; background: var(--amber); }
+.legend .dot-closed { margin-left: 8px; background: var(--line-strong); }
+.day-filter { display: flex; align-items: center; gap: 10px; margin: 12px 0 0; font-weight: 600; }
+
+/* Anteprime: come i clienti vedono la scheda. */
+.preview h2 { margin-top: 0; }
+.preview .status { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 10px; padding: 5px 12px; border-radius: 999px; background: var(--fill); font-size: 14px; font-weight: 600; }
+.preview .status span { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); }
+.preview .status.open { background: var(--green-soft); color: var(--green); }
+.preview .status.open span { background: var(--green); }
+.preview .row.today { font-weight: 650; }
+.news-preview { display: flex; gap: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; }
+.news-preview img, .news-preview .news-photo { flex: none; width: 64px; height: 64px; border-radius: 10px; object-fit: cover; background: var(--fill); }
+.news-preview p { margin: 2px 0; font-size: 14px; overflow-wrap: anywhere; }
+.preview-photo { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 12px; object-fit: cover; margin-bottom: 10px; }
+.preview-name { font-size: 17px; }
+.preview-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.preview-desc { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; white-space: pre-line; }

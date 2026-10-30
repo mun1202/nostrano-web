@@ -1,6 +1,6 @@
 // Le parti della pagina, come HTML. Ogni testo che arriva dal database o dai clienti passa da esc().
-import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=28861c4766'
-import { WEEK, addDays, formatDay, formatInstant, openDays, toClock, todayRome, weekdayName } from './days.js?v=28861c4766'
+import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=db225f0c12'
+import { WEEK, addDays, dayRanges, formatDay, formatInstant, minuteNowRome, openDays, toClock, todayRome, weekday, weekdayName } from './days.js?v=db225f0c12'
 
 export const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
@@ -211,39 +211,62 @@ function collectCard(s, request) {
 }
 
 /**
- * Il calendario delle richieste: i prossimi 14 giorni con quante richieste ci sono per ciascuno (in attesa o
- * confermate per quel giorno). Toccando un giorno l'elenco sotto mostra solo quello; di nuovo, tutti.
+ * Il calendario delle richieste: un mese intero (lunedì-domenica) con quante richieste ci sono in ogni giorno (in
+ * attesa o confermate per quel giorno). Il pallino ambra dice che qualcuna aspetta ancora una risposta; i giorni chiusi
+ * e quelli passati sono più chiari. Toccando un giorno l'elenco mostra solo quello; di nuovo, tutti. Le frecce
+ * cambiano mese.
  */
 const OPEN = ['waiting', 'accepted', 'other_day']
-function calendar(s) {
+const monthOf = (day) => day.slice(0, 7)
+
+export function calendar(s) {
+  if (!s.farm.has_farm_shop) return ''
   const today = todayRome()
-  const days = Array.from({ length: 14 }, (_, i) => addDays(today, i))
-  const count = (day) => s.requests.filter((r) => OPEN.includes(r.status) && pickupDay(r) === day && !(r.status === 'waiting' && r.day < today)).length
-  const short = (day, options) => new Intl.DateTimeFormat(s.lang === 'de' ? 'de-DE' : 'it-IT', { ...options, timeZone: 'UTC' }).format(new Date(`${day}T12:00:00Z`))
+  const month = s.month ?? monthOf(today)
+  const first = `${month}-01`
+  const lead = (weekday(first) + 5) % 7 // quanti giorni del mese prima stanno nella prima settimana (lunedì = 0)
+  const days = []
+  for (let d = first; monthOf(d) === month; d = addDays(d, 1)) days.push(d)
+  const locale = s.lang === 'de' ? 'de-DE' : 'it-IT'
+  const fmt = (day, options) => new Intl.DateTimeFormat(locale, { ...options, timeZone: 'UTC' }).format(new Date(`${day}T12:00:00Z`))
+  const open = (r) => OPEN.includes(r.status) && !(r.status === 'waiting' && r.day < today)
+  const onDay = (day) => s.requests.filter((r) => open(r) && pickupDay(r) === day)
+  const heads = WEEK.map((wd) => `<span>${esc(weekdayName(wd, s.lang).slice(0, 3))}</span>`).join('')
+  const cells = days.map((day) => {
+    const list = onDay(day)
+    const waiting = list.some((r) => r.status === 'waiting')
+    const closed = dayRanges(s.farm, day).length === 0
+    const classes = ['cal-cell', list.length && 'has', waiting && 'waiting', closed && 'closed', day < today && 'past', day === today && 'today'].filter(Boolean).join(' ')
+    return `<button type="button" class="${classes}" data-action="day" data-day="${day}" aria-pressed="${s.day === day}"
+      aria-label="${esc(capitalize(formatDay(day, s.lang)))}: ${list.length}">
+      <span class="cal-n">${Number(day.slice(8))}</span>${list.length ? `<span class="cal-count">${list.length}</span>` : ''}
+    </button>`
+  }).join('')
+  const total = s.requests.filter((r) => open(r) && monthOf(pickupDay(r)) === month).length
+  const selected = s.day ? onDay(s.day) : []
   return `
-    <div class="calendar" role="group" aria-label="${esc(t(s.lang, 'calendar'))}">
-      ${days.map((day) => {
-        const n = count(day)
-        return `<button type="button" class="cal-day${n ? ' has' : ''}" data-action="day" data-day="${day}" aria-pressed="${s.day === day}"
-          aria-label="${esc(capitalize(formatDay(day, s.lang)))}: ${n}">
-          <small>${esc(day === today ? t(s.lang, 'today') : short(day, { weekday: 'short' }))}</small>
-          <strong>${esc(short(day, { day: 'numeric' }))}</strong>
-          <span class="cal-count">${n || ''}</span>
-        </button>`
-      }).join('')}
-    </div>
-    ${s.day ? `<p class="small">${esc(capitalize(formatDay(s.day, s.lang)))} · <button class="link small" data-action="day" data-day="${s.day}">${t(s.lang, 'allDays')}</button></p>` : ''}`
+    <div class="card month" role="group" aria-label="${esc(t(s.lang, 'calendar'))}">
+      <div class="month-head">
+        <button type="button" class="icon" data-action="month" data-delta="-1" aria-label="${esc(t(s.lang, 'prevMonth'))}">‹</button>
+        <strong>${esc(capitalize(fmt(first, { month: 'long', year: 'numeric' })))}</strong>
+        <button type="button" class="icon" data-action="month" data-delta="1" aria-label="${esc(t(s.lang, 'nextMonth'))}">›</button>
+      </div>
+      <div class="month-grid">
+        ${heads}
+        ${'<span></span>'.repeat(lead)}${cells}
+      </div>
+      <p class="muted small month-foot">${s.day
+        ? `${esc(capitalize(formatDay(s.day, s.lang)))} · ${t(s.lang, 'requestsCount', selected.length)} · <button class="link small" data-action="day" data-day="${s.day}">${t(s.lang, 'allDays')}</button>`
+        : t(s.lang, 'monthTotal', total)}</p>
+      <p class="legend small"><span class="dot-waiting"></span>${t(s.lang, 'legendWaiting')} <span class="dot-closed"></span>${t(s.lang, 'legendClosed')}</p>
+    </div>`
 }
 
-export function requests(s) {
+/** Accetto richieste, quante al giorno e le notifiche del browser. */
+export function requestSettings(s) {
   const { farm } = s
   if (!farm.has_farm_shop) return ''
-  const onDay = (r) => !s.day || pickupDay(r) === s.day
-  const waiting = s.requests.filter(isWaiting).filter(onDay)
-  const collecting = s.requests.filter(isToCollect).filter(onDay)
-  const answered = s.requests.filter((r) => !isWaiting(r) && !isToCollect(r)).filter(onDay)
   return `
-    <h2>${t(s.lang, 'requests')}</h2>
     <div class="card">
       <label class="row">
         <span><strong>${t(s.lang, 'acceptRequests')}</strong><br><small class="muted">${t(s.lang, 'acceptRequestsText')}</small></span>
@@ -259,8 +282,19 @@ export function requests(s) {
           </span>
         </div>` : ''}
     </div>
-    ${notifyCard(s)}
-    ${calendar(s)}
+    ${notifyCard(s)}`
+}
+
+export function requests(s) {
+  const { farm } = s
+  if (!farm.has_farm_shop) return ''
+  const onDay = (r) => !s.day || pickupDay(r) === s.day
+  const waiting = s.requests.filter(isWaiting).filter(onDay)
+  const collecting = s.requests.filter(isToCollect).filter(onDay)
+  const answered = s.requests.filter((r) => !isWaiting(r) && !isToCollect(r)).filter(onDay)
+  return `
+    <h2>${t(s.lang, 'requests')}</h2>
+    ${s.day ? `<p class="day-filter">${esc(capitalize(formatDay(s.day, s.lang)))} <button class="link small" data-action="day" data-day="${s.day}">${t(s.lang, 'allDays')}</button></p>` : ''}
     <h3>${t(s.lang, 'requestsWaiting')}</h3>
     ${waiting.length ? waiting.map((r) => requestCard(s, r)).join('') : `<p class="muted">${t(s.lang, 'requestsNone')}</p>`}
     <p class="muted small">${t(s.lang, 'answerWithin')}</p>
@@ -564,4 +598,85 @@ export function footer(s) {
       <button class="link danger" data-action="leave">${t(s.lang, 'leave')}</button>
       ${s.farm.is_demo ? `<button class="link" data-action="reset">${t(s.lang, 'reset')}</button>` : ''}
     </div>`
+}
+
+// Anteprime (colonna a destra sul computer): come i clienti vedono la parte della scheda che si sta modificando.
+
+const photoUrl = (photo, width = 400) =>
+  photo.startsWith('https://') ? photo : `https://images.unsplash.com/photo-${photo}?auto=format&fit=crop&w=${width}&q=70`
+
+const previewCard = (s, title, body) => `
+    <div class="card preview">
+      <p class="eyebrow">${t(s.lang, 'previewTitle')}</p>
+      <h2>${title}</h2>
+      ${body}
+    </div>`
+
+export function hoursPreview(s) {
+  const f = s.farm
+  if (!f.has_farm_shop) return ''
+  const today = todayRome()
+  const now = minuteNowRome()
+  const ranges = dayRanges(f, today)
+  const openNow = ranges.find(([a, b]) => a <= now && now < b)
+  const later = ranges.find(([a]) => a > now)
+  // Chiuso adesso: quando riapre, oggi più tardi o nei prossimi giorni.
+  let next = null
+  for (let i = 1; i <= 7 && !later && !next; i++) {
+    const day = addDays(today, i)
+    const first = dayRanges(f, day)[0]
+    if (first) next = t(s.lang, 'opensOn', i === 1 ? t(s.lang, 'tomorrow') : formatDay(day, s.lang).split(' ')[0], toClock(first[0]))
+  }
+  const status = openNow
+    ? `<p class="status open"><span></span>${t(s.lang, 'openUntil', toClock(openNow[1]))}</p>`
+    : `<p class="status"><span></span>${later ? t(s.lang, 'opensAt', toClock(later[0])) : next ?? t(s.lang, 'closedNow')}</p>`
+  const week = Array.from({ length: 7 }, (_, i) => addDays(today, i)).map((day) => {
+    const r = dayRanges(f, day)
+    const exception = f.hours_exceptions.find((e) => e.day === day)
+    return `<div class="row small${day === today ? ' today' : ''}"><span>${esc(capitalize(day === today ? t(s.lang, 'today') : formatDay(day, s.lang).split(' ')[0]))}</span>
+      <span class="${r.length ? '' : 'muted'}">${r.length ? r.map(([a, b]) => `${toClock(a)}–${toClock(b)}`).join(', ') : t(s.lang, 'closed')}${exception ? ' *' : ''}</span></div>`
+  }).join('')
+  return previewCard(s, t(s.lang, 'previewHours'), `${status}<div class="list">${week}</div>
+      ${f.hours_exceptions.some((e) => e.day >= today && e.day <= addDays(today, 6)) ? `<p class="muted small">* ${t(s.lang, 'specialDay')}</p>` : ''}`)
+}
+
+export function noticePreview(s) {
+  const f = s.farm
+  const today = todayRome()
+  const active = f.notice_text && f.notice_until >= today
+  return previewCard(s, t(s.lang, 'previewNotice'), `
+      <div class="news-preview">
+        ${f.photos?.[0] ? `<img src="${esc(photoUrl(f.photos[0], 160))}" alt="" width="64" height="64">` : '<span class="news-photo"></span>'}
+        <div>
+          <strong>${esc(f.name)}</strong>
+          <p data-preview-notice>${esc(active ? f.notice_text : t(s.lang, 'noticePreviewEmpty'))}</p>
+          <small class="muted" data-preview-until>${active ? t(s.lang, 'noticeUntilShort', formatDay(f.notice_until, s.lang)) : ''}</small>
+        </div>
+      </div>
+      <p class="muted small">${t(s.lang, 'noticePreviewHelp')}</p>`)
+}
+
+export function productsPreview(s) {
+  const sorted = [...s.farm.products].sort((a, b) => b.available - a.available
+    || productName(s, a.kind).localeCompare(productName(s, b.kind), s.lang))
+  return previewCard(s, t(s.lang, 'previewProducts'), sorted.length ? `<div class="list">${sorted.map((p) => `
+      <div class="row small${p.available ? '' : ' muted'}"><span>${esc(capitalize(productName(s, p.kind)))}</span>
+        <span>${p.available ? esc(priceText(s.lang, p) || '—') : t(s.lang, 'soldOut')}</span></div>`).join('')}</div>`
+    : `<p class="muted small">${t(s.lang, 'productsPreviewEmpty')}</p>`)
+}
+
+export function farmPreview(s) {
+  const f = s.farm
+  const own = (s.lang === 'de' ? f.description_own_de : f.description_own_it) || f.description || ''
+  const tags = [
+    f.has_farm_shop && t(s.lang, 'shop'),
+    f.has_vending_24h && t(s.lang, 'vending'),
+    f.payments?.includes('card') ? t(s.lang, 'cashAndCard') : t(s.lang, 'cashOnly'),
+  ].filter(Boolean)
+  return previewCard(s, t(s.lang, 'previewFarm'), `
+      ${f.photos?.[0] ? `<img class="preview-photo" src="${esc(photoUrl(f.photos[0], 640))}" alt="" width="640" height="360">` : ''}
+      <strong class="preview-name">${esc(f.name)}</strong>
+      <p class="muted small">${esc(f.address ?? '')}</p>
+      <p class="preview-tags">${tags.map((x) => `<span class="pill">${esc(x)}</span>`).join('')}</p>
+      ${own ? `<p class="small preview-desc">${esc(own)}</p>` : `<p class="muted small">${t(s.lang, 'descriptionPreviewEmpty')}</p>`}`)
 }
