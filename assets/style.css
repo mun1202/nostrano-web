@@ -478,12 +478,14 @@ section:empty { display: none; }
   .topbar > select { margin-top: auto; }
   #nav { flex-direction: column; overflow: visible; }
   #nav a { padding: 8px 10px; }
-  main { max-width: 1120px; width: 100%; margin: 0; padding: 32px 48px 72px; }
+  /* Il contenuto sta al centro dello spazio a destra del menu, non attaccato al menu con mezzo schermo vuoto. */
+  main { max-width: none; width: 100%; margin: 0; padding: 40px clamp(32px, 4vw, 72px) 80px; }
+  main > * { margin-inline: auto; }
   h1 { font-size: 26px; }
   .tiles { grid-template-columns: repeat(4, 1fr); }
   .split-view { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 0 32px; align-items: start; }
-  .page:not(.single), main:has(.page:not(.single)) > #s-header { max-width: 1020px; }
-  .page.single, main:has(.page.single) > #s-header { max-width: 720px; }
+  .page:not(.single), main:has(.page:not(.single)) > #s-header { max-width: 1180px; }
+  .page.single, main:has(.page.single) > #s-header { max-width: 800px; }
   #toast { left: calc(50% + 120px); bottom: 32px; }
 }
 
@@ -492,7 +494,7 @@ section:empty { display: none; }
 .with-side.side-first .side-col { order: -1; }
 .side-col > section:first-child > .card:first-child { margin-top: 20px; }
 @media (min-width: 1100px) {
-  .page.wide, main:has(.page.wide) > #s-header { max-width: 1060px; }
+  .page.wide, main:has(.page.wide) > #s-header { max-width: 1220px; }
   .with-side { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(300px, 1fr); gap: 0 36px; align-items: start; }
   .with-side.side-first .side-col { order: 0; }
   .side-col { position: sticky; top: 24px; }
@@ -538,3 +540,15 @@ ambra che qualcuna aspetta una risposta; il giorno scelto è scuro, come le pill
 .preview-name { font-size: 17px; }
 .preview-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .preview-desc { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; white-space: pre-line; }
+
+/* Schermi grandi: testo e titoli un po' più grandi, così la pagina non sembra lontana. */
+@media (min-width: 1280px) {
+  body { font-size: 16px; }
+  .small, small { font-size: 14px; }
+  h1 { font-size: 30px; }
+  h2 { font-size: 19px; }
+  .tile span { font-size: 14px; }
+  .tile strong { font-size: 34px; }
+  #nav a { font-size: 15px; padding: 9px 12px; }
+  .chip { font-size: 14px; }
+}

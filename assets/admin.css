@@ -1,6 +1,7 @@
 /* Pannello admin: stessa base della pagina del produttore (style.css), con il menu delle sezioni. */
 body.admin main { max-width: 1080px; }
-@media (min-width: 960px) { body.admin main { max-width: 1240px; } }
+/* Dal computer al centro dello spazio a destra del menu, come la pagina del maso. */
+@media (min-width: 960px) { body.admin main { max-width: 1320px; margin: 0 auto; } }
 body.admin h1 { font-size: 24px; }
 
 .topbar .tag {

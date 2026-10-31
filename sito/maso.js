@@ -1,13 +1,13 @@
 // Pagina di un maso. L'HTML arriva già pronto dal generatore (web/genera/pagine.mjs): qui la galleria con il
 // contatore, "Segnala un errore" e quello che dipende dall'ora, ricalcolato nel browser così resta giusto anche su
 // una pagina generata un'ora prima: stato, orari di oggi, giorni speciali, novità scadute, "aggiornata … fa".
-import { badge, distanza, km, novita, rigaStato, stato } from './comune.js?v=de8833acec'
-import { adesso, barra, chiamaAnonimo, foglio, frammento, mostraErrore, ogniMinuto, pagina } from './browser.js?v=de8833acec'
-import { aggiornata, oggiMaso, orariMaso, pillStato, quandoPrezzi } from './viste.js?v=de8833acec'
-import { mostraCuori, preferiti, toccaCuore } from './preferiti.js?v=de8833acec'
-import { suggerisci } from './suggerisci.js?v=de8833acec'
-import { account } from './accedi.js?v=de8833acec'
-import { richiesta } from './richiesta.js?v=de8833acec'
+import { badge, distanza, km, novita, rigaStato, stato } from './comune.js?v=eeaf70f043'
+import { adesso, barra, chiamaAnonimo, foglio, frammento, mostraErrore, ogniMinuto, pagina } from './browser.js?v=eeaf70f043'
+import { aggiornata, oggiMaso, orariMaso, pillStato, quandoPrezzi } from './viste.js?v=eeaf70f043'
+import { mostraCuori, preferiti, toccaCuore } from './preferiti.js?v=eeaf70f043'
+import { suggerisci } from './suggerisci.js?v=eeaf70f043'
+import { account } from './accedi.js?v=eeaf70f043'
+import { richiesta } from './richiesta.js?v=eeaf70f043'
 
 const { dati, c } = pagina('../../')
 const f = dati.f
@@ -53,9 +53,10 @@ if (track && conta) {
   }, { passive: true })
 }
 
-// Le foto a tutto schermo ----------------------------------------------------------------------
-// Toccando una foto (o "Tutte le foto") si apre la galleria: si scorre con il dito o le frecce, si chiude con Esc, la
-// X o trascinando giù. Dove ci sono le View Transitions la foto toccata cresce fino a tutto schermo.
+// Le foto in una finestra -------------------------------------------------------------------------
+// Toccando una foto (o "Tutte le foto") si apre la galleria al centro della pagina: si scorre con il dito o le frecce,
+// si chiude con Esc, la X, toccando fuori o trascinando giù. Dove ci sono le View Transitions la foto toccata cresce
+// fino alla finestra.
 const galleria = $('galleria')
 if (galleria && track) {
   const lbTrack = $('lb-track')
@@ -110,6 +111,12 @@ if (galleria && track) {
   $('apri-galleria').addEventListener('click', () => apri(conta ? Math.round(track.scrollLeft / Math.max(1, track.clientWidth)) : 0))
   lbTrack.addEventListener('scroll', segna, { passive: true })
   $('lb-chiudi').addEventListener('click', () => galleria.close())
+  // Un tocco sulla pagina scurita (fuori dalla finestra) chiude.
+  galleria.addEventListener('click', (e) => {
+    if (e.target !== galleria) return
+    const r = galleria.getBoundingClientRect()
+    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) galleria.close()
+  })
   $('lb-prima')?.addEventListener('click', () => vai(indice() - 1))
   $('lb-dopo')?.addEventListener('click', () => vai(indice() + 1))
   // Le frecce della tastiera: subito, senza scorrimento animato.

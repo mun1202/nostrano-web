@@ -1088,36 +1088,42 @@ a.chip { text-decoration: none; }
 .copiato.si { opacity: 1; transform: none; }
 .action-bar .copiato { left: auto; right: 0; translate: none; }
 
-/* Le foto a tutto schermo. */
+/* Le foto in una finestra al centro, con la pagina scurita dietro (non a tutto schermo). */
 .gallery-track img { cursor: zoom-in; }
 .gallery-all { position: absolute; right: 12px; bottom: 12px; display: none; background: rgb(255 255 255 / 0.94); }
 @media (min-width: 760px) { .gallery-all { display: inline-flex; } }
 .lightbox {
   --lb-fondo: 1;
-  width: 100vw;
-  max-width: 100vw;
-  height: 100dvh;
-  max-height: 100dvh;
-  margin: 0;
+  /* Sul telefono larga quasi tutto, alta quanto una foto 4:3 più la barra; dal computer fino a 1120 × 820. */
+  width: calc(100vw - 24px);
+  max-width: none;
+  height: min(78dvh, calc((100vw - 24px) * 0.75 + 96px));
+  max-height: none;
+  margin: auto;
   padding: 0;
   border: 0;
-  background: rgb(11 11 12 / var(--lb-fondo));
+  border-radius: 20px;
+  overflow: hidden;
+  background: #111113;
   color: #fff;
+  box-shadow: 0 24px 80px rgb(0 0 0 / 0.35);
   opacity: 0;
-  transition: opacity 150ms var(--ease-out), overlay 150ms allow-discrete, display 150ms allow-discrete;
+  transform: scale(0.98);
+  transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out), overlay 150ms allow-discrete, display 150ms allow-discrete;
 }
-.lightbox[open] { opacity: 1; transition-duration: 200ms; }
-@starting-style { .lightbox[open] { opacity: 0; } }
+@media (min-width: 760px) { .lightbox { width: min(1120px, calc(100vw - 96px)); height: min(820px, calc(100dvh - 96px)); } }
+.lightbox[open] { opacity: 1; transform: none; transition-duration: 200ms; }
+@starting-style { .lightbox[open] { opacity: 0; transform: scale(0.98); } }
 .lightbox.subito { transition: none; }
-.lightbox::backdrop { background: transparent; }
-.lb-top { position: absolute; z-index: 2; top: 0; right: 0; left: 0; display: flex; align-items: center; justify-content: space-between; padding: calc(10px + env(safe-area-inset-top)) 12px 10px 20px; }
+.lightbox::backdrop { background: rgb(11 11 12 / calc(0.62 * var(--lb-fondo))); }
+.lb-top { position: absolute; z-index: 2; top: 0; right: 0; left: 0; display: flex; align-items: center; justify-content: space-between; padding: 10px 10px 10px 20px; }
 .lb-conta { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .lb-x { color: #fff; }
 .lb-track { display: flex; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior: contain; scrollbar-width: none; touch-action: pan-x; transition: transform 250ms var(--ease-drawer); }
 .lb-track::-webkit-scrollbar { display: none; }
 .trascina .lb-track { transition: none; }
 /* min-width 0 e righe minmax: senza, una foto più larga dello schermo allarga la sua pagina e il conto non torna. */
-.lb-foto { display: grid; flex: 0 0 100%; grid-template: minmax(0, 1fr) / minmax(0, 1fr); place-items: center; min-width: 0; margin: 0; padding: 56px 0 24px; scroll-snap-align: center; }
+.lb-foto { display: grid; flex: 0 0 100%; grid-template: minmax(0, 1fr) / minmax(0, 1fr); place-items: center; min-width: 0; margin: 0; padding: 56px 12px 24px; scroll-snap-align: center; }
 .lb-foto img { width: 100%; height: 100%; min-width: 0; min-height: 0; object-fit: contain; }
 .lb-nav { position: absolute; z-index: 2; top: 50%; display: none; place-items: center; width: 44px; height: 44px; margin-top: -22px; border: 0; border-radius: 50%; background: rgb(255 255 255 / 0.14); color: #fff; cursor: pointer; transition: background-color 150ms ease; }
 .lb-prima { left: 16px; }
@@ -1131,6 +1137,8 @@ a.chip { text-decoration: none; }
 /* Nel passaggio della galleria il resto della pagina non si muove: dura quanto la foto, non come un cambio di pagina. */
 .vt-galleria::view-transition-group(*), .vt-galleria::view-transition-old(*), .vt-galleria::view-transition-new(*) { animation-duration: 260ms; }
 @media (prefers-reduced-motion: reduce) {
+  .lightbox, .lightbox[open] { transform: none; }
+  @starting-style { .lightbox[open] { transform: none; } }
   .fav:active { transform: none; }
   .copiato, .copiato.si { transform: none; }
   .lb-track { transition: none; }
@@ -1339,7 +1347,10 @@ a.chip { text-decoration: none; }
 .report-done .muted { font-size: 14px; }
 
 /* Le pagine dell'account ----------------------------------------------------------------------- */
-.personal { max-width: 760px; padding-top: 24px; padding-bottom: 56px; }
+.personal { max-width: 960px; padding-top: 32px; padding-bottom: 72px; }
+/* I preferiti sono schede con la foto: più larga, e colonne di almeno 260 px invece di quelle della home. */
+.personal:has([data-pagina="preferiti"]) { max-width: 1280px; }
+.personal .farms.grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
 .personal h1 { margin: 0 0 20px; font-size: clamp(30px, 4.4vw, 40px); line-height: 1.08; letter-spacing: -0.03em; }
 .empty-state { display: grid; justify-items: center; gap: 10px; padding: 40px 16px; text-align: center; }
 .empty-state h2 { margin: 6px 0 0; font-size: 20px; letter-spacing: -0.015em; outline: 0; }
