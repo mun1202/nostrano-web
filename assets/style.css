@@ -341,6 +341,9 @@ fieldset.day.no-split .times.second { display: none; }
 
 .message { text-align: center; padding: 64px 12px; }
 .message h1 { font-size: 20px; margin-top: 16px; }
+/* Senza link: l'accesso con l'email, sotto il messaggio, allineato a sinistra come gli altri moduli. */
+.message #s-access { max-width: 380px; margin: 28px auto 0; text-align: left; }
+.access-error { color: var(--text); font-weight: 600; }
 
 #toast {
   position: fixed;

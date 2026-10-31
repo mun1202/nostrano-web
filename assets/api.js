@@ -37,20 +37,35 @@ function saveSession(value) {
 let session = loadSession()
 let pending = null
 
-async function auth(path, body) {
-  const response = await fetch(`${url}/auth/v1/${path}`, {
-    method: 'POST',
-    headers: { apikey: key, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  })
+async function authRequest(path, { method = 'POST', body, token } = {}) {
+  let response
+  try {
+    response = await fetch(`${url}/auth/v1/${path}`, {
+      method,
+      headers: { apikey: key, 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify(body ?? {}),
+    })
+  } catch {
+    throw new ApiError('network', 0)
+  }
   const data = await response.json().catch(() => ({}))
-  if (!response.ok) throw new ApiError(data.error_code || 'auth_failed', response.status)
+  if (!response.ok) throw new ApiError(data.error_code || (response.status === 429 ? 'too_many_attempts' : 'auth_failed'), response.status)
+  return data
+}
+
+function setSession(data) {
   session = {
     access_token: data.access_token,
     refresh_token: data.refresh_token,
     expires_at: data.expires_at ?? Math.floor(Date.now() / 1000) + (data.expires_in ?? 3600),
+    // L'email solo se l'identità è un account: quella anonima non ne ha.
+    email: data.user && !data.user.is_anonymous ? data.user.email || null : null,
   }
   saveSession(session)
+}
+
+async function auth(path, body) {
+  setSession(await authRequest(path, { body }))
 }
 
 /** Un'identità anonima per questo browser, come fa l'app: niente account e niente password. */
@@ -70,6 +85,50 @@ async function accessToken() {
   })().finally(() => { pending = null })
   await pending
   return session.access_token
+}
+
+/** L'email con cui questo browser è entrato; null se l'identità è anonima (il caso normale, con il link). */
+export const accountEmail = () => session?.email || null
+
+/**
+ * Manda il codice di 6 cifre per entrare con l'email. Dalla pagina del maso l'email si aggiunge a questa identità
+ * anonima, che resta collegata al maso; se l'email ha già un account si entra lì e il maso passa all'account
+ * (account_merge). Con existingOnly ("Hai salvato l'accesso?") si entra solo in un account che c'è già.
+ */
+export async function sendCode(email, { existingOnly = false } = {}) {
+  if (!existingOnly) {
+    try {
+      await authRequest('user', { method: 'PUT', body: { email }, token: await accessToken() })
+      return { add: true }
+    } catch (error) {
+      if (error.code !== 'email_exists') throw error
+    }
+  }
+  // Prima, ancora da anonimi, il codice che porterà i dati di questa identità nell'account.
+  const linkCode = accountEmail() ? null : await rpc('account_link_code')
+  await authRequest('otp', { body: { email, create_user: false } })
+  return { linkCode }
+}
+
+export async function verifyCode(email, code, step) {
+  if (step.add) {
+    const data = await authRequest('verify', { body: { type: 'email_change', email, token: code }, token: await accessToken() })
+    // Lo stesso utente, ora con l'email: se la risposta non porta la sessione nuova, la si rinnova.
+    if (data.access_token) setSession(data)
+    else await auth('token?grant_type=refresh_token', { refresh_token: session.refresh_token })
+    return
+  }
+  // Dopo la verifica la sessione è già dell'account: l'unione si chiede da lì.
+  setSession(await authRequest('verify', { body: { type: 'email', email, token: code } }))
+  if (step.linkCode) await rpc('account_merge', { p_code: step.linkCode })
+}
+
+/** Esce da questo browser: alla prossima chiamata si riparte da un'identità anonima nuova. */
+export async function signOut() {
+  const token = session?.access_token
+  session = null
+  try { localStorage.removeItem(SESSION_KEY) } catch { /* navigazione privata */ }
+  if (token) await authRequest('logout?scope=local', { token }).catch(() => { /* la sessione qui è già tolta */ })
 }
 
 export async function rpc(name, args = {}) {

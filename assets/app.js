@@ -1,11 +1,11 @@
 // Pagina del produttore: si apre dal link personale https://ilmiocontadino.com/modifica/<token>.
 // Fa le stesse cose dell'area produttore dell'app, con le stesse funzioni del database.
-import { ROOT, linkCode, rpc } from './api.js?v=5655526bff'
-import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=5655526bff'
-import { WEEK, fromClock, todayRome } from './days.js?v=5655526bff'
-import * as views from './views.js?v=5655526bff'
-import * as notify from './notify.js?v=5655526bff'
-import { icon } from './icons.js?v=5655526bff'
+import { ROOT, accountEmail, linkCode, rpc, sendCode, signOut, verifyCode } from './api.js?v=1e72ab56fe'
+import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=1e72ab56fe'
+import { WEEK, fromClock, todayRome } from './days.js?v=1e72ab56fe'
+import * as views from './views.js?v=1e72ab56fe'
+import * as notify from './notify.js?v=1e72ab56fe'
+import { icon } from './icons.js?v=1e72ab56fe'
 
 const root = document.querySelector('#app')
 const nav = document.querySelector('#nav')
@@ -40,7 +40,12 @@ function pageSections() {
 const s = {
   lang: initialLanguage(), farm: null, area: null, requests: [], catalog: [], route: currentRoute(),
   proposing: null, day: null, month: null, editing: null, customOpen: false, appLink: null, busy: false, message: null,
-  push: null, pushHelp: false,
+  push: null, pushHelp: false, accountEmail: accountEmail(), access: freshAccess(),
+}
+
+/** Il modulo "accesso con l'email", vuoto. */
+function freshAccess() {
+  return { open: false, email: '', step: null, busy: false, error: null }
 }
 
 // Disegno ------------------------------------------------------------------------------------
@@ -101,6 +106,7 @@ function showMessage(titleKey, textKey) {
       <img src="${ROOT}assets/logo.svg" alt="" width="48" height="60">
       <h1>${t(s.lang, titleKey)}</h1>
       ${textKey ? `<p class="muted">${t(s.lang, textKey)}</p>` : ''}
+      ${titleKey === 'openLink' && !ADMIN_SLUG ? `<section id="s-access">${views.access(s)}</section>` : ''}
     </div>`
 }
 
@@ -328,8 +334,25 @@ root.addEventListener('click', (event) => {
       return toggleClosedToday()
     case 'remove-notice':
       return save({ notice_text: null, notice_until: null }, t(s.lang, 'noticeRemoved'))
+    case 'access-open':
+      s.access.open = true
+      renderSection('access')
+      return root.querySelector('#s-access input')?.focus()
+    case 'access-restart':
+      Object.assign(s.access, { step: null, error: null })
+      renderSection('access')
+      return root.querySelector('#s-access input')?.focus()
+    case 'sign-out':
+      if (window.confirm(t(s.lang, 'signOutConfirm'))) {
+        signOut().finally(() => {
+          Object.assign(s, { farm: null, accountEmail: null, access: freshAccess() })
+          toast(t(s.lang, 'signedOut'))
+          showMessage('openLink', 'openLinkText')
+        })
+      }
+      return
     case 'leave':
-      if (window.confirm(t(s.lang, 'leaveConfirm'))) {
+      if (window.confirm(t(s.lang, s.accountEmail ? 'leaveConfirmAccount' : 'leaveConfirm'))) {
         rpc('producer_leave').finally(() => {
           s.farm = null
           toast(t(s.lang, 'left'))
@@ -402,6 +425,10 @@ root.addEventListener('submit', (event) => {
   const form = event.target
   const data = new FormData(form)
   switch (form.dataset.form) {
+    case 'access-email':
+      return accessSend(String(data.get('email') ?? ''))
+    case 'access-code':
+      return accessVerify(String(data.get('code') ?? ''))
     case 'proposal':
       return act(async () => {
         const reply = String(data.get('reply') ?? '').trim()
@@ -492,7 +519,72 @@ function appLink() {
   return token ? `nostrano://produttore/${encodeURIComponent(token)}` : null
 }
 
+// Accesso con l'email ------------------------------------------------------------------------
+
+function accessError(error) {
+  switch (error?.code) {
+    case 'otp_expired': return t(s.lang, 'accessWrongCode')
+    case 'over_email_send_rate_limit': case 'over_request_rate_limit': case 'too_many_attempts': return t(s.lang, 'accessTooMany')
+    // Solo da "Hai salvato l'accesso?", che non crea account nuovi.
+    case 'otp_disabled': case 'signup_disabled': return t(s.lang, 'accessNoFarm')
+    case 'email_address_invalid': case 'validation_failed': return t(s.lang, 'accessBadEmail')
+    case 'invalid_code': return t(s.lang, 'accessExpired')
+    default: return errorText(s.lang, error)
+  }
+}
+
+async function accessSend(email) {
+  Object.assign(s.access, { email: email.trim().toLowerCase(), busy: true, error: null })
+  renderSection('access')
+  try {
+    // Senza maso aperto si entra solo in un account che c'è già: niente account nuovi per sbaglio.
+    s.access.step = await sendCode(s.access.email, { existingOnly: !s.farm })
+  } catch (error) {
+    s.access.error = accessError(error)
+  }
+  s.access.busy = false
+  renderSection('access')
+  root.querySelector('#s-access input')?.focus()
+}
+
+async function accessVerify(code) {
+  const saving = Boolean(s.farm)
+  Object.assign(s.access, { busy: true, error: null })
+  renderSection('access')
+  try {
+    await verifyCode(s.access.email, code.trim(), s.access.step)
+  } catch (error) {
+    Object.assign(s.access, { busy: false, error: accessError(error) })
+    // Il codice che unisce i dati vale 15 minuti: dopo si riparte dall'email.
+    if (error.code === 'invalid_code') s.access.step = null
+    renderSection('access')
+    return root.querySelector('#s-access input')?.focus()
+  }
+  Object.assign(s, { accountEmail: accountEmail(), access: freshAccess() })
+  if (saving) {
+    render()
+    return toast(t(s.lang, 'accessSavedToast'))
+  }
+  try {
+    await openFarm()
+    toast(t(s.lang, 'accessWelcome'))
+  } catch (error) {
+    // Un account senza maso: lo dice la pagina, con "Esci da questo browser".
+    if (error.code === 'not_member') showMessage('openLink', 'openLinkText')
+    else showMessage('error_generic')
+  }
+}
+
 // Avvio --------------------------------------------------------------------------------------
+
+/** Dati del maso, notifiche e pagina: dopo il link, all'avvio, o entrando con l'email. */
+async function openFarm() {
+  s.appLink = appLink()
+  if (!s.catalog.length) s.catalog = await rpc('product_catalog')
+  await reload()
+  s.push = ADMIN_SLUG ? null : await notify.pushState().catch(() => null)
+  render()
+}
 
 async function boot() {
   applyLanguage()
@@ -507,11 +599,7 @@ async function boot() {
       // Per "Apri nell'app" serve ancora, ma solo finché resta aperta questa scheda del browser.
       try { sessionStorage.setItem(TOKEN_KEY, token) } catch { /* navigazione privata */ }
     }
-    s.appLink = appLink()
-    s.catalog = await rpc('product_catalog')
-    await reload()
-    s.push = ADMIN_SLUG ? null : await notify.pushState().catch(() => null)
-    render()
+    await openFarm()
   } catch (error) {
     if (error.code === 'invalid_link') showMessage('invalidLink')
     else if (error.code === 'not_member') showMessage('openLink', 'openLinkText')

@@ -1,6 +1,6 @@
 // Notifiche del browser per le richieste nuove. Le manda il server (funzione push), anche a pagina chiusa;
 // qui il browser si abbona e il server riceve l'abbonamento, legato al maso di questo browser.
-import { ApiError, ROOT, rpc } from './api.js?v=5655526bff'
+import { ApiError, ROOT, rpc } from './api.js?v=1e72ab56fe'
 
 const SCOPE = `${ROOT}modifica/`
 const apple = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)

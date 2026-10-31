@@ -6,16 +6,16 @@
 import {
   aperto, categoria, esc, giorno, icona, leggiRicerca, nuovaRicerca, ordina, origine, passa, riassunto, riassuntoCosa,
   riassuntoDove, riassuntoQuando, scheda, scriviRicerca, stato, statoScheda, stessaRicerca,
-} from './comune.js?v=5655526bff'
-import { adesso, aggiornaDom, barra, foglio, frammento, ogniMinuto, pagina } from './browser.js?v=5655526bff'
+} from './comune.js?v=1e72ab56fe'
+import { adesso, aggiornaDom, barra, foglio, frammento, ogniMinuto, pagina } from './browser.js?v=1e72ab56fe'
 import {
   chips, comuniDi, daDove, elencoComuni, ordinaMercati, pannello, passiFinestra, passiTelefono, quandoMercato,
   scelteFinestra,
-} from './viste.js?v=5655526bff'
-import { mostraCuori, preferiti, toccaCuore } from './preferiti.js?v=5655526bff'
-import { account } from './accedi.js?v=5655526bff'
-import { suggerisci } from './suggerisci.js?v=5655526bff'
-import { creaCartina } from './cartina.js?v=5655526bff'
+} from './viste.js?v=1e72ab56fe'
+import { mostraCuori, preferiti, toccaCuore } from './preferiti.js?v=1e72ab56fe'
+import { account } from './accedi.js?v=1e72ab56fe'
+import { suggerisci } from './suggerisci.js?v=1e72ab56fe'
+import { creaCartina } from './cartina.js?v=1e72ab56fe'
 
 const $ = (id) => document.getElementById(id)
 const { dati, c } = pagina(document.body.dataset.base ?? './')

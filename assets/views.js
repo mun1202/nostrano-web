@@ -1,6 +1,6 @@
 // Le parti della pagina, come HTML. Ogni testo che arriva dal database o dai clienti passa da esc().
-import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=5655526bff'
-import { WEEK, addDays, dayRanges, formatDay, formatInstant, minuteNowRome, openDays, toClock, todayRome, weekday, weekdayName } from './days.js?v=5655526bff'
+import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=1e72ab56fe'
+import { WEEK, addDays, dayRanges, formatDay, formatInstant, minuteNowRome, openDays, toClock, todayRome, weekday, weekdayName } from './days.js?v=1e72ab56fe'
 
 export const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
@@ -590,8 +590,57 @@ export function notice(s) {
     </form>`
 }
 
+/**
+ * Entrare con l'email. Dalla pagina del maso salva l'accesso (l'email si aggiunge a questa identità, collegata al
+ * maso); senza collegamento ritrova il maso salvato. Il primo ingresso resta il link dell'invito.
+ */
+export function access(s) {
+  const a = s.access
+  const enter = !s.farm
+  const signOut = `<button class="link" data-action="sign-out">${t(s.lang, 'signOutBrowser')}</button>`
+  if (s.accountEmail) {
+    return `
+    <div class="card stack">
+      <p class="small">${esc(t(s.lang, enter ? 'accessNoFarmSigned' : 'accessSaved', s.accountEmail))}</p>
+      ${signOut}
+    </div>`
+  }
+  const error = a.error ? `<p class="access-error small" role="alert">${esc(a.error)}</p>` : ''
+  const busy = a.busy ? 'disabled' : ''
+  if (a.step) {
+    return `
+    <form data-form="access-code" class="card stack">
+      <label class="stack"><strong>${esc(t(s.lang, 'accessCodeSent', a.email))}</strong>
+        <input name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" required>
+      </label>
+      <small class="muted">${t(s.lang, 'accessCodeHelp')}</small>
+      ${error}
+      <button type="submit" class="primary wide" ${busy}>${t(s.lang, 'accessEnter')}</button>
+      <button type="button" class="link small" data-action="access-restart">${t(s.lang, 'accessChangeEmail')}</button>
+    </form>`
+  }
+  if (!enter && !a.open) {
+    return `
+    <div class="card stack">
+      <strong>${t(s.lang, 'accessSave')}</strong>
+      <p class="muted small">${t(s.lang, 'accessSaveText')}</p>
+      <button class="secondary" data-action="access-open">${t(s.lang, 'accessSaveButton')}</button>
+    </div>`
+  }
+  return `
+    <form data-form="access-email" class="card stack">
+      <label class="stack"><strong>${t(s.lang, enter ? 'accessEnterTitle' : 'accessSave')}</strong>
+        <small class="muted">${t(s.lang, enter ? 'accessEnterText' : 'accessSaveText')}</small>
+        <input name="email" type="email" autocomplete="email" required value="${esc(a.email)}">
+      </label>
+      ${error}
+      <button type="submit" class="primary wide" ${busy}>${t(s.lang, 'accessSendCode')}</button>
+    </form>`
+}
+
 export function footer(s) {
   return `
+    <section id="s-access">${access(s)}</section>
     <p class="muted small">${t(s.lang, 'personal')}</p>
     <p class="muted small">${t(s.lang, 'appHint')}</p>
     <div class="stack">

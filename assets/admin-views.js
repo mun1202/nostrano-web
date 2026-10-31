@@ -1,8 +1,8 @@
 // Le schermate del pannello admin, come HTML. Solo in italiano: lo usa chi gestisce Il mio contadino.
-import { esc } from './views.js?v=5655526bff'
-import { CATEGORY_CODES, MUNICIPALITY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=5655526bff'
-import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=5655526bff'
-import { icon } from './icons.js?v=5655526bff'
+import { esc } from './views.js?v=1e72ab56fe'
+import { CATEGORY_CODES, MUNICIPALITY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=1e72ab56fe'
+import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=1e72ab56fe'
+import { icon } from './icons.js?v=1e72ab56fe'
 
 const ROOT = window.NOSTRANO_ROOT ?? '/'
 const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1)
@@ -322,6 +322,7 @@ function inviteBox(a, f) {
       <p class="small">
         ${never ? 'Non ancora invitato.' : `Ultimo link mandato il ${dateText(f.invited_at, true)}.`}
         ${f.linked ? ' <span class="green">Il maso ha aperto il link.</span>' : f.invited_at ? ' Il maso non ha ancora aperto il link.' : ''}
+        ${f.linked_email ? ' <span class="green">Ha salvato l\'accesso con l\'email: entra anche senza link.</span>' : ''}
       </p>
       <p class="small muted">${f.contact_name ? esc(f.contact_name) : 'Nessun contatto'}${f.contact_phone ? ` · ${esc(f.contact_phone)}` : ' · manca il numero WhatsApp'} · ${f.language === 'de' ? 'tedesco' : 'italiano'}</p>
       ${invite ? `
