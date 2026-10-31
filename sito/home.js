@@ -6,16 +6,16 @@
 import {
   aperto, categoria, esc, giorno, icona, leggiRicerca, nuovaRicerca, ordina, origine, passa, riassunto, riassuntoCosa,
   riassuntoDove, riassuntoQuando, scheda, scriviRicerca, stato, statoScheda, stessaRicerca,
-} from './comune.js?v=61e746c333'
-import { adesso, aggiornaDom, barra, foglio, frammento, ogniMinuto, pagina } from './browser.js?v=61e746c333'
+} from './comune.js?v=de8833acec'
+import { adesso, aggiornaDom, barra, foglio, frammento, ogniMinuto, pagina } from './browser.js?v=de8833acec'
 import {
-  chips, comuniDi, daDove, elencoComuni, ordinaMercati, pannello, passiFinestra, passiTelefono, quandoMercato,
+  chips, daDove, elencoDove, ordinaMercati, pannello, passiFinestra, passiTelefono, quandoMercato,
   scelteFinestra,
-} from './viste.js?v=61e746c333'
-import { mostraCuori, preferiti, toccaCuore } from './preferiti.js?v=61e746c333'
-import { account } from './accedi.js?v=61e746c333'
-import { suggerisci } from './suggerisci.js?v=61e746c333'
-import { creaCartina } from './cartina.js?v=61e746c333'
+} from './viste.js?v=de8833acec'
+import { mostraCuori, preferiti, toccaCuore } from './preferiti.js?v=de8833acec'
+import { account } from './accedi.js?v=de8833acec'
+import { suggerisci } from './suggerisci.js?v=de8833acec'
+import { creaCartina } from './cartina.js?v=de8833acec'
 
 const $ = (id) => document.getElementById(id)
 const { dati, c } = pagina(document.body.dataset.base ?? './')
@@ -45,8 +45,9 @@ calcolaStati()
 const P = new URLSearchParams(location.search)
 const preset = nuovaRicerca(dati.preset ?? {})
 let r = leggiRicerca(P, COMUNI)
-// Senza preferiti in questo browser "?preferiti=1" (un link condiviso) non vale: darebbe sempre zero masi.
-if (!pref) r.preferiti = false
+// I preferiti hanno una pagina loro: i vecchi link con "?preferiti=1" (menu dell'account, segnalibri) portano lì.
+if (P.get('preferiti')) location.replace(`${c.base}preferiti/`)
+r.preferiti = false
 if (preset.comune && !P.has('comune')) r.comune = preset.comune
 if (preset.prodotti.length && !P.has('prodotto')) r.prodotti = [...preset.prodotti]
 
@@ -363,7 +364,7 @@ function ricerca() {
   corpo.addEventListener('input', (e) => {
     if (e.target.dataset.k === 'cerca-comune') {
       ui.comune = e.target.value
-      corpo.querySelector('[data-elenco="comuni"]').innerHTML = elencoComuni(comuniDi(FARMS, c, ui.comune), bozza, c)
+      corpo.querySelector('[data-elenco="comuni"]').innerHTML = elencoDove(FARMS, bozza, c, ui.comune)
     } else if (e.target.dataset.k === 'testo') {
       bozza.q = e.target.value
       riassuntiBozza()
@@ -384,8 +385,8 @@ function ricerca() {
     }
     if (e.key !== 'Enter' || !e.target.matches('input')) return
     e.preventDefault()
-    // Invio nel campo dei comuni sceglie il primo della lista; nel campo di testo cerca.
-    if (e.target.dataset.k === 'cerca-comune') corpo.querySelector('[data-elenco="comuni"] [data-comune]')?.click()
+    // Invio nel campo dei comuni sceglie il primo comune della lista (o apre il primo maso); nel campo di testo cerca.
+    if (e.target.dataset.k === 'cerca-comune') corpo.querySelector('[data-elenco="comuni"] [data-comune], [data-elenco="comuni"] a')?.click()
     else mostraRisultati()
   })
   largo.addEventListener('change', () => {

@@ -2,7 +2,7 @@
 // solo quando si apre la vista) con le tessere di OpenStreetMap di OpenFreeMap, per tutta l'Italia (mappa in
 // web/genera/impostazioni.mjs). Niente account né chiavi; i caratteri stanno sul nostro sito.
 // Colori naturali e vivi (boschi verdi, acqua azzurra, strade principali gialle): i segnaposti bianchi restano in primo piano.
-import { aperto, categoria, esc, icona, scheda, stato } from './comune.js?v=61e746c333'
+import { aperto, categoria, esc, icona, scheda, stato } from './comune.js?v=de8833acec'
 
 const CHIARO = {
   terra: '#f2efe4',
@@ -162,6 +162,9 @@ export async function creaCartina({ contenitore, cartina: dalGeneratore, c, prep
   contenitore.querySelector('.cartina-carica').remove()
 
   const segnaposti = new Map()
+  // I gruppi: i masi troppo vicini sullo schermo diventano una pillola con il numero, che si apre avvicinando.
+  let gruppi = []
+  let livello = null
   let scelto = null
   let tu = null
   let lista = []
@@ -215,6 +218,60 @@ export async function creaCartina({ contenitore, cartina: dalGeneratore, c, prep
   // Toccando la cartina fuori dai masi la scheda si chiude.
   map.on('click', chiudiScheda)
 
+  // Raggruppa in una griglia del mondo a quel livello di zoom (non dello schermo): spostando la cartina i gruppi
+  // restano gli stessi, cambiano solo avvicinando o allontanando. Da vicino (zoom 14) ogni maso ha il suo segnaposto.
+  const CELLA = 56
+  function raggruppa() {
+    const z = Math.floor(map.getZoom())
+    livello = z
+    for (const g of gruppi) g.remove()
+    gruppi = []
+    const celle = new Map()
+    const mondo = 512 * 2 ** z
+    for (const f of lista) {
+      const x = ((f.lng + 180) / 360) * mondo
+      const s = Math.sin((f.lat * Math.PI) / 180)
+      const y = (0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * mondo
+      const chiave = z >= 14 ? f.slug : `${Math.floor(x / CELLA)}:${Math.floor(y / CELLA)}`
+      if (!celle.has(chiave)) celle.set(chiave, [])
+      celle.get(chiave).push(f)
+    }
+    for (const membri of celle.values()) {
+      const soli = membri.length === 1
+      for (const f of membri) segnaposti.get(f.slug).marker.getElement().hidden = !soli
+      if (!soli) gruppi.push(gruppo(membri))
+    }
+  }
+
+  function gruppo(membri) {
+    const bottone = document.createElement('button')
+    bottone.type = 'button'
+    bottone.className = 'cartina-gruppo'
+    bottone.classList.toggle('aperto', membri.some((f) => aperto(stato(f, c.ora))))
+    bottone.textContent = membri.length
+    bottone.setAttribute('aria-label', `${T.masi(membri.length)}: ${T.avvicina}`)
+    bottone.addEventListener('click', (ev) => {
+      ev.stopPropagation()
+      const lon = membri.map((f) => f.lng)
+      const lat = membri.map((f) => f.lat)
+      const riduci = matchMedia('(prefers-reduced-motion: reduce)').matches
+      // Tutti nello stesso punto: si avvicina di due livelli, poi ognuno ha il suo segnaposto.
+      if (Math.max(...lon) - Math.min(...lon) < 1e-6 && Math.max(...lat) - Math.min(...lat) < 1e-6) {
+        map.easeTo({ center: [lon[0], lat[0]], zoom: Math.max(14, map.getZoom() + 2), duration: riduci ? 0 : 300 })
+        return
+      }
+      map.fitBounds([[Math.min(...lon), Math.min(...lat)], [Math.max(...lon), Math.max(...lat)]], {
+        padding: 72, maxZoom: 15, duration: riduci ? 0 : 300,
+      })
+    })
+    const el = document.createElement('div')
+    el.append(bottone)
+    const centro = [membri.reduce((t, f) => t + f.lng, 0) / membri.length, membri.reduce((t, f) => t + f.lat, 0) / membri.length]
+    return new maplibregl.Marker({ element: el }).setLngLat(centro).addTo(map)
+  }
+
+  map.on('zoomend', () => { if (Math.floor(map.getZoom()) !== livello) raggruppa() })
+
   function inquadra({ anima }) {
     const punti = lista.map((f) => [f.lng, f.lat])
     if (!punti.length) return
@@ -239,6 +296,7 @@ export async function creaCartina({ contenitore, cartina: dalGeneratore, c, prep
         bottone.classList.toggle('aperto', si)
         bottone.setAttribute('aria-label', `${f.name}, ${si ? T.aperto : T.chiuso}`)
       }
+      raggruppa()
       if (scelto && !slugs.has(scelto)) chiudiScheda()
       else if (scelto) apriScheda(lista.find((f) => f.slug === scelto))
       if (rifai) inquadra({ anima })

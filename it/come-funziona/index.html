@@ -21,14 +21,14 @@
   <link rel="manifest" href="../../assets/manifest-it.webmanifest">
   <link rel="apple-touch-icon" href="../../assets/icon-180.png">
   <meta name="apple-mobile-web-app-title" content="Il mio contadino">
-  <link rel="stylesheet" href="../../sito/sito.css?v=61e746c333">
+  <link rel="stylesheet" href="../../sito/sito.css?v=de8833acec">
   <script>
     // Tornando indietro (o avanti) con il browser niente passaggio animato tra le pagine: solo cliccando un maso.
     addEventListener('pagereveal', (e) => { if (e.viewTransition && navigation?.activation?.navigationType === 'traverse') e.viewTransition.skipTransition() })
   </script>
-  <link rel="modulepreload" href="../../sito/comune.js?v=61e746c333">
-  <link rel="modulepreload" href="../../sito/testi.js?v=61e746c333">
-  <link rel="modulepreload" href="../../sito/viste.js?v=61e746c333">
+  <link rel="modulepreload" href="../../sito/comune.js?v=de8833acec">
+  <link rel="modulepreload" href="../../sito/testi.js?v=de8833acec">
+  <link rel="modulepreload" href="../../sito/viste.js?v=de8833acec">
   <noscript><style>.farm-photo img { opacity: 1; } .search-box, .filters, .tools, #posizione, #apri-segnala { display: none; } .hero { --box-h: 0px; }</style></noscript>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Tutti i masi","item":"https://ilmiocontadino.com/it/"},{"@type":"ListItem","position":2,"name":"Come funziona","item":"https://ilmiocontadino.com/it/come-funziona/"}]}</script>
   <script type="application/json" id="progetto">{"url":"https://gvdnbutkdaxcglotgwev.supabase.co","key":"sb_publishable_SGZwwvi4vcQvUj1R3aEH0w_sCw_a5ol","email":""}</script>
@@ -42,7 +42,8 @@
       
       <nav aria-label="Principale">
         <a class="for-producers" href="../../per-i-produttori/">Per i produttori</a>
-        <div class="account" id="conto" data-richieste="../richieste/" data-account="../account/" hidden></div>
+        <a class="account-btn solo-icona" href="../preferiti/" aria-label="I tuoi preferiti"><svg class="icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.3s-7.4-4.5-9.1-9.3C1.7 7.5 4 4.6 7.2 4.6c2 0 3.7 1.1 4.8 2.8 1.1-1.7 2.8-2.8 4.8-2.8 3.2 0 5.5 2.9 4.3 6.4-1.7 4.8-9.1 9.3-9.1 9.3z"/></svg></a>
+        <div class="account" id="conto" data-richieste="../richieste/" data-account="../account/" data-preferiti="../preferiti/" hidden></div>
         <div class="lang" role="group" aria-label="Lingua">
           <a href="../../it/come-funziona/" aria-current="page" lang="it" hreflang="it">IT</a>
           <a href="../../de/come-funziona/" lang="de" hreflang="de">DE</a>
@@ -155,6 +156,6 @@
     </div>
   </dialog>
 
-  <script type="module" src="../../sito/pagina.js?v=61e746c333"></script>
+  <script type="module" src="../../sito/pagina.js?v=de8833acec"></script>
 </body>
 </html>

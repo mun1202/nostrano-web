@@ -1,6 +1,6 @@
 // Le parti della pagina, come HTML. Ogni testo che arriva dal database o dai clienti passa da esc().
-import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=61e746c333'
-import { WEEK, addDays, dayRanges, formatDay, formatInstant, minuteNowRome, openDays, toClock, todayRome, weekday, weekdayName } from './days.js?v=61e746c333'
+import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=de8833acec'
+import { WEEK, addDays, dayRanges, formatDay, formatInstant, minuteNowRome, openDays, toClock, todayRome, weekday, weekdayName } from './days.js?v=de8833acec'
 
 export const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
@@ -361,23 +361,26 @@ export function inbox(s) {
 
 // Numeri e domanda ---------------------------------------------------------------------------
 
-const tile = (value, label, note = '') =>
-  `<div class="tile"><span>${label}</span><strong>${value}</strong>${note ? `<small>${note}</small>` : ''}</div>`
+const tile = (value, label, note = '', tone = '') =>
+  `<div class="tile"><span>${label}</span><strong>${value}</strong>${note ? `<small class="${tone}">${note}</small>` : ''}</div>`
 
 export function stats(s) {
   if (s.farm.status !== 'published') return ''
   const { stats: n } = s.area
-  const trend = `${n.views_trend >= 0 ? '+' : ''}${n.views_trend}%`
+  const trend = `${n.views_trend > 0 ? '+' : ''}${n.views_trend}%`
+  const empty = !n.views && !n.directions && !n.followers && !n.waiting
+  // Come nell'app: +0% in verde sembra una buona notizia, e quattro zeri di un maso nuovo si spiegano.
   return `
     <h2>${t(s.lang, 'week')}</h2>
     <div class="tiles">
-      ${tile(n.views, t(s.lang, 'views'), t(s.lang, 'trend', trend))}
+      ${tile(n.views, t(s.lang, 'views'), n.views_trend ? t(s.lang, 'trend', trend) : '', n.views_trend > 0 ? '' : 'muted')}
       ${tile(n.directions, t(s.lang, 'directions'))}
       ${tile(n.followers, t(s.lang, 'followers'))}
       ${tile(n.waiting, t(s.lang, 'waiting'))}
     </div>
     ${n.confirmations > 0 ? `<p class="green">${t(s.lang, 'confirmations', n.confirmations)}</p>` : ''}
     ${n.closed_reports > 0 ? `<p class="amber-text">${t(s.lang, 'closedReports', n.closed_reports)}</p>` : ''}
+    ${empty ? `<p class="muted">${t(s.lang, 'statsEmpty')}</p>` : ''}
     <p class="muted small">${t(s.lang, 'anonymous')}</p>`
 }
 
@@ -386,7 +389,7 @@ export function demand(s) {
   return `
     <h2>${t(s.lang, 'demand')}</h2>
     <p class="muted small">${t(s.lang, 'demandText')}</p>
-    ${items.length ? items.map((item) => `
+    ${items.length ? `<div class="card list">${items.map((item) => `
       <div class="row demand">
         <div>
           <strong>${esc(productName(s, item.kind))}</strong><br>
@@ -394,7 +397,7 @@ export function demand(s) {
             ? t(s.lang, 'suppliersNone') : t(s.lang, 'suppliers', item.suppliers)}</small>
         </div>
         <button class="secondary small" data-action="demand-add" data-kind="${esc(item.kind)}">${t(s.lang, 'iSellIt')}</button>
-      </div>`).join('') : `<p class="muted">${t(s.lang, 'demandNone')}</p>`}`
+      </div>`).join('')}</div>` : `<p class="muted">${t(s.lang, 'demandNone')}</p>`}`
 }
 
 // Prodotti -----------------------------------------------------------------------------------

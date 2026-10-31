@@ -7,10 +7,10 @@ import {
   accettaRichieste, dataEstesa, esc, fasce, fasceTesto, giorniA, giornoDellaData, giornoRitiro, gruppoRichiesta, icona,
   istanteEsteso, maiuscola, nomeRiga, oraDi, prezzo, quantita, richiestaInBreve, richiesteDi, siPuoAnnullare,
   statoRichiesta,
-} from './comune.js?v=61e746c333'
-import { barra, foglio, mostraErrore, pagina } from './browser.js?v=61e746c333'
-import { account, mieRichieste, segnaViste, sessioneSito } from './accedi.js?v=61e746c333'
-import { suggerisci } from './suggerisci.js?v=61e746c333'
+} from './comune.js?v=de8833acec'
+import { barra, foglio, mostraErrore, pagina } from './browser.js?v=de8833acec'
+import { account, mieRichieste, segnaViste, sessioneSito } from './accedi.js?v=de8833acec'
+import { suggerisci } from './suggerisci.js?v=de8833acec'
 
 const { dati, c } = pagina('../')
 const T = c.T
@@ -197,8 +197,8 @@ let daAnnullare = null
 function chiediAnnulla(id) {
   daAnnullare = id
   $('conferma-si').disabled = false
+  // showModal mette già il focus su «Tienila», il primo pulsante: spostarlo a mano accendeva il bordo della tastiera.
   $('conferma').showModal()
-  $('conferma-no').focus()
 }
 
 async function annulla() {

@@ -1,6 +1,6 @@
 // Parti del sito pubblico che servono solo nel browser: l'ora di adesso, il contesto della pagina, la barra in alto.
-import { oraDi } from './comune.js?v=61e746c333'
-import { TESTI } from './testi.js?v=61e746c333'
+import { oraDi } from './comune.js?v=de8833acec'
+import { TESTI } from './testi.js?v=de8833acec'
 
 // Ora di Roma. Per le prove, con "?ora=2026-10-30T10:00" nell'indirizzo il sito fa finta che sia quell'ora.
 export function adesso() {

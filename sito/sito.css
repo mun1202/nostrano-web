@@ -855,6 +855,9 @@ dialog:focus { outline: none; }
   white-space: normal;
 }
 .towns, .days { display: flex; flex-wrap: wrap; gap: 8px; }
+.dove-masi { display: flex; flex-basis: 100%; flex-wrap: wrap; gap: 8px; }
+.dove-masi .step-sub { flex-basis: 100%; margin: 8px 0 0; }
+a.chip.town { text-decoration: none; }
 .chip small { color: var(--muted); font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .chip[aria-pressed="true"] small { color: rgb(255 255 255 / 0.72); }
 .products .chip .icon { width: 14px; height: 14px; }
@@ -1154,7 +1157,8 @@ a.chip { text-decoration: none; }
 }
 .account-btn .icon { width: 17px; height: 17px; }
 .account-btn:active { transform: scale(0.96); }
-.account-btn.signed { width: 36px; padding: 0; justify-content: center; }
+.account-btn.signed, .account-btn.solo-icona { width: 36px; padding: 0; justify-content: center; }
+.account-btn[aria-current="page"] { border-color: var(--ink); }
 @media (max-width: 420px) { .account-btn { width: 36px; padding: 0; justify-content: center; } .account-btn span:not(.account-dot) { display: none; } }
 /* Con l'intestazione compatta (il bottone della ricerca al centro) "Per i produttori" lascia il posto ad "Accedi":
    resta nel piè di pagina. */
@@ -1427,6 +1431,8 @@ a.chip { text-decoration: none; }
 .detail-lines strong { white-space: nowrap; }
 .quote { font-style: italic; overflow-wrap: anywhere; }
 .confirm .sheet-body p { margin: 0 0 8px; color: var(--text); }
+/* Le domande di conferma non hanno la maniglia: senza, il titolo stava attaccato al bordo in alto. */
+.sheet.confirm header { padding-top: 22px; }
 .btn.danger { border-color: var(--ink); background: var(--ink); color: #fff; }
 .account-card { display: grid; gap: 6px; padding: 20px; border: 1px solid var(--line); border-radius: 18px; }
 .account-card p { margin: 0; }
@@ -1482,6 +1488,16 @@ html:has(dialog[open]) { overflow: hidden; }
 .cartina-pin[aria-pressed="true"] { border: 2px solid var(--ink); transform: scale(1.15); }
 .cartina-pin:active { transform: scale(0.95); }
 @media (hover: hover) and (pointer: fine) { .cartina-pin:hover { transform: scale(1.08); } .cartina-pin[aria-pressed="true"]:hover { transform: scale(1.15); } }
+/* Più masi vicini: una pillola nera con il numero; il pallino verde se almeno uno è aperto adesso. */
+.cartina-gruppo {
+  position: relative; display: grid; place-items: center; min-width: 38px; height: 38px; padding: 0 11px; color: #fff;
+  border: 2px solid #fff; border-radius: 999px; background: var(--ink); box-shadow: 0 2px 8px rgb(24 24 27 / 0.28);
+  font: 700 14px/1 inherit; font-variant-numeric: tabular-nums; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: transform 150ms var(--ease-out);
+}
+.cartina-gruppo.aperto::after { content: ""; position: absolute; top: -3px; right: -3px; width: 11px; height: 11px; border: 2px solid #fff; border-radius: 50%; background: var(--green); }
+.cartina-gruppo:active { transform: scale(0.95); }
+@media (hover: hover) and (pointer: fine) { .cartina-gruppo:hover { transform: scale(1.06); } }
 .cartina-tu { width: 16px; height: 16px; border: 3px solid #fff; border-radius: 50%; background: var(--ink); box-shadow: 0 0 0 1px rgb(24 24 27 / 0.2), 0 1px 4px rgb(24 24 27 / 0.25); }
 .cartina-scheda {
   position: absolute; right: 12px; bottom: 12px; left: 12px; z-index: 2; max-width: 460px;
@@ -1492,4 +1508,4 @@ html:has(dialog[open]) { overflow: hidden; }
 .cartina-chiudi { position: absolute; top: 8px; right: 8px; }
 .cartina .maplibregl-ctrl-group { border-radius: 10px; box-shadow: 0 1px 4px rgb(24 24 27 / 0.15); }
 .cartina .maplibregl-ctrl-attrib { font-size: 11px; }
-@media (prefers-reduced-motion: reduce) { .cartina-pin { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .cartina-pin, .cartina-gruppo { transition: none; } }

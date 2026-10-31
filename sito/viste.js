@@ -2,10 +2,10 @@
 // Il generatore li mette nell'HTML già pronto; il browser li rifà quando cambiano i filtri o l'ora.
 import {
   CATEGORIE, DISTANZE, QUANDO, aperto, categoria, categoriePresenti, comune, comuneInTutteLeLingue, comuniPresenti,
-  dataEstesa, esc, fasce, fasceTesto, filtriAttivi, foto, giorniA, giorniDa, giorno, icona, maiuscola, nomeProdotto,
+  dataEstesa, esc, fasce, fasceTesto, filtriAttivi, foto, giorniA, giorniDa, giorno, icona, linkMaso, maiuscola, nomeProdotto,
   normalizza, novita, oraScelta, orario, prezzo, prodottiPresenti, riassunto, riassuntoCosa, riassuntoDove,
   riassuntoQuando, stato, titolo,
-} from './comune.js?v=61e746c333'
+} from './comune.js?v=de8833acec'
 
 // Home ---------------------------------------------------------------------------------------------
 
@@ -13,7 +13,7 @@ export const chip = (attr, testo, premuto, prima = '') =>
   `<button class="chip" type="button" ${attr} aria-pressed="${premuto}">${prima}${esc(testo)}</button>`
 
 // Filtri veloci: scorciatoie della stessa ricerca (Aperti ora = Quando: Aperto ora, le categorie = Cosa).
-// "Preferiti" c'è solo se nel browser ce n'è almeno uno (o se è già acceso, per poterlo spegnere).
+// "Preferiti" c'è solo se nel browser ce n'è almeno uno, e porta alla pagina dei preferiti (non è più un filtro).
 export function chips(r, c, { preferiti = 0 } = {}) {
   const n = filtriAttivi(r)
   const testo = r.q.trim()
@@ -25,7 +25,7 @@ export function chips(r, c, { preferiti = 0 } = {}) {
   }).join('')
   return `<button class="chip" type="button" id="apri-filtri" aria-haspopup="dialog">${icona('sliders')}${esc(c.T.filtri)}${n ? `<span class="count">${n}</span>` : ''}</button>` +
     testo + prodotti +
-    (preferiti || r.preferiti ? chip('data-veloce="preferiti"', c.T.preferiti, r.preferiti, icona('heart')) : '') +
+    (preferiti ? `<a class="chip" href="${esc(`${c.base}preferiti/`)}">${icona('heart')}${esc(c.T.preferiti)}<small>${preferiti}</small></a>` : '') +
     chip('data-veloce="ora"', c.T.apertiOra, r.quando === 'ora', '<span class="dot"></span>') +
     chip('data-veloce="bio"', c.T.bio, r.bio) +
     chip('data-veloce="h24"', c.T.distributore, r.h24) +
@@ -103,12 +103,11 @@ export const scelteFinestra = (passo, r, c, farms, ui, entra = false) => `<div c
  */
 export function contenutoPasso(passo, r, c, farms, ui = {}) {
   if (passo === 'dove') {
-    const comuni = comuniDi(farms, c, ui.comune)
     return `
           <label class="field">${icona('search')}<span class="sr">${esc(c.T.cercaComune)}</span>
             <input type="search" data-k="cerca-comune" placeholder="${esc(c.T.cercaComune)}" value="${esc(ui.comune ?? '')}" autocomplete="off" enterkeyhint="search"></label>
           <div class="chip-row"><button class="chip" type="button" data-k="vicino" data-dove="vicino" aria-pressed="${!r.comune}">${icona('locate')}${esc(c.T.vicinoATe)}</button></div>
-          <div class="towns" data-elenco="comuni">${ui.comune ? elencoComuni(comuni, r, c) : ''}</div>
+          <div class="towns" data-elenco="comuni">${ui.comune ? elencoDove(farms, r, c, ui.comune) : ''}</div>
           <h3 class="step-sub">${esc(c.T.distanzaMassima)}</h3>
           <div class="segmented" role="group" aria-label="${esc(c.T.distanzaMassima)}">
             ${[0, ...DISTANZE].map((km) => `<button type="button" data-k="km-${km}" data-km="${km}" aria-pressed="${r.km === km}">${esc(km ? `${km} km` : c.T.tutte)}</button>`).join('')}
@@ -156,9 +155,23 @@ export function comuniDi(farms, c, testo = '') {
   return comuniPresenti(farms, c).filter(({ codice }) => !cercato || comuneInTutteLeLingue(codice).some((n) => normalizza(n).includes(cercato)))
 }
 
-export const elencoComuni = (comuni, r, c) => (comuni.length
-  ? comuni.map(({ codice, n }) => `<button class="chip town" type="button" data-k="comune-${esc(codice)}" data-comune="${esc(codice)}" aria-pressed="${r.comune === codice}">${esc(comune(codice, c.lang))}<small>${n}</small></button>`).join('')
-  : `<p class="muted">${esc(c.T.nessunComune)}</p>`)
+/** I masi con quel nome (almeno due lettere), i primi sei in ordine alfabetico. */
+export function masiDiNome(farms, c, testo = '') {
+  const cercato = normalizza(testo.trim())
+  if (cercato.length < 2) return []
+  return farms.filter((f) => normalizza(f.name).includes(cercato))
+    .sort((a, b) => a.name.localeCompare(b.name, c.lang))
+    .slice(0, 6)
+}
+
+/** Sotto il campo di Dove: i comuni con quel nome, poi i masi con quel nome (un tocco apre la loro pagina). */
+export function elencoDove(farms, r, c, testo) {
+  const comuni = comuniDi(farms, c, testo)
+  const masi = masiDiNome(farms, c, testo)
+  if (!comuni.length && !masi.length) return `<p class="muted">${esc(c.T.nessunComune)}</p>`
+  return comuni.map(({ codice, n }) => `<button class="chip town" type="button" data-k="comune-${esc(codice)}" data-comune="${esc(codice)}" aria-pressed="${r.comune === codice}">${esc(comune(codice, c.lang))}<small>${n}</small></button>`).join('')
+    + (masi.length ? `<div class="dove-masi"><h3 class="step-sub">${esc(c.T.masiConNome)}</h3>${masi.map((f) => `<a class="chip town" href="${esc(linkMaso(f.slug, c))}">${icona('store')}${esc(f.name)}<small>${esc(comune(f.municipality, c.lang))}</small></a>`).join('')}</div>` : '')
+}
 
 /**
  * Il telefono: i tre passi uno sotto l'altro. Ogni riquadro ha la riga del riassunto e le scelte: aperto, le scelte
