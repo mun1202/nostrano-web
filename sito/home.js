@@ -6,16 +6,16 @@
 import {
   aperto, categoria, esc, giorno, icona, leggiRicerca, nuovaRicerca, ordina, origine, passa, riassunto, riassuntoCosa,
   riassuntoDove, riassuntoQuando, scheda, scriviRicerca, stato, statoScheda, stessaRicerca,
-} from './comune.js?v=8dc1905cd3'
-import { adesso, aggiornaDom, barra, foglio, frammento, ogniMinuto, pagina } from './browser.js?v=8dc1905cd3'
+} from './comune.js?v=da1cc59c62'
+import { adesso, aggiornaDom, barra, foglio, frammento, ogniMinuto, pagina } from './browser.js?v=da1cc59c62'
 import {
   chips, comuniDi, daDove, elencoComuni, ordinaMercati, pannello, passiFinestra, passiTelefono, quandoMercato,
   scelteFinestra,
-} from './viste.js?v=8dc1905cd3'
-import { mostraCuori, preferiti, toccaCuore } from './preferiti.js?v=8dc1905cd3'
-import { account } from './accedi.js?v=8dc1905cd3'
-import { suggerisci } from './suggerisci.js?v=8dc1905cd3'
-import { creaCartina } from './cartina.js?v=8dc1905cd3'
+} from './viste.js?v=da1cc59c62'
+import { mostraCuori, preferiti, toccaCuore } from './preferiti.js?v=da1cc59c62'
+import { account } from './accedi.js?v=da1cc59c62'
+import { suggerisci } from './suggerisci.js?v=da1cc59c62'
+import { creaCartina } from './cartina.js?v=da1cc59c62'
 
 const $ = (id) => document.getElementById(id)
 const { dati, c } = pagina(document.body.dataset.base ?? './')

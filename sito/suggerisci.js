@@ -1,11 +1,9 @@
 // "Suggerisci un maso", su ogni pagina con il piè di pagina: come "Segnala un maso" nell'app (suggestion_create),
 // con lo stesso accesso anonimo chiesto solo al momento dell'invio. Il pannello lo scrive il generatore
 // (web/genera/pagine.mjs) con indirizzo del progetto e chiave publishable; i bottoni hanno data-suggerisci.
-import { chiamaAnonimo, foglio, mostraErrore } from './browser.js?v=8dc1905cd3'
-import { cercaIndirizzo } from './indirizzo.js?v=8dc1905cd3'
-import { mappaPunto } from './punto.js?v=8dc1905cd3'
-import { esc } from './comune.js?v=8dc1905cd3'
-import { TESTI } from './testi.js?v=8dc1905cd3'
+import { chiamaAnonimo, foglio, mostraErrore } from './browser.js?v=da1cc59c62'
+import { sceltaLuogo } from './luogo.js?v=da1cc59c62'
+import { TESTI } from './testi.js?v=da1cc59c62'
 
 export function suggerisci() {
   const pannello = document.getElementById('suggerisci')
@@ -21,10 +19,9 @@ export function suggerisci() {
   const lang = document.documentElement.lang === 'de' ? 'de' : 'it'
   // "Chiedi il tuo link": è il produttore a scrivere, e senza numero non sapremmo dove mandarglielo.
   let dalMaso = false
-  // "Dove sta il maso": i luoghi trovati, quello scelto (con il punto confermato) e la piccola mappa.
-  let trovati = []
+  // "Dove sta il maso": il luogo confermato (cerca, conferma, fatto: web/sito/luogo.js).
   let luogo = null
-  let mappa = null
+  let scelta = null
   const scrivi = (id, testo) => { $(id).textContent = testo }
   function modo(maso) {
     dalMaso = maso
@@ -42,71 +39,34 @@ export function suggerisci() {
   }
 
   // Dove sta il maso ---------------------------------------------------------------------------------
-
-  function svuotaDove() {
-    trovati = []
+  // Un riquadro nuovo a ogni apertura; confermato l'indirizzo, il campo del paese non serve più.
+  function nuovoLuogo() {
+    scelta?.togli()
     luogo = null
-    $('suggerisci-risultati').innerHTML = ''
-    $('suggerisci-mappa').hidden = true
-    scrivi('suggerisci-dove-nota', T.doveNota)
-  }
-
-  async function trova() {
-    const q = modulo.elements.cerca.value.trim()
-    if (q.length < 3) return modulo.elements.cerca.focus()
-    const box = $('suggerisci-risultati')
-    box.innerHTML = `<p class="sub">${esc(T.doveCerco)}</p>`
-    try {
-      trovati = await cercaIndirizzo(q, lang)
-      box.innerHTML = trovati.length
-        ? trovati.map((r, i) => `<button class="dove-luogo" type="button" data-luogo="${i}" aria-pressed="false">${esc(r.etichetta)}</button>`).join('')
-        : `<p class="sub">${esc(T.doveNessuno)}</p>`
-    } catch (e) {
-      box.innerHTML = `<p class="sub">${esc(e.message === 'too_many' ? T.doveTroppe : T.doveErrore)}</p>`
-    }
-  }
-
-  async function scegli(i) {
-    const r = trovati[i]
-    if (!r) return
-    luogo = { indirizzo: r.indirizzo, lat: r.lat, lng: r.lng }
-    if (r.comune) modulo.elements.paese.value = r.comune
-    for (const b of $('suggerisci-risultati').querySelectorAll('[data-luogo]')) b.setAttribute('aria-pressed', String(b.dataset.luogo === String(i)))
-    // La mappa per confermare il punto, se il sito la ha; senza, vale il punto trovato.
-    if (!pannello.dataset.tessere) return
-    const box = $('suggerisci-mappa')
-    box.hidden = false
-    scrivi('suggerisci-dove-nota', T.doveControlla)
-    if (mappa) return mappa.then((m) => m.vai(luogo))
-    mappa = mappaPunto({
-      contenitore: box,
-      cartina: { tessere: pannello.dataset.tessere, font: pannello.dataset.font, libreria: pannello.dataset.libreria },
+    $('suggerisci-paese').hidden = false
+    if (!dalMaso) return
+    scelta = sceltaLuogo({
+      contenitore: $('suggerisci-luogo'),
+      testi: T.luogo,
       lang,
-      punto: luogo,
-      sposta: (p) => { if (luogo) Object.assign(luogo, p) },
+      classi: { primario: 'btn primary small', secondario: 'btn small', link: 'link-btn' },
+      cartina: pannello.dataset.tessere
+        ? { tessere: pannello.dataset.tessere, font: pannello.dataset.font, libreria: pannello.dataset.libreria }
+        : null,
+      cambia: (l) => {
+        luogo = l
+        modulo.elements.paese.value = l.comune
+        $('suggerisci-paese').hidden = true
+      },
     })
-    mappa.catch(() => { box.hidden = true; mappa = null })
   }
 
-  $('suggerisci-trova').addEventListener('click', trova)
-  // Invio nella ricerca cerca, senza mandare il modulo.
-  modulo.elements.cerca.addEventListener('keydown', (e) => {
-    if (e.key !== 'Enter') return
-    e.preventDefault()
-    trova()
-  })
-  $('suggerisci-risultati').addEventListener('click', (e) => {
-    const b = e.target.closest('[data-luogo]')
-    if (b) scegli(Number(b.dataset.luogo))
-  })
-
-  // Inviti e bottoni compaiono solo con il JavaScript, che apre il pannello.
   for (const el of document.querySelectorAll('[data-invito]')) el.hidden = false
   for (const b of document.querySelectorAll('[data-suggerisci]')) {
     b.addEventListener('click', () => {
       // Ogni volta un modulo pulito, anche dopo un invio.
       modo(b.dataset.suggerisci === 'maso')
-      svuotaDove()
+      nuovoLuogo()
       modulo.hidden = false
       $('suggerisci-fatto').hidden = true
       invia.hidden = false

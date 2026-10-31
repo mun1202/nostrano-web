@@ -1,10 +1,10 @@
 // Pannello admin: si apre con un link di accesso (https://ilmiocontadino.com/admin/<codice>), poi il browser resta abilitato.
 // Da qui si creano le schede in bozza, si invitano i masi su WhatsApp e si pubblica.
-import { ROOT, linkCode, removeUploaded, rpc, upload } from './api.js?v=8dc1905cd3'
-import { MUNICIPALITY_CODES, municipalityName } from './i18n.js?v=8dc1905cd3'
-import * as views from './admin-views.js?v=8dc1905cd3'
-import { cercaIndirizzo } from '../sito/indirizzo.js?v=8dc1905cd3'
-import { mappaPunto } from '../sito/punto.js?v=8dc1905cd3'
+import { ROOT, linkCode, removeUploaded, rpc, upload } from './api.js?v=da1cc59c62'
+import { MUNICIPALITY_CODES, municipalityName } from './i18n.js?v=da1cc59c62'
+import * as views from './admin-views.js?v=da1cc59c62'
+import { sceltaLuogo } from '../sito/luogo.js?v=da1cc59c62'
+import { TESTI } from '../sito/testi.js?v=da1cc59c62'
 
 const root = document.querySelector('#app')
 const navigation = document.querySelector('#nav')
@@ -19,8 +19,8 @@ const a = {
   filter: 'all', search: '', invite: null, newCode: null, personalLink: null, fromSuggestion: null, uploading: false, busy: false,
 }
 
-// "Cerca l'indirizzo": i luoghi trovati e la piccola mappa del modulo che si vede adesso.
-let geo = { results: null, map: null }
+// "Indirizzo del maso" del modulo che si vede adesso (web/sito/luogo.js).
+let place = null
 // Un modulo con modifiche non salvate: tornando sulla pagina non si ridisegna, se no si perderebbero.
 let editing = false
 
@@ -33,11 +33,12 @@ const SCREENS = {
 
 function render() {
   // La mappa per confermare il punto sta nel modulo che si ridisegna: si ricrea quando serve.
-  geo.map?.then((m) => m.togli()).catch(() => {})
-  geo = { results: null, map: null }
+  place?.togli()
+  place = null
   editing = false
   navigation.innerHTML = views.nav(a)
   root.innerHTML = (SCREENS[a.route.name] ?? views.overview)(a)
+  mountPlace()
 }
 
 let toastTimer
@@ -176,7 +177,7 @@ function municipalityCode(text) {
     .some((name) => name.toLowerCase() === value)) ?? text.trim()
 }
 
-/** Coordinate incollate da Google Maps: "46.4983, 11.2611", un link con @46.49,11.26 o ?q=46.49,11.26. */
+/** Le coordinate del campo nascosto ("46.4983, 11.2611"); legge anche un link di Google Maps (@46.49,11.26 o ?q=…). */
 export function parseCoordinates(text) {
   const value = String(text ?? '').trim()
   const match = value.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/)
@@ -191,14 +192,11 @@ function farmData(form) {
   const data = new FormData(form)
   const text = (name) => String(data.get(name) ?? '').trim()
   const coordinates = parseCoordinates(text('coordinates'))
-  if (!coordinates) {
-    toast('Posizione non valida: incolla due numeri come 46.4983, 11.2611', true)
-    form.elements.coordinates.focus()
+  if (!coordinates || !text('municipality')) {
+    toast('Cerca e conferma l\'indirizzo del maso.', true)
+    form.querySelector('[data-ref="luogo"] input')?.focus()
     return null
   }
-  // L'Alto Adige sta più o meno tra questi numeri: fuori è quasi sempre un errore di copia.
-  if ((coordinates.lat < 45.6 || coordinates.lat > 47.2 || coordinates.lng < 10.3 || coordinates.lng > 12.6)
-      && !window.confirm('La posizione è fuori dall\'Alto Adige. Salvare lo stesso?')) return null
   return {
     name: text('name'),
     municipality: municipalityCode(text('municipality')),
@@ -217,22 +215,6 @@ function farmData(form) {
     description_it: text('description_it'),
     description_de: text('description_de'),
   }
-}
-
-/** "Sono al maso": la posizione del telefono, quando si crea la scheda sul posto. */
-function fillHere(form) {
-  if (!navigator.geolocation) return toast('Questo browser non dà la posizione.', true)
-  toast('Cerco la posizione…')
-  navigator.geolocation.getCurrentPosition(
-    ({ coords }) => {
-      editing = true
-      form.elements.coordinates.value = `${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)}`
-      toast(`Posizione presa (precisione ${Math.round(coords.accuracy)} m)`)
-      geoShow(form, { lat: coords.latitude, lng: coords.longitude })
-    },
-    () => toast('Posizione non disponibile: controlla il permesso in Impostazioni › Safari › Posizione.', true),
-    { enableHighAccuracy: true, timeout: 15000 },
-  )
 }
 
 // Invito su WhatsApp --------------------------------------------------------------------------
@@ -326,68 +308,40 @@ async function addPhotos(files) {
   }
 }
 
-// Cerca l'indirizzo ---------------------------------------------------------------------------
-// Photon trova il luogo (web/sito/indirizzo.js); un tocco compila comune, indirizzo e posizione, e la piccola mappa
-// (web/sito/punto.js, le tessere della mappa del sito) fa controllare il punto e spostarlo sul maso vero.
+// Indirizzo del maso ---------------------------------------------------------------------------
+// Cerca, conferma, fatto (web/sito/luogo.js): un solo riquadro scrive comune, indirizzo e posizione nei campi nascosti
+// del modulo. La piccola mappa usa le tessere della mappa del sito.
 
-const geoMap = { tessere: config.mappa, font: `${ROOT}sito/mappa/font/`, libreria: `${ROOT}sito/vendor/maplibre/` }
-const geoRef = (form, name) => form.querySelector(`[data-ref="${name}"]`)
-
-async function geoSearch(form) {
-  const query = form.elements.cerca.value.trim()
-  if (query.length < 3) return form.elements.cerca.focus()
-  const box = geoRef(form, 'geo-results')
-  box.innerHTML = '<p class="muted small">Cerco…</p>'
-  try {
-    geo.results = await cercaIndirizzo(query, 'it')
-    box.innerHTML = views.geoResults(geo.results)
-  } catch (error) {
-    box.innerHTML = views.geoResults(null, error.message === 'too_many'
-      ? 'Troppe ricerche di fila: riprova tra qualche secondo.'
-      : 'La ricerca degli indirizzi non risponde: riprova, o incolla la posizione da Google Maps.')
-  }
-}
+const placeMap = { tessere: config.mappa, font: `${ROOT}sito/mappa/font/`, libreria: `${ROOT}sito/vendor/maplibre/` }
 
 /** Il comune trovato com'è nell'elenco ("Appiano sulla Strada del Vino" → Appiano), altrimenti com'è. */
-function municipalityOf(place) {
-  for (const name of [place.comune, ...place.comuni]) {
+function municipalityOf(found) {
+  for (const name of [found.comune, ...(found.comuni ?? [])]) {
     const code = municipalityCode(name)
     if (MUNICIPALITY_CODES.includes(code)) return municipalityName('it', code)
   }
-  return place.comune
+  return found.comune
 }
 
-function geoPick(form, place) {
-  editing = true
-  if (place.indirizzo) form.elements.address.value = place.indirizzo
-  if (place.comune) form.elements.municipality.value = municipalityOf(place)
-  form.elements.coordinates.value = `${place.lat.toFixed(6)}, ${place.lng.toFixed(6)}`
-  geoShow(form, place)
-}
-
-/** La piccola mappa sul punto: si apre la prima volta, poi si sposta. */
-function geoShow(form, point = parseCoordinates(form.elements.coordinates.value)) {
-  if (!point) return toast('Prima cerca l\'indirizzo o scrivi la posizione.', true)
-  if (!config.mappa) return toast('La mappa non è configurata (mappa in impostazioni.mjs).', true)
-  const box = geoRef(form, 'geo-map')
-  geoRef(form, 'geo-hint').hidden = false
-  if (geo.map) return geo.map.then((m) => m.vai(point))
-  box.hidden = false
-  geo.map = mappaPunto({
+function mountPlace() {
+  const box = root.querySelector('[data-ref="luogo"]')
+  if (!box) return
+  const form = box.closest('form')
+  const point = parseCoordinates(form.elements.coordinates.value)
+  place = sceltaLuogo({
     contenitore: box,
-    cartina: geoMap,
-    punto: point,
-    sposta: ({ lat, lng }) => {
+    testi: TESTI.it.luogo,
+    lang: 'it',
+    classi: { primario: 'primary', secondario: 'secondary', link: 'link' },
+    cartina: config.mappa ? placeMap : null,
+    iniziale: point && { ...point, indirizzo: form.elements.address.value, comune: form.elements.municipality.value },
+    cambia: (found) => {
       editing = true
-      form.elements.coordinates.value = `${lat}, ${lng}`
+      form.elements.address.value = found.indirizzo
+      form.elements.municipality.value = municipalityOf(found)
+      form.elements.coordinates.value = `${found.lat}, ${found.lng}`
     },
   })
-  geo.map.catch(() => {
-    box.hidden = true
-    geo.map = null
-    toast('La mappa non si apre in questo browser.', true)
-  })
-  return geo.map
 }
 
 const savePhotos = (photos, success) => act(() => rpc('admin_farm_save', { p_slug: a.farm.slug, p_data: { photos } }), success)
@@ -412,14 +366,6 @@ root.addEventListener('click', (event) => {
     }
     case 'invite':
       return prepareInvite()
-    case 'here':
-      return fillHere(element.closest('form'))
-    case 'geo-search':
-      return geoSearch(element.closest('form'))
-    case 'geo-pick':
-      return geo.results?.[Number(element.dataset.i)] && geoPick(element.closest('form'), geo.results[Number(element.dataset.i)])
-    case 'geo-show':
-      return geoShow(element.closest('form'))
     case 'copy':
       return copy(text)
     case 'copy-message':
@@ -460,13 +406,6 @@ root.addEventListener('click', (event) => {
       if (!window.confirm(me === 'true' ? 'Togliere questo browser? Per rientrare servirà un link nuovo.' : 'Togliere questo dispositivo?')) return
       return act(() => rpc('admin_device_remove', { p_user: id }), 'Accesso tolto')
   }
-})
-
-// Invio nella ricerca dell'indirizzo cerca, senza mandare il modulo del maso.
-root.addEventListener('keydown', (event) => {
-  if (event.key !== 'Enter' || event.target.name !== 'cerca') return
-  event.preventDefault()
-  geoSearch(event.target.closest('form'))
 })
 
 root.addEventListener('change', (event) => {

@@ -975,15 +975,6 @@ dialog:focus { outline: none; }
 .report-field textarea:focus, .report-field input:focus { border-color: var(--ink); outline: 0; box-shadow: 0 0 0 4px rgb(24 24 27 / 0.07); }
 .report-field small { color: var(--muted); font-size: 13px; font-weight: 400; }
 .report-error { margin: 0; color: var(--amber); font-size: 14px; font-weight: 500; }
-/* "Dove sta il maso" in "Chiedi il tuo link": ricerca, luoghi trovati come righe da toccare, piccola mappa. */
-.dove-riga { display: flex; gap: 8px; }
-.dove-riga input { flex: 1; min-width: 0; }
-.dove-riga .btn { height: auto; }
-.dove-risultati { display: grid; gap: 6px; }
-.dove-risultati:empty { display: none; }
-.dove-luogo { padding: 10px 12px; border: 1px solid var(--line-strong); border-radius: 12px; background: #fff; color: var(--ink); font: inherit; font-size: 14px; font-weight: 500; text-align: left; cursor: pointer; }
-.dove-luogo[aria-pressed="true"] { border-color: var(--green); box-shadow: inset 0 0 0 1px var(--green); }
-.dove-mappa { height: 220px; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; }
 .report-error a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 .report-done { display: grid; justify-items: center; gap: 4px; padding: 24px 20px 32px; text-align: center; }
 .report-done .icon { width: 36px; height: 36px; margin-bottom: 8px; padding: 7px; border-radius: 50%; background: var(--green-soft); color: var(--green); }

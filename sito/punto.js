@@ -1,9 +1,9 @@
 // La piccola mappa per confermare dove sta un maso: il segnaposto parte dall'indirizzo trovato e si trascina (o si
-// tocca la mappa) fin sul maso vero. Stessa mappa della vista "Mappa" (cartina.js); la usano il pannello admin e
-// "Chiedi il tuo link". cartina: { tessere, font, libreria } come dal generatore; sposta({ lat, lng }) a ogni cambio.
-import { caricaLibreria, completa, stile } from './cartina.js?v=8dc1905cd3'
+// tocca la mappa) fin sul maso vero. Stessa mappa della vista "Mappa" (cartina.js); la usa "Indirizzo del maso"
+// (luogo.js) nel pannello admin e in "Chiedi il tuo link". cartina: { tessere, font, libreria } come dal generatore; sposta({ lat, lng }) a ogni cambio.
+import { caricaLibreria, completa, stile } from './cartina.js?v=da1cc59c62'
 
-export async function mappaPunto({ contenitore, cartina: data, lang = 'it', punto, sposta = () => {} }) {
+export async function mappaPunto({ contenitore, cartina: data, lang = 'it', punto, zoom = 16, sposta = () => {} }) {
   const cartina = completa(data)
   const maplibregl = await caricaLibreria(cartina.libreria)
   if (!maplibregl.Map || !document.createElement('canvas').getContext('webgl2')) throw new Error('webgl')
@@ -11,7 +11,7 @@ export async function mappaPunto({ contenitore, cartina: data, lang = 'it', punt
     container: contenitore,
     style: stile(cartina, lang),
     center: [punto.lng, punto.lat],
-    zoom: 16,
+    zoom,
     minZoom: 5,
     maxZoom: 18,
     attributionControl: { compact: true },

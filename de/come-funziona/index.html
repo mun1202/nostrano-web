@@ -21,14 +21,14 @@
   <link rel="manifest" href="../../assets/manifest-de.webmanifest">
   <link rel="apple-touch-icon" href="../../assets/icon-180.png">
   <meta name="apple-mobile-web-app-title" content="Il mio contadino">
-  <link rel="stylesheet" href="../../sito/sito.css?v=8dc1905cd3">
+  <link rel="stylesheet" href="../../sito/sito.css?v=da1cc59c62">
   <script>
     // Tornando indietro (o avanti) con il browser niente passaggio animato tra le pagine: solo cliccando un maso.
     addEventListener('pagereveal', (e) => { if (e.viewTransition && navigation?.activation?.navigationType === 'traverse') e.viewTransition.skipTransition() })
   </script>
-  <link rel="modulepreload" href="../../sito/comune.js?v=8dc1905cd3">
-  <link rel="modulepreload" href="../../sito/testi.js?v=8dc1905cd3">
-  <link rel="modulepreload" href="../../sito/viste.js?v=8dc1905cd3">
+  <link rel="modulepreload" href="../../sito/comune.js?v=da1cc59c62">
+  <link rel="modulepreload" href="../../sito/testi.js?v=da1cc59c62">
+  <link rel="modulepreload" href="../../sito/viste.js?v=da1cc59c62">
   <noscript><style>.farm-photo img { opacity: 1; } .search-box, .filters, .tools, #posizione, #apri-segnala { display: none; } .hero { --box-h: 0px; }</style></noscript>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Alle Höfe","item":"https://ilmiocontadino.com/de/"},{"@type":"ListItem","position":2,"name":"So funktioniert’s","item":"https://ilmiocontadino.com/de/come-funziona/"}]}</script>
   <script type="application/json" id="progetto">{"url":"https://gvdnbutkdaxcglotgwev.supabase.co","key":"sb_publishable_SGZwwvi4vcQvUj1R3aEH0w_sCw_a5ol","email":""}</script>
@@ -92,17 +92,12 @@
         <p class="sub" id="suggerisci-sub">Wir nehmen Kontakt auf und veröffentlichen ihn nur mit seiner Zustimmung.</p>
         <label class="report-field"><span>Name des Hofs</span>
           <input name="nome" type="text" maxlength="120" required autocomplete="off"></label>
-        <div class="report-field dove" id="suggerisci-dove" hidden>
-          <label for="suggerisci-cerca">Wo der Hof liegt</label>
-          <span class="dove-riga">
-            <input id="suggerisci-cerca" name="cerca" type="search" enterkeyhint="search" autocomplete="off" placeholder="Straße und Ort, oder der Name des Hofs">
-            <button class="btn small" type="button" id="suggerisci-trova">Suchen</button>
-          </span>
-          <small id="suggerisci-dove-nota">Freiwillig: So startet das Profil gleich mit dem richtigen Punkt.</small>
-          <div class="dove-risultati" id="suggerisci-risultati"></div>
-          <div class="dove-mappa" id="suggerisci-mappa" hidden></div>
+        <div class="report-field" id="suggerisci-dove" hidden>
+          <span>Wo der Hof liegt</span>
+          <div id="suggerisci-luogo"></div>
+          <small>Freiwillig: So startet das Profil gleich mit dem richtigen Punkt.</small>
         </div>
-        <label class="report-field"><span>Gemeinde oder Fraktion</span>
+        <label class="report-field" id="suggerisci-paese"><span>Gemeinde oder Fraktion</span>
           <input name="paese" type="text" maxlength="120" autocomplete="off"></label>
         <label class="report-field"><span id="suggerisci-vende">Was verkauft er?</span>
           <textarea name="prodotti" rows="3" maxlength="500" placeholder="Zum Beispiel: Eier, Äpfel, Käse …"></textarea></label>
@@ -160,6 +155,6 @@
     </div>
   </dialog>
 
-  <script type="module" src="../../sito/pagina.js?v=8dc1905cd3"></script>
+  <script type="module" src="../../sito/pagina.js?v=da1cc59c62"></script>
 </body>
 </html>

@@ -18,14 +18,14 @@
   <link rel="manifest" href="../assets/manifest-it.webmanifest">
   <link rel="apple-touch-icon" href="../assets/icon-180.png">
   <meta name="apple-mobile-web-app-title" content="Il mio contadino">
-  <link rel="stylesheet" href="../sito/sito.css?v=8dc1905cd3">
+  <link rel="stylesheet" href="../sito/sito.css?v=da1cc59c62">
   <script>
     // Tornando indietro (o avanti) con il browser niente passaggio animato tra le pagine: solo cliccando un maso.
     addEventListener('pagereveal', (e) => { if (e.viewTransition && navigation?.activation?.navigationType === 'traverse') e.viewTransition.skipTransition() })
   </script>
-  <link rel="modulepreload" href="../sito/comune.js?v=8dc1905cd3">
-  <link rel="modulepreload" href="../sito/testi.js?v=8dc1905cd3">
-  <link rel="modulepreload" href="../sito/viste.js?v=8dc1905cd3">
+  <link rel="modulepreload" href="../sito/comune.js?v=da1cc59c62">
+  <link rel="modulepreload" href="../sito/testi.js?v=da1cc59c62">
+  <link rel="modulepreload" href="../sito/viste.js?v=da1cc59c62">
   <noscript><style>.farm-photo img { opacity: 1; } .search-box, .filters, .tools, #posizione, #apri-segnala { display: none; } .hero { --box-h: 0px; }</style></noscript>
   <script type="application/json" id="progetto">{"url":"https://gvdnbutkdaxcglotgwev.supabase.co","key":"sb_publishable_SGZwwvi4vcQvUj1R3aEH0w_sCw_a5ol","email":""}</script>
 </head>
@@ -84,17 +84,12 @@
         <p class="sub" id="suggerisci-sub">Lo contattiamo noi e lo pubblichiamo solo con il suo consenso.</p>
         <label class="report-field"><span>Nome del maso</span>
           <input name="nome" type="text" maxlength="120" required autocomplete="off"></label>
-        <div class="report-field dove" id="suggerisci-dove" hidden>
-          <label for="suggerisci-cerca">Dove sta il maso</label>
-          <span class="dove-riga">
-            <input id="suggerisci-cerca" name="cerca" type="search" enterkeyhint="search" autocomplete="off" placeholder="Via e paese, o il nome del maso">
-            <button class="btn small" type="button" id="suggerisci-trova">Cerca</button>
-          </span>
-          <small id="suggerisci-dove-nota">Facoltativo: così la scheda parte già con il punto giusto.</small>
-          <div class="dove-risultati" id="suggerisci-risultati"></div>
-          <div class="dove-mappa" id="suggerisci-mappa" hidden></div>
+        <div class="report-field" id="suggerisci-dove" hidden>
+          <span>Dove sta il maso</span>
+          <div id="suggerisci-luogo"></div>
+          <small>Facoltativo: così la scheda parte già con il punto giusto.</small>
         </div>
-        <label class="report-field"><span>Comune o frazione</span>
+        <label class="report-field" id="suggerisci-paese"><span>Comune o frazione</span>
           <input name="paese" type="text" maxlength="120" autocomplete="off"></label>
         <label class="report-field"><span id="suggerisci-vende">Cosa vende?</span>
           <textarea name="prodotti" rows="3" maxlength="500" placeholder="Per esempio: uova, mele, formaggio…"></textarea></label>
@@ -152,6 +147,6 @@
     </div>
   </dialog>
 
-  <script type="module" src="../sito/pagina.js?v=8dc1905cd3"></script>
+  <script type="module" src="../sito/pagina.js?v=da1cc59c62"></script>
 </body>
 </html>

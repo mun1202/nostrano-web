@@ -124,8 +124,3 @@ pre.code {
 
 /* Titolo della pagina e pulsante principale, con un po' di aria prima del contenuto. */
 body.admin main > .row:first-child { margin-bottom: 16px; }
-
-/* "Cerca l'indirizzo": i risultati come righe da toccare, poi la piccola mappa per confermare il punto. */
-.geo-list { gap: 6px; }
-.geo-pick { justify-content: flex-start; text-align: left; white-space: normal; height: auto; min-height: 36px; padding: 8px 12px; }
-.geo-map { height: 280px; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); }
