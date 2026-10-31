@@ -552,3 +552,10 @@ ambra che qualcuna aspetta una risposta; il giorno scelto è scuro, come le pill
   #nav a { font-size: 15px; padding: 9px 12px; }
   .chip { font-size: 14px; }
 }
+
+/* «Oggi resto chiuso»: acceso, il riquadro diventa scuro (si vede da lontano, non solo dal pulsante). */
+.card.closed-today.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+.card.closed-today.on small { color: rgba(255, 255, 255, 0.78); }
+button.light { background: #fff; color: var(--ink); }
+.row.wrap-row { flex-wrap: wrap; align-items: flex-end; }
+.row.wrap-row > .grow { min-width: 140px; }

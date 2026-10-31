@@ -942,7 +942,6 @@ a.chip.town { text-decoration: none; }
 .prose p { margin: 10px 0 0; color: var(--text); font-size: 16px; line-height: 1.65; }
 .prose a { text-decoration-color: var(--line-strong); text-underline-offset: 3px; }
 .prose > .muted { margin-top: 36px; font-size: 14px; }
-.prose.producers p { color: var(--muted); }
 .page-head { display: grid; gap: 20px; padding: 8px 0 8px; }
 .page-head h1 { margin: 0; font-size: clamp(30px, 4.4vw, 42px); line-height: 1.08; letter-spacing: -0.03em; }
 .page-head .place { display: flex; align-items: center; gap: 6px; }
@@ -1520,3 +1519,62 @@ html:has(dialog[open]) { overflow: hidden; }
 .cartina .maplibregl-ctrl-group { border-radius: 10px; box-shadow: 0 1px 4px rgb(24 24 27 / 0.15); }
 .cartina .maplibregl-ctrl-attrib { font-size: 11px; }
 @media (prefers-reduced-motion: reduce) { .cartina-pin, .cartina-gruppo { transition: none; } }
+
+/* Per i produttori ----------------------------------------------------------------------------------
+   Apertura con il testo e un telefono disegnato (una richiesta come la vede il maso), poi i passi, le cose che si
+   fanno, le domande e l'invito finale. */
+.producers-page main { padding-bottom: 24px; }
+.pp-hero { display: grid; gap: 40px; align-items: center; padding: 32px 0 24px; }
+@media (min-width: 900px) { .pp-hero { grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr); gap: 64px; padding: 56px 0 40px; } }
+.pp-eyebrow { margin: 0 0 10px; color: var(--green); font-size: 14px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; }
+.pp-hero h1 { margin: 0; font-size: clamp(34px, 5.2vw, 56px); line-height: 1.04; letter-spacing: -0.035em; }
+.pp-lead { max-width: 52ch; margin: 18px 0 0; color: var(--text); font-size: clamp(17px, 1.6vw, 19px); line-height: 1.6; }
+.pp-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+.pp-note { display: flex; gap: 8px; align-items: flex-start; max-width: 52ch; margin: 18px 0 0; color: var(--muted); font-size: 14px; }
+.pp-note .icon { flex: none; width: 16px; height: 16px; margin-top: 2px; color: var(--green); }
+
+.pp-phone { justify-self: center; width: min(320px, 100%); padding: 12px; border-radius: 44px; background: var(--ink); box-shadow: 0 30px 60px rgb(24 24 27 / 0.18), 0 8px 18px rgb(24 24 27 / 0.12); }
+.pp-screen { display: grid; gap: 12px; padding: 28px 16px 20px; border-radius: 34px; background: var(--fill); }
+.pp-screen-title { margin: 0 4px; font-size: 22px; font-weight: 750; letter-spacing: -0.02em; }
+.pp-card { padding: 16px; border-left: 3px solid var(--ink); border-radius: 16px; background: #fff; box-shadow: 0 1px 2px rgb(24 24 27 / 0.06); }
+.pp-card p { margin: 0; }
+.pp-card-label { color: var(--muted); font-size: 12px; font-weight: 650; text-transform: uppercase; letter-spacing: 0.03em; }
+.pp-card-name { margin-top: 6px !important; font-size: 17px; font-weight: 700; }
+.pp-card-when { margin-top: 2px !important; color: var(--text); font-size: 14px; }
+.pp-card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+.pp-card-actions span { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 40px; border-radius: 999px; font-size: 13px; font-weight: 650; }
+.pp-yes { background: var(--green); color: #fff; }
+.pp-yes .icon { width: 15px; height: 15px; }
+.pp-no { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1px var(--line-strong); }
+.pp-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pp-tiles div { display: grid; gap: 2px; padding: 12px 14px; border-radius: 14px; background: #fff; }
+.pp-tiles span { color: var(--muted); font-size: 12px; font-weight: 550; }
+.pp-tiles strong { font-size: 24px; letter-spacing: -0.02em; }
+
+.pp-section { padding: 40px 0 8px; border-top: 1px solid var(--line); }
+.pp-section h2 { margin: 0 0 22px; font-size: clamp(24px, 2.6vw, 30px); letter-spacing: -0.025em; }
+.pp-steps, .pp-features { display: grid; gap: 14px; margin: 0; padding: 0; list-style: none; }
+@media (min-width: 760px) { .pp-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); } .pp-features { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .pp-features { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.pp-steps li, .pp-features li { padding: 22px; border: 1px solid var(--line); border-radius: 18px; background: #fff; }
+.pp-steps h3, .pp-features h3 { margin: 12px 0 6px; font-size: 18px; letter-spacing: -0.01em; }
+.pp-steps p, .pp-features p { margin: 0; color: var(--text); line-height: 1.6; }
+.pp-num { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--ink); color: #fff; font-weight: 700; }
+.pp-features .icon { width: 26px; height: 26px; color: var(--green); }
+
+.pp-faq details { max-width: 860px; }
+.pp-faq details { border-bottom: 1px solid var(--line); }
+.pp-faq summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 0; font-size: 17px; font-weight: 650; list-style: none; cursor: pointer; }
+.pp-faq summary::-webkit-details-marker { display: none; }
+.pp-faq summary .icon { flex: none; color: var(--muted); transition: transform 200ms var(--ease-out); }
+.pp-faq details[open] summary .icon { transform: rotate(180deg); }
+.pp-faq details p { max-width: 70ch; margin: -6px 0 18px; color: var(--text); line-height: 1.65; }
+
+.pp-final { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px 40px; margin: 48px 0 24px; padding: 32px; border-radius: 24px; background: var(--ink); color: #fff; }
+.pp-final h2 { margin: 0; font-size: clamp(22px, 2.4vw, 28px); letter-spacing: -0.02em; }
+.pp-final p { margin: 6px 0 0; color: rgb(255 255 255 / 0.75); }
+.pp-final .pp-cta { margin: 0; }
+.pp-final .btn { border-color: rgb(255 255 255 / 0.4); background: transparent; color: #fff; }
+.pp-final .btn.primary { border-color: #fff; background: #fff; color: var(--ink); }
+@media (prefers-reduced-motion: reduce) { .pp-faq summary .icon { transition: none; } }
+

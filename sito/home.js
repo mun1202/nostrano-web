@@ -6,16 +6,16 @@
 import {
   aperto, categoria, esc, giorno, icona, leggiRicerca, nuovaRicerca, ordina, origine, passa, riassunto, riassuntoCosa,
   riassuntoDove, riassuntoQuando, scheda, scriviRicerca, stato, statoScheda, stessaRicerca,
-} from './comune.js?v=eeaf70f043'
-import { adesso, aggiornaDom, barra, foglio, frammento, ogniMinuto, pagina } from './browser.js?v=eeaf70f043'
+} from './comune.js?v=814dc9da84'
+import { adesso, aggiornaDom, barra, foglio, frammento, ogniMinuto, pagina } from './browser.js?v=814dc9da84'
 import {
   chips, daDove, elencoDove, ordinaMercati, pannello, passiFinestra, passiTelefono, quandoMercato,
   scelteFinestra,
-} from './viste.js?v=eeaf70f043'
-import { mostraCuori, preferiti, toccaCuore } from './preferiti.js?v=eeaf70f043'
-import { account } from './accedi.js?v=eeaf70f043'
-import { suggerisci } from './suggerisci.js?v=eeaf70f043'
-import { creaCartina } from './cartina.js?v=eeaf70f043'
+} from './viste.js?v=814dc9da84'
+import { mostraCuori, preferiti, toccaCuore } from './preferiti.js?v=814dc9da84'
+import { account } from './accedi.js?v=814dc9da84'
+import { suggerisci } from './suggerisci.js?v=814dc9da84'
+import { creaCartina } from './cartina.js?v=814dc9da84'
 
 const $ = (id) => document.getElementById(id)
 const { dati, c } = pagina(document.body.dataset.base ?? './')
@@ -333,11 +333,17 @@ function chiudiRicerca(tastiera = false) {
   finestra.close()
 }
 
+// Dopo «Cerca» la pagina scende finché in alto restano solo la barra (con il bottone della ricerca e la lente) e i
+// filtri, e subito sotto i risultati. Si scorre dopo la chiusura: chiudendosi, la finestra rimette il fuoco su «Dove»
+// in cima e il browser riportava su la pagina.
 function mostraRisultati() {
   r = copia(bozza)
   chiudiRicerca()
   mostra({ dallaRicerca: true })
-  $('risultati').scrollIntoView({ behavior: riduci() ? 'auto' : 'smooth' })
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const alto = $('filtri').offsetHeight + parseFloat(getComputedStyle($('filtri')).top)
+    scrollTo({ top: scrollY + $('risultati').getBoundingClientRect().top - alto, behavior: riduci() ? 'auto' : 'smooth' })
+  }))
 }
 
 function ricerca() {

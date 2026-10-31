@@ -1,6 +1,6 @@
 // Le parti della pagina, come HTML. Ogni testo che arriva dal database o dai clienti passa da esc().
-import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=eeaf70f043'
-import { WEEK, addDays, dayRanges, formatDay, formatInstant, minuteNowRome, openDays, toClock, todayRome, weekday, weekdayName } from './days.js?v=eeaf70f043'
+import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=814dc9da84'
+import { WEEK, addDays, dayRanges, formatDay, formatInstant, minuteNowRome, openDays, toClock, todayRome, weekday, weekdayName } from './days.js?v=814dc9da84'
 
 export const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
@@ -386,10 +386,8 @@ export function stats(s) {
 
 export function demand(s) {
   const items = s.area.demand
-  return `
-    <h2>${t(s.lang, 'demand')}</h2>
-    <p class="muted small">${t(s.lang, 'demandText')}</p>
-    ${items.length ? `<div class="card list">${items.map((item) => `
+  // Fino a dodici: le prime tre si vedono, le altre sotto «Mostra tutte», come nell'app.
+  const row = (item) => `
       <div class="row demand">
         <div>
           <strong>${esc(productName(s, item.kind))}</strong><br>
@@ -397,7 +395,14 @@ export function demand(s) {
             ? t(s.lang, 'suppliersNone') : t(s.lang, 'suppliers', item.suppliers)}</small>
         </div>
         <button class="secondary small" data-action="demand-add" data-kind="${esc(item.kind)}">${t(s.lang, 'iSellIt')}</button>
-      </div>`).join('')}</div>` : `<p class="muted">${t(s.lang, 'demandNone')}</p>`}`
+      </div>`
+  return `
+    <h2>${t(s.lang, 'demand')}</h2>
+    <p class="muted small">${t(s.lang, 'demandText')}</p>
+    ${items.length ? `<div class="card list">${items.slice(0, 3).map(row).join('')}</div>
+      ${items.length > 3 ? `<details class="custom demand-more"><summary>${t(s.lang, 'demandMore', items.length - 3)}</summary>
+        <div class="card list">${items.slice(3).map(row).join('')}</div></details>` : ''}`
+    : `<p class="muted">${t(s.lang, 'demandNone')}</p>`}`
 }
 
 // Prodotti -----------------------------------------------------------------------------------
@@ -554,25 +559,40 @@ export function closures(s) {
   const today = todayRome()
   const upcoming = farm.hours_exceptions.filter((e) => e.day >= today).sort((a, b) => a.day.localeCompare(b.day))
   const closedToday = upcoming.some((e) => e.day === today && e.ranges.length === 0)
+  const reason = (e) => (s.lang === 'de' ? e.reason_de : e.reason_it)
+  // Giorni di fila con lo stesso motivo in una riga sola («Dal 3 al 9 novembre · Ferie»), come nell'app.
+  const groups = []
+  for (const e of upcoming) {
+    const last = groups.at(-1)?.at(-1)
+    if (last && !e.ranges.length && !last.ranges.length && reason(last) === reason(e) && addDays(last.day, 1) === e.day) groups.at(-1).push(e)
+    else groups.push([e])
+  }
+  const when = (g) => (g.length > 1
+    ? t(s.lang, 'closureRange', formatDay(g[0].day, s.lang), formatDay(g.at(-1).day, s.lang))
+    : capitalize(formatDay(g[0].day, s.lang)))
   return `
     <h2>${t(s.lang, 'closures')}</h2>
     ${farm.has_farm_shop ? `
-      <div class="card">
+      <div class="card closed-today${closedToday ? ' on' : ''}">
         <div class="row">
-          <span><strong>${t(s.lang, closedToday ? 'reopenToday' : 'closedToday')}</strong><br><small class="muted">${t(s.lang, 'closedTodayText')}</small></span>
-          <button class="secondary small" data-action="closed-today">${closedToday ? '🔓' : '🔒'}</button>
+          <span><strong>${t(s.lang, closedToday ? 'closedTodayOn' : 'closedToday')}</strong><br><small>${t(s.lang, closedToday ? 'closedTodayOnText' : 'closedTodayText')}</small></span>
+          <button class="${closedToday ? 'light' : 'secondary'} small" data-action="closed-today">${t(s.lang, closedToday ? 'reopen' : 'closeToday')}</button>
         </div>
       </div>` : ''}
     <div class="card list">
-      ${upcoming.length ? upcoming.map((e) => `
+      ${groups.length ? groups.map((g) => `
         <div class="row">
-          <span class="terracotta">${esc(capitalize(formatDay(e.day, s.lang)))} · ${esc(s.lang === 'de' ? e.reason_de : e.reason_it)}${e.ranges.length
-            ? ` · ${e.ranges.map((r) => `${toClock(r[0])}–${toClock(r[1])}`).join(', ')}` : ''}</span>
-          <button class="icon" data-action="remove-closure" data-day="${e.day}" aria-label="${t(s.lang, 'remove')}">✕</button>
+          <span class="terracotta">${esc(when(g))} · ${esc(reason(g[0]))}${g[0].ranges.length
+            ? ` · ${g[0].ranges.map((r) => `${toClock(r[0])}–${toClock(r[1])}`).join(', ')}` : ''}</span>
+          <button class="icon" data-action="remove-closure" data-day="${g.map((e) => e.day).join(',')}" aria-label="${t(s.lang, 'remove')}">✕</button>
         </div>`).join('') : `<p class="muted">${t(s.lang, 'closuresNone')}</p>`}
     </div>
-    <form data-form="closure" class="row add">
-      <input type="date" name="day" required min="${today}" max="${addDays(today, 90)}" value="${addDays(today, 1)}">
+    ${groups.length ? `<p class="muted small">${t(s.lang, 'closuresExpire')}</p>` : ''}
+    <form data-form="closure" class="card stack">
+      <div class="row wrap-row">
+        <label class="stack grow">${t(s.lang, 'closureFrom')}<input type="date" name="day" required min="${today}" max="${addDays(today, 90)}" value="${addDays(today, 1)}"></label>
+        <label class="stack grow">${t(s.lang, 'closureTo')}<input type="date" name="last" min="${today}" max="${addDays(today, 90)}"></label>
+      </div>
       <input name="reason" maxlength="60" placeholder="${esc(t(s.lang, 'closureReason'))}">
       <button type="submit" class="secondary">${t(s.lang, 'addClosure')}</button>
     </form>`

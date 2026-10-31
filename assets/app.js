@@ -1,11 +1,11 @@
 // Pagina del produttore: si apre dal link personale https://ilmiocontadino.com/modifica/<token>.
 // Fa le stesse cose dell'area produttore dell'app, con le stesse funzioni del database.
-import { ROOT, accountEmail, linkCode, rpc, sendCode, signOut, verifyCode } from './api.js?v=eeaf70f043'
-import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=eeaf70f043'
-import { WEEK, fromClock, todayRome } from './days.js?v=eeaf70f043'
-import * as views from './views.js?v=eeaf70f043'
-import * as notify from './notify.js?v=eeaf70f043'
-import { icon } from './icons.js?v=eeaf70f043'
+import { ROOT, accountEmail, linkCode, rpc, sendCode, signOut, verifyCode } from './api.js?v=814dc9da84'
+import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=814dc9da84'
+import { WEEK, addDays, fromClock, todayRome } from './days.js?v=814dc9da84'
+import * as views from './views.js?v=814dc9da84'
+import * as notify from './notify.js?v=814dc9da84'
+import { icon } from './icons.js?v=814dc9da84'
 
 const root = document.querySelector('#app')
 const nav = document.querySelector('#nav')
@@ -328,8 +328,11 @@ root.addEventListener('click', (event) => {
       return act(() => rpc('producer_consent'), t(s.lang, 'consentGiven'))
     case 'request-publish':
       return act(() => rpc('producer_request_publish'), t(s.lang, 'publishRequested'))
-    case 'remove-closure':
-      return save({ hours_exceptions: upcomingExceptions().filter((e) => e.day !== day) }, t(s.lang, 'closureRemoved'))
+    case 'remove-closure': {
+      // Una riga può essere più giorni di fila: si tolgono tutti insieme.
+      const days = day.split(',')
+      return save({ hours_exceptions: upcomingExceptions().filter((e) => !days.includes(e.day)) }, t(s.lang, 'closureRemoved'))
+    }
     case 'closed-today':
       return toggleClosedToday()
     case 'remove-notice':
@@ -440,14 +443,19 @@ root.addEventListener('submit', (event) => {
     case 'hours':
       return saveHours(form)
     case 'closure': {
-      const day = data.get('day')
+      // "Al" è facoltativo: con un giorno dopo il primo, un giorno di chiusura per ognuno (ferie), come nell'app.
+      const first = String(data.get('day'))
+      const last = String(data.get('last') || first)
       const reason = String(data.get('reason') ?? '').trim()
-      const closure = {
-        day, ranges: [],
+      const days = []
+      for (let d = first; d <= (last < first ? first : last) && days.length < 91; d = addDays(d, 1)) days.push(d)
+      const closures = days.map((d) => ({
+        day: d, ranges: [],
         reason_it: reason || t('it', 'defaultReason'),
         reason_de: reason || t('de', 'defaultReason'),
-      }
-      return save({ hours_exceptions: [...upcomingExceptions().filter((e) => e.day !== day), closure] }, t(s.lang, 'closureAdded'))
+      }))
+      return save({ hours_exceptions: [...upcomingExceptions().filter((e) => !days.includes(e.day)), ...closures] },
+        days.length > 1 ? t(s.lang, 'closuresAdded', days.length) : t(s.lang, 'closureAdded'))
     }
     case 'notice':
       return save({ notice_text: String(data.get('text')).trim(), notice_until: data.get('until') }, t(s.lang, 'noticePublished'))

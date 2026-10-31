@@ -512,6 +512,20 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/fragole/"/>
   </url>
   <url>
+    <loc>https://ilmiocontadino.com/it/prodotti/insalata/</loc>
+    <lastmod>2026-10-31</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/insalata/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/insalata/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/insalata/"/>
+  </url>
+  <url>
+    <loc>https://ilmiocontadino.com/de/prodotti/insalata/</loc>
+    <lastmod>2026-10-31</lastmod>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/insalata/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/prodotti/insalata/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/prodotti/insalata/"/>
+  </url>
+  <url>
     <loc>https://ilmiocontadino.com/it/prodotti/lagrein/</loc>
     <lastmod>2026-10-17</lastmod>
     <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/prodotti/lagrein/"/>
@@ -777,5 +791,14 @@
   </url>
   <url>
     <loc>https://ilmiocontadino.com/per-i-produttori/</loc>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/per-i-produttori/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/per-i-produttori/de/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/per-i-produttori/"/>
+  </url>
+  <url>
+    <loc>https://ilmiocontadino.com/per-i-produttori/de/</loc>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/per-i-produttori/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/per-i-produttori/de/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/per-i-produttori/"/>
   </url>
 </urlset>
