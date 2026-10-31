@@ -1,8 +1,8 @@
 // Le schermate del pannello admin, come HTML. Solo in italiano: lo usa chi gestisce Il mio contadino.
-import { esc } from './views.js?v=764ded37ff'
-import { CATEGORY_CODES, MUNICIPALITY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=764ded37ff'
-import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=764ded37ff'
-import { icon } from './icons.js?v=764ded37ff'
+import { esc } from './views.js?v=8dc1905cd3'
+import { CATEGORY_CODES, MUNICIPALITY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=8dc1905cd3'
+import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=8dc1905cd3'
+import { icon } from './icons.js?v=8dc1905cd3'
 
 const ROOT = window.NOSTRANO_ROOT ?? '/'
 const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1)
@@ -228,6 +228,15 @@ export function farms(a) {
 
 const checked = (value) => (value ? 'checked' : '')
 
+/** I luoghi trovati da "Cerca l'indirizzo": uno per riga, si tocca quello giusto. */
+export function geoResults(results, error) {
+  if (error) return `<p class="small">${esc(error)}</p>`
+  if (!results) return ''
+  if (!results.length) return '<p class="muted small">Nessun indirizzo trovato: prova con meno parole, per esempio via e paese.</p>'
+  return `<div class="stack geo-list">${results.map((r, i) => `
+    <button type="button" class="secondary small geo-pick" data-action="geo-pick" data-i="${i}">${esc(r.etichetta)}</button>`).join('')}</div>`
+}
+
 /** I campi della scheda: per il maso nuovo e per quello esistente. */
 function farmFields(f, isNew) {
   const payments = new Set(f.payments ?? ['cash'])
@@ -235,6 +244,16 @@ function farmFields(f, isNew) {
   return `
     <fieldset class="plain grid">
       <legend>Il maso</legend>
+      <div class="stack small wide geo">
+        <label class="stack small" for="geo-q">Cerca l'indirizzo <span class="muted">— via e paese, o il nome del maso: compila comune, indirizzo e posizione</span></label>
+        <span class="row wrap">
+          <input id="geo-q" name="cerca" type="search" enterkeyhint="search" autocomplete="off" class="grow-input" placeholder="Per esempio: Via Monte 12, Appiano">
+          <button type="button" class="secondary small" data-action="geo-search">Cerca</button>
+        </span>
+        <div class="geo-results" data-ref="geo-results"></div>
+        <div class="geo-map" data-ref="geo-map" hidden></div>
+        <p class="muted small" data-ref="geo-hint" hidden>Controlla il punto: trascina il segnaposto sul maso, o tocca la mappa. La posizione qui sotto si aggiorna.</p>
+      </div>
       <label class="stack small wide">Nome del maso *
         <input name="name" required minlength="2" maxlength="80" value="${esc(f.name)}" placeholder="Per esempio: Maso Sonnenhof">
       </label>
@@ -244,11 +263,11 @@ function farmFields(f, isNew) {
       <label class="stack small">Indirizzo *
         <input name="address" required maxlength="160" value="${esc(f.address)}" placeholder="Per esempio: Via Monte 12, Missiano">
       </label>
-      <label class="stack small wide">Posizione * <span class="muted">— se sei al maso tocca «Sono al maso»; altrimenti su Google Maps tieni premuto sul maso e copia i numeri</span>
+      <label class="stack small wide">Posizione * <span class="muted">— dalla ricerca qui sopra, con «Sono al maso», o i numeri copiati da Google Maps</span>
         <span class="row wrap">
           <input name="coordinates" required value="${esc(coords)}" placeholder="46.4983, 11.2611" class="grow-input">
           <button type="button" class="secondary small" data-action="here">📍 Sono al maso</button>
-          ${coords ? `<a class="button secondary small" target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(coords.replace(' ', ''))}">Vedi sulla mappa</a>` : ''}
+          <button type="button" class="secondary small" data-action="geo-show">Controlla sulla mappa</button>
         </span>
       </label>
     </fieldset>
@@ -299,7 +318,17 @@ function farmFields(f, isNew) {
 
 export function newFarm(a) {
   const s = a.fromSuggestion
-  const draft = s ? { name: s.name, admin_notes: [s.place && `Zona: ${s.place}`, s.products && `Prodotti: ${s.products}`, s.contact && `Contatto dal suggerimento: ${s.contact}`].filter(Boolean).join('\n') } : {}
+  // Dal suggerimento: nome, e se il maso ha cercato l'indirizzo anche comune, indirizzo e posizione; il contatto del
+  // maso che chiede il link è quello per l'invito.
+  const draft = s ? {
+    name: s.name,
+    municipality: s.lat !== null && s.lat !== undefined ? s.place : undefined,
+    address: s.address ?? undefined,
+    lat: s.lat ?? undefined,
+    lng: s.lng ?? undefined,
+    contact_phone: s.from_farm ? s.contact : undefined,
+    admin_notes: [s.place && `Zona: ${s.place}`, s.products && `Prodotti: ${s.products}`, s.contact && `Contatto dal suggerimento: ${s.contact}`].filter(Boolean).join('\n'),
+  } : {}
   return `
     <a class="back" href="#/masi">← Masi</a>
     <h1>Nuovo maso</h1>
@@ -543,6 +572,7 @@ export function suggestions(a) {
             <a class="button secondary small" href="#/nuovo?s=${s.id}">Crea la bozza</a>
           </span>
         </div>
+        ${s.address ? `<p class="small">${esc(s.address)}${s.lat !== null ? ` · <a target="_blank" rel="noopener noreferrer" href="https://www.openstreetmap.org/?mlat=${s.lat}&mlon=${s.lng}#map=17/${s.lat}/${s.lng}">posizione confermata sulla mappa</a>` : ''}</p>` : ''}
         ${s.products ? `<p class="small">${esc(s.products)}</p>` : ''}
         ${s.contact ? `<p class="small muted">Contatto: ${esc(s.contact)}</p>` : ''}
       </div>`).join('') : '<p class="muted">Nessun suggerimento.</p>'}</div>`

@@ -2,7 +2,7 @@
 // solo quando si apre la vista) con le tessere di OpenStreetMap di OpenFreeMap, per tutta l'Italia (mappa in
 // web/genera/impostazioni.mjs). Niente account né chiavi; i caratteri stanno sul nostro sito.
 // Colori naturali e vivi (boschi verdi, acqua azzurra, strade principali gialle): i segnaposti bianchi restano in primo piano.
-import { aperto, categoria, esc, icona, scheda, stato } from './comune.js?v=764ded37ff'
+import { aperto, categoria, esc, icona, scheda, stato } from './comune.js?v=8dc1905cd3'
 
 const CHIARO = {
   terra: '#f2efe4',
@@ -27,7 +27,7 @@ const CHIARO = {
 let libreria = null
 
 /** MapLibre e il suo stile, una volta sola. */
-function caricaLibreria(cartella) {
+export function caricaLibreria(cartella) {
   libreria ??= (async () => {
     const css = document.createElement('link')
     css.rel = 'stylesheet'
@@ -43,7 +43,7 @@ function caricaLibreria(cartella) {
  * Lo stile della cartina sulle tessere di OpenFreeMap (schema OpenMapTiles): pochi livelli, i nomi nella lingua della
  * pagina. Gallerie e ponti si disegnano come le strade normali, senza distinzioni: alla scala dei masi bastano.
  */
-function stile(cartina, lang, colori = CHIARO) {
+export function stile(cartina, lang, colori = CHIARO) {
   // Fuori dall'Italia il nome nella lingua della pagina spesso manca: allora quello in alfabeto latino, che i nostri
   // caratteri sanno scrivere (Tunisi e non تونس).
   const nome = ['coalesce', ['get', `name:${lang}`], ['get', 'name:latin'], ['get', 'name']]
@@ -120,16 +120,18 @@ function stile(cartina, lang, colori = CHIARO) {
  * prepara(elemento): chi la usa sistema la scheda aperta (i cuori dei preferiti).
  * Restituisce { mostra(lista, opzioni), posizione(punto), ridisegna() }.
  */
+/**
+ * I percorsi della cartina (relativi alla pagina) resi completi: MapLibre e i suoi worker li leggono da altri posti.
+ * Le graffe dei caratteri si aggiungono dopo, perché new URL le cambierebbe in %7B.
+ */
+export function completa(cartina) {
+  const pieno = (p) => new URL(p, location.href).href
+  return { ...cartina, libreria: pieno(cartina.libreria), font: `${pieno(cartina.font)}{fontstack}/{range}.pbf` }
+}
+
 export async function creaCartina({ contenitore, cartina: dalGeneratore, c, prepara = () => {} }) {
   const T = c.T
-  // Percorsi relativi alla pagina, resi completi: MapLibre e i suoi worker li leggono da altri posti. Le graffe dei
-  // caratteri si aggiungono dopo, perché new URL le cambierebbe in %7B.
-  const pieno = (p) => new URL(p, location.href).href
-  const cartina = {
-    ...dalGeneratore,
-    libreria: pieno(dalGeneratore.libreria),
-    font: `${pieno(dalGeneratore.font)}{fontstack}/{range}.pbf`,
-  }
+  const cartina = completa(dalGeneratore)
   contenitore.innerHTML = `<div class="cartina-mappa"></div><p class="cartina-carica">${esc(T.mappaCarica)}</p>`
   const maplibregl = await caricaLibreria(cartina.libreria)
   if (!maplibregl.Map || !document.createElement('canvas').getContext('webgl2')) {

@@ -1,8 +1,10 @@
 // Pannello admin: si apre con un link di accesso (https://ilmiocontadino.com/admin/<codice>), poi il browser resta abilitato.
 // Da qui si creano le schede in bozza, si invitano i masi su WhatsApp e si pubblica.
-import { ROOT, linkCode, removeUploaded, rpc, upload } from './api.js?v=764ded37ff'
-import { MUNICIPALITY_CODES, municipalityName } from './i18n.js?v=764ded37ff'
-import * as views from './admin-views.js?v=764ded37ff'
+import { ROOT, linkCode, removeUploaded, rpc, upload } from './api.js?v=8dc1905cd3'
+import { MUNICIPALITY_CODES, municipalityName } from './i18n.js?v=8dc1905cd3'
+import * as views from './admin-views.js?v=8dc1905cd3'
+import { cercaIndirizzo } from '../sito/indirizzo.js?v=8dc1905cd3'
+import { mappaPunto } from '../sito/punto.js?v=8dc1905cd3'
 
 const root = document.querySelector('#app')
 const navigation = document.querySelector('#nav')
@@ -17,6 +19,11 @@ const a = {
   filter: 'all', search: '', invite: null, newCode: null, personalLink: null, fromSuggestion: null, uploading: false, busy: false,
 }
 
+// "Cerca l'indirizzo": i luoghi trovati e la piccola mappa del modulo che si vede adesso.
+let geo = { results: null, map: null }
+// Un modulo con modifiche non salvate: tornando sulla pagina non si ridisegna, se no si perderebbero.
+let editing = false
+
 // Disegno e messaggi --------------------------------------------------------------------------
 
 const SCREENS = {
@@ -25,6 +32,10 @@ const SCREENS = {
 }
 
 function render() {
+  // La mappa per confermare il punto sta nel modulo che si ridisegna: si ricrea quando serve.
+  geo.map?.then((m) => m.togli()).catch(() => {})
+  geo = { results: null, map: null }
+  editing = false
   navigation.innerHTML = views.nav(a)
   root.innerHTML = (SCREENS[a.route.name] ?? views.overview)(a)
 }
@@ -150,10 +161,19 @@ async function act(action, success) {
 // Modulo della scheda -------------------------------------------------------------------------
 
 /** "Bolzano", "Bozen" o "bolzano" diventano il codice; un comune nuovo resta come scritto. */
+// I nomi ufficiali lunghi dei comuni in elenco, come arrivano dalla ricerca dell'indirizzo. Non "comincia con":
+// Bolzano Vicentino non è Bolzano.
+const OFFICIAL_NAMES = {
+  appiano: ['Appiano sulla Strada del Vino', 'Eppan an der Weinstraße'],
+  caldaro: ['Caldaro sulla Strada del Vino', 'Kaltern an der Weinstraße'],
+  sanGenesio: ['San Genesio Atesino'],
+  cornedo: ["Cornedo all'Isarco"],
+}
+
 function municipalityCode(text) {
   const value = text.trim().toLowerCase()
-  return MUNICIPALITY_CODES.find((code) => code.toLowerCase() === value
-    || municipalityName('it', code).toLowerCase() === value || municipalityName('de', code).toLowerCase() === value) ?? text.trim()
+  return MUNICIPALITY_CODES.find((code) => [code, municipalityName('it', code), municipalityName('de', code), ...(OFFICIAL_NAMES[code] ?? [])]
+    .some((name) => name.toLowerCase() === value)) ?? text.trim()
 }
 
 /** Coordinate incollate da Google Maps: "46.4983, 11.2611", un link con @46.49,11.26 o ?q=46.49,11.26. */
@@ -205,8 +225,10 @@ function fillHere(form) {
   toast('Cerco la posizione…')
   navigator.geolocation.getCurrentPosition(
     ({ coords }) => {
+      editing = true
       form.elements.coordinates.value = `${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)}`
       toast(`Posizione presa (precisione ${Math.round(coords.accuracy)} m)`)
+      geoShow(form, { lat: coords.latitude, lng: coords.longitude })
     },
     () => toast('Posizione non disponibile: controlla il permesso in Impostazioni › Safari › Posizione.', true),
     { enableHighAccuracy: true, timeout: 15000 },
@@ -304,6 +326,70 @@ async function addPhotos(files) {
   }
 }
 
+// Cerca l'indirizzo ---------------------------------------------------------------------------
+// Photon trova il luogo (web/sito/indirizzo.js); un tocco compila comune, indirizzo e posizione, e la piccola mappa
+// (web/sito/punto.js, le tessere della mappa del sito) fa controllare il punto e spostarlo sul maso vero.
+
+const geoMap = { tessere: config.mappa, font: `${ROOT}sito/mappa/font/`, libreria: `${ROOT}sito/vendor/maplibre/` }
+const geoRef = (form, name) => form.querySelector(`[data-ref="${name}"]`)
+
+async function geoSearch(form) {
+  const query = form.elements.cerca.value.trim()
+  if (query.length < 3) return form.elements.cerca.focus()
+  const box = geoRef(form, 'geo-results')
+  box.innerHTML = '<p class="muted small">Cerco…</p>'
+  try {
+    geo.results = await cercaIndirizzo(query, 'it')
+    box.innerHTML = views.geoResults(geo.results)
+  } catch (error) {
+    box.innerHTML = views.geoResults(null, error.message === 'too_many'
+      ? 'Troppe ricerche di fila: riprova tra qualche secondo.'
+      : 'La ricerca degli indirizzi non risponde: riprova, o incolla la posizione da Google Maps.')
+  }
+}
+
+/** Il comune trovato com'è nell'elenco ("Appiano sulla Strada del Vino" → Appiano), altrimenti com'è. */
+function municipalityOf(place) {
+  for (const name of [place.comune, ...place.comuni]) {
+    const code = municipalityCode(name)
+    if (MUNICIPALITY_CODES.includes(code)) return municipalityName('it', code)
+  }
+  return place.comune
+}
+
+function geoPick(form, place) {
+  editing = true
+  if (place.indirizzo) form.elements.address.value = place.indirizzo
+  if (place.comune) form.elements.municipality.value = municipalityOf(place)
+  form.elements.coordinates.value = `${place.lat.toFixed(6)}, ${place.lng.toFixed(6)}`
+  geoShow(form, place)
+}
+
+/** La piccola mappa sul punto: si apre la prima volta, poi si sposta. */
+function geoShow(form, point = parseCoordinates(form.elements.coordinates.value)) {
+  if (!point) return toast('Prima cerca l\'indirizzo o scrivi la posizione.', true)
+  if (!config.mappa) return toast('La mappa non è configurata (mappa in impostazioni.mjs).', true)
+  const box = geoRef(form, 'geo-map')
+  geoRef(form, 'geo-hint').hidden = false
+  if (geo.map) return geo.map.then((m) => m.vai(point))
+  box.hidden = false
+  geo.map = mappaPunto({
+    contenitore: box,
+    cartina: geoMap,
+    punto: point,
+    sposta: ({ lat, lng }) => {
+      editing = true
+      form.elements.coordinates.value = `${lat}, ${lng}`
+    },
+  })
+  geo.map.catch(() => {
+    box.hidden = true
+    geo.map = null
+    toast('La mappa non si apre in questo browser.', true)
+  })
+  return geo.map
+}
+
 const savePhotos = (photos, success) => act(() => rpc('admin_farm_save', { p_slug: a.farm.slug, p_data: { photos } }), success)
 
 // Tocchi e moduli -----------------------------------------------------------------------------
@@ -328,6 +414,12 @@ root.addEventListener('click', (event) => {
       return prepareInvite()
     case 'here':
       return fillHere(element.closest('form'))
+    case 'geo-search':
+      return geoSearch(element.closest('form'))
+    case 'geo-pick':
+      return geo.results?.[Number(element.dataset.i)] && geoPick(element.closest('form'), geo.results[Number(element.dataset.i)])
+    case 'geo-show':
+      return geoShow(element.closest('form'))
     case 'copy':
       return copy(text)
     case 'copy-message':
@@ -370,6 +462,13 @@ root.addEventListener('click', (event) => {
   }
 })
 
+// Invio nella ricerca dell'indirizzo cerca, senza mandare il modulo del maso.
+root.addEventListener('keydown', (event) => {
+  if (event.key !== 'Enter' || event.target.name !== 'cerca') return
+  event.preventDefault()
+  geoSearch(event.target.closest('form'))
+})
+
 root.addEventListener('change', (event) => {
   const element = event.target
   if (element.dataset.ref === 'photos' && element.files.length) return addPhotos(element.files)
@@ -380,6 +479,7 @@ root.addEventListener('change', (event) => {
 
 root.addEventListener('input', (event) => {
   const element = event.target
+  if (element.closest('form[data-form]')) editing = true
   if (element.dataset.ref === 'search') {
     a.search = element.value
     const position = element.selectionStart
@@ -444,7 +544,7 @@ window.addEventListener('hashchange', show)
 
 document.addEventListener('visibilitychange', () => {
   // Tornando sulla pagina (per esempio da WhatsApp) i dati si aggiornano, ma senza perdere un invito aperto.
-  if (document.visibilityState === 'visible' && !a.busy && !a.invite && a.overview) {
+  if (document.visibilityState === 'visible' && !a.busy && !a.invite && !editing && a.overview) {
     load().then(render).catch(() => {})
   }
 })
