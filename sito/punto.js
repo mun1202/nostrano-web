@@ -2,7 +2,7 @@
 // mentre si cerca. Il segnaposto compare sul luogo scelto dall'elenco, oppure dove si tocca la mappa, e si trascina
 // fin sul maso vero. Stessa mappa della vista "Mappa" (cartina.js); cartina: { tessere, font, libreria } come dal
 // generatore. sposta({ lat, lng }) quando lo si sposta con il dito o il mouse.
-import { caricaLibreria, completa, stile } from './cartina.js?v=4ce0e02e69'
+import { caricaLibreria, completa, stile } from './cartina.js?v=66128a0433'
 
 // Il centro dell'Alto Adige, quando non c'è ancora un punto.
 const PARTENZA = { lat: 46.62, lng: 11.33 }

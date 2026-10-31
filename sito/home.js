@@ -6,16 +6,16 @@
 import {
   aperto, categoria, esc, giorno, icona, leggiRicerca, nuovaRicerca, ordina, origine, passa, riassunto, riassuntoCosa,
   riassuntoDove, riassuntoQuando, scheda, scriviRicerca, stato, statoScheda, stessaRicerca,
-} from './comune.js?v=4ce0e02e69'
-import { adesso, aggiornaDom, barra, foglio, frammento, ogniMinuto, pagina } from './browser.js?v=4ce0e02e69'
+} from './comune.js?v=66128a0433'
+import { adesso, aggiornaDom, barra, foglio, frammento, ogniMinuto, pagina } from './browser.js?v=66128a0433'
 import {
   chips, comuniDi, daDove, elencoComuni, ordinaMercati, pannello, passiFinestra, passiTelefono, quandoMercato,
   scelteFinestra,
-} from './viste.js?v=4ce0e02e69'
-import { mostraCuori, preferiti, toccaCuore } from './preferiti.js?v=4ce0e02e69'
-import { account } from './accedi.js?v=4ce0e02e69'
-import { suggerisci } from './suggerisci.js?v=4ce0e02e69'
-import { creaCartina } from './cartina.js?v=4ce0e02e69'
+} from './viste.js?v=66128a0433'
+import { mostraCuori, preferiti, toccaCuore } from './preferiti.js?v=66128a0433'
+import { account } from './accedi.js?v=66128a0433'
+import { suggerisci } from './suggerisci.js?v=66128a0433'
+import { creaCartina } from './cartina.js?v=66128a0433'
 
 const $ = (id) => document.getElementById(id)
 const { dati, c } = pagina(document.body.dataset.base ?? './')
@@ -90,6 +90,7 @@ function mostra({ entra = false, dallaRicerca = false } = {}) {
   $('elenco').style.visibility = ''
   if (dallaRicerca) $('elenco').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 180, easing: EASE_OUT })
   $('vuoto').hidden = lista.length > 0
+  vuoto(lista)
   $('ordine').value = r.ordine
   mostraChips({ anima: dallaRicerca })
   riassunti({ anima: dallaRicerca })
@@ -453,6 +454,18 @@ function tocca(e) {
   mostra()
 }
 
+/**
+ * Il riquadro senza risultati dice perché: con "Preferiti" acceso e nessun preferito tra i masi non sono i filtri,
+ * è che non ce ne sono (o non più) — allora "Vedi tutti i masi" e come se ne salva uno.
+ */
+function vuoto(lista) {
+  if (lista.length || !FARMS.length) return
+  const soloPreferiti = r.preferiti && trovati({ ...r, preferiti: false }).length > 0
+  $('vuoto').querySelector('h3').textContent = soloPreferiti ? T.preferitiVuotiTitolo : T.vuotoTitolo
+  $('vuoto').querySelector('p').textContent = soloPreferiti ? T.preferitiVuotiTesto : T.vuotoTesto
+  $('togli').textContent = soloPreferiti ? T.vediTuttiIMasi : T.togliFiltri
+}
+
 function togliTutto() {
   r = copia(preset)
   mostra()
@@ -496,7 +509,8 @@ const telefono = () => matchMedia('(max-width: 759px)').matches
 
 function bottoneVista() {
   const b = $('cambia-vista')
-  if (!b) return
+  // Senza masi non c'è niente da vedere sulla mappa.
+  if (!b || !FARMS.length) return
   const mappa = inMappa()
   b.hidden = !(mappa || vicinoAiRisultati)
   b.innerHTML = `${icona(mappa ? 'list' : 'map')}<span>${esc(mappa ? T.elenco : T.mappa)}</span>`

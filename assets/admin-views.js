@@ -1,8 +1,8 @@
 // Le schermate del pannello admin, come HTML. Solo in italiano: lo usa chi gestisce Il mio contadino.
-import { esc } from './views.js?v=4ce0e02e69'
-import { CATEGORY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=4ce0e02e69'
-import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=4ce0e02e69'
-import { icon } from './icons.js?v=4ce0e02e69'
+import { esc } from './views.js?v=66128a0433'
+import { CATEGORY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=66128a0433'
+import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=66128a0433'
+import { icon } from './icons.js?v=66128a0433'
 
 const ROOT = window.NOSTRANO_ROOT ?? '/'
 const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1)
@@ -96,30 +96,48 @@ export function overview(a) {
   const farms = a.farms ?? []
   const count = (key) => farms.filter(FILTERS.find(([k]) => k === key)[2])
   const [ready, invite, waiting] = [count('ready'), count('invite'), count('waiting')]
+  // Solo i numeri che dicono qualcosa: otto «0» di fila non aiutano. I masi pubblicati si vedono sempre.
+  const tiles = [
+    [count('published').length, 'Masi pubblicati', '#/masi?f=published', 'green', true],
+    [ready.length, 'Pronti da pubblicare', '#/masi?f=ready', 'amber'],
+    [invite.length, 'Da invitare', '#/masi?f=invite', 'terracotta'],
+    [waiting.length, 'Invitati, in attesa', '#/masi?f=waiting', ''],
+    [count('stale').length, 'Da ricontrollare', '#/masi?f=stale', ''],
+    [o.reports_open, 'Segnalazioni aperte', '#/segnalazioni', 'terracotta'],
+    [o.suggestions_open, 'Masi suggeriti', '#/suggeriti', ''],
+    [o.custom_products, 'Prodotti nuovi dai masi', '#/prodotti', ''],
+  ].filter(([value, , , , always]) => value || always)
+  const empty = !farms.some((f) => !f.is_demo)
+  // Le richieste che aspettano un maso vero: se non risponde in 12 ore scadono, vale la pena saperlo.
+  const unanswered = farms.filter((f) => !f.is_demo && f.requests_waiting > 0)
+  const todos = [
+    ...ready.map((f) => todo(f, 'ha completato la scheda: controllala e pubblicala', 'Controlla')),
+    ...invite.map((f) => todo(f, f.contact_phone ? 'è pronto per l\'invito su WhatsApp' : 'manca il numero WhatsApp per l\'invito', 'Invita')),
+    ...waiting.filter((f) => daysSince(f.invited_at) >= 3).map((f) => todo(f, `invitato ${daysSince(f.invited_at)} giorni fa, manca: ${missingText(f.missing) || 'la richiesta di pubblicazione'}`, 'Apri')),
+    ...unanswered.map((f) => todo(f, `ha ${f.requests_waiting === 1 ? '1 richiesta' : `${f.requests_waiting} richieste`} da rispondere`, 'Apri')),
+  ]
   return `
     <div class="row">
       <h1>Panoramica</h1>
       <a class="button primary" href="#/nuovo">+ Nuovo maso</a>
     </div>
+    ${empty ? `
+    <div class="card stack">
+      <h2>Per cominciare</h2>
+      <p>1. <strong>Aggiungi un maso</strong>: nome, indirizzo e il numero WhatsApp per l'invito.</p>
+      <p>2. <strong>Manda l'invito</strong>: il maso apre il link, completa prodotti e orari e ti chiede di pubblicare.</p>
+      <p>3. <strong>Pubblica</strong>: la scheda compare nell'app e sul sito.</p>
+      <p class="muted small">Puoi partire anche da un maso suggerito dall'app o dal sito, in «Suggeriti».</p>
+    </div>` : `
     <div class="tiles four">
-      ${tile(count('published').length, 'Masi pubblicati', '#/masi?f=published', 'green')}
-      ${tile(ready.length, 'Pronti da pubblicare', '#/masi?f=ready', ready.length ? 'amber' : '')}
-      ${tile(invite.length, 'Da invitare', '#/masi?f=invite', invite.length ? 'terracotta' : '')}
-      ${tile(waiting.length, 'Invitati, in attesa', '#/masi?f=waiting')}
-      ${tile(count('stale').length, 'Da ricontrollare', '#/masi?f=stale')}
-      ${tile(o.reports_open, 'Segnalazioni aperte', '#/segnalazioni', o.reports_open ? 'terracotta' : '')}
-      ${tile(o.suggestions_open, 'Masi suggeriti', '#/suggeriti')}
-      ${tile(o.custom_products, 'Prodotti nuovi dai masi', '#/prodotti')}
-    </div>
-    <p class="muted small">${o.requests_waiting} richieste «Tienimeli da parte» in attesa di risposta · ${o.phones} telefoni e browser · ${o.demo} schede demo</p>
+      ${tiles.map(([value, label, href, tone]) => tile(value, label, href, value ? tone : '')).join('')}
+    </div>`}
+    <p class="muted small">${summary(o)}</p>
     <div class="columns">
     <div>
     <h2>Da fare</h2>
     <div class="card list">
-      ${ready.map((f) => todo(f, 'ha completato la scheda: controllala e pubblicala', 'Controlla')).join('')}
-      ${invite.map((f) => todo(f, f.contact_phone ? 'è pronto per l\'invito su WhatsApp' : 'manca il numero WhatsApp per l\'invito', 'Invita')).join('')}
-      ${waiting.filter((f) => daysSince(f.invited_at) >= 3).map((f) => todo(f, `invitato ${daysSince(f.invited_at)} giorni fa, manca: ${missingText(f.missing) || 'la richiesta di pubblicazione'}`, 'Apri')).join('')}
-      ${!ready.length && !invite.length ? '<p class="muted">Niente di urgente. Aggiungi un maso nuovo o guarda i suggeriti.</p>' : ''}
+      ${todos.join('') || '<p class="muted">Niente di urgente. Aggiungi un maso nuovo o guarda i suggeriti.</p>'}
     </div>
     </div>
     <div>
@@ -127,6 +145,16 @@ export function overview(a) {
     ${requestsCalendar(a)}
     </div>
     </div>`
+}
+
+/** La riga sotto i riquadri: solo le voci diverse da zero, al singolare quando è una. */
+function summary(o) {
+  const n = (value, one, many) => `${value} ${value === 1 ? one : many}`
+  return [
+    o.requests_waiting && n(o.requests_waiting, 'richiesta «Tienimeli da parte» in attesa di risposta', 'richieste «Tienimeli da parte» in attesa di risposta'),
+    o.phones && n(o.phones, 'telefono o browser', 'telefoni e browser'),
+    o.demo && n(o.demo, 'scheda demo', 'schede demo'),
+  ].filter(Boolean).join(' · ')
 }
 
 /**

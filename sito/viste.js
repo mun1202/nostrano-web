@@ -5,7 +5,7 @@ import {
   dataEstesa, esc, fasce, fasceTesto, filtriAttivi, foto, giorniA, giorniDa, giorno, icona, maiuscola, nomeProdotto,
   normalizza, novita, oraScelta, orario, prezzo, prodottiPresenti, riassunto, riassuntoCosa, riassuntoDove,
   riassuntoQuando, stato, titolo,
-} from './comune.js?v=4ce0e02e69'
+} from './comune.js?v=66128a0433'
 
 // Home ---------------------------------------------------------------------------------------------
 
@@ -264,7 +264,13 @@ const prezzoACapo = (testo) => testo.split(' / ').map((parte, i) => `<span>${i ?
  * c'è "Non trovi quello che cerchi? Chiedi al maso".
  */
 export function bloccoProdotti(f, c, link = () => null, { richieste = false } = {}) {
-  if (!f.products.length && !richieste) return ''
+  // Senza prodotti la sezione c'è lo stesso e lo dice, come gli orari: se no sembrerebbe che manchi un pezzo.
+  if (!f.products.length) {
+    return `<section class="block" aria-labelledby="t-prodotti" id="prodotti">
+          <h2 id="t-prodotti">${esc(c.T.cosaTrovi)}</h2>
+          <p class="sub">${esc(c.T.prodottiMancanti)}</p>
+        </section>`
+  }
   const sotto = quandoPrezzi(f, c)
   const lista = prodottiOrdinati(f, c).map((p) => {
     const nome = nomeProdotto(p.kind, c)
