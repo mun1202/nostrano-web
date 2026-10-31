@@ -1,8 +1,8 @@
 // Le schermate del pannello admin, come HTML. Solo in italiano: lo usa chi gestisce Il mio contadino.
-import { esc } from './views.js?v=4c1a21cc08'
-import { CATEGORY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=4c1a21cc08'
-import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=4c1a21cc08'
-import { icon } from './icons.js?v=4c1a21cc08'
+import { esc } from './views.js?v=a4bd50e540'
+import { CATEGORY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=a4bd50e540'
+import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=a4bd50e540'
+import { icon } from './icons.js?v=a4bd50e540'
 
 const ROOT = window.NOSTRANO_ROOT ?? '/'
 const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1)
@@ -13,12 +13,16 @@ export const NAV = [
   ['segnalazioni', 'Segnalazioni', 'flag'],
   ['suggeriti', 'Suggeriti', 'bulb'],
   ['prodotti', 'Prodotti', 'package'],
+  ['mercati', 'Mercati', 'market'],
   ['accessi', 'Accessi', 'key'],
 ]
 
 export function nav(a) {
-  const counts = { segnalazioni: a.overview?.reports_open, suggeriti: a.overview?.suggestions_open, prodotti: a.overview?.custom_products }
-  const current = a.route.name === 'maso' || a.route.name === 'nuovo' ? 'masi' : a.route.name
+  const counts = {
+    segnalazioni: a.overview?.reports_open, suggeriti: a.overview?.suggestions_open, prodotti: a.overview?.custom_products,
+    mercati: a.marketRequests?.length,
+  }
+  const current = a.route.name === 'maso' || a.route.name === 'nuovo' ? 'masi' : a.route.name === 'mercato' ? 'mercati' : a.route.name
   return NAV.map(([name, label, symbol]) => `
     <a href="#/${name}" ${current === name ? 'aria-current="page"' : ''}>${icon(symbol)}<span>${label}</span>${counts[name] ? `<span class="count">${counts[name]}</span>` : ''}</a>`).join('')
 }
@@ -566,6 +570,94 @@ export function reports(a) {
     <p class="muted">Quello che le persone scrivono da «Segnala un problema» nella scheda di un maso, e le richieste di
       modifica dei masi (indirizzo, foto, telefono), segnate «dal maso»: falle da «Modifica come il maso» o dalla scheda.</p>
     <div class="card list">${a.reports.length ? a.reports.map((r) => reportRow(r)).join('') : '<p class="muted">Nessuna segnalazione.</p>'}</div>`
+}
+
+// Mercati contadini --------------------------------------------------------------------------
+
+const MARKET_STATUS = [['published', 'Pubblicato', 'green'], ['draft', 'Bozza', ''], ['hidden', 'Nascosto', '']]
+const marketWhen = (m) => `${capitalize(weekdayName(m.weekday, 'it'))} ${toClock(m.opens_at)}–${toClock(m.closes_at)}`
+
+/** I mercati e, sopra, le richieste dei masi («Ci vado» / «Non ci vado più») da confermare. */
+export function markets(a) {
+  const requests = a.marketRequests ?? []
+  return `
+    <div class="row">
+      <h1>Mercati contadini</h1>
+      <a class="button primary" href="#/mercato/nuovo">+ Nuovo mercato</a>
+    </div>
+    <p class="muted">Compaiono nell'app e sul sito quando sono pubblicati, con i masi che ci vanno. I masi chiedono di
+      entrare o uscire dalla loro pagina: confermi tu.</p>
+    ${requests.length ? `
+    <h2>Richieste dei masi</h2>
+    <div class="card list">${requests.map((r) => `
+      <div class="row">
+        <span><a href="#/maso/${encodeURIComponent(r.farm)}"><strong>${esc(r.farm_name)}</strong></a>
+          ${r.join ? 'chiede di <strong>entrare</strong> in' : 'non va più al'} <a href="#/mercato/${encodeURIComponent(r.market)}">${esc(r.market_name)}</a>
+          <br><small class="muted">${dateText(r.created_at, true)}</small></span>
+        <span class="side">
+          <button class="primary small" data-action="market-ok" data-id="${r.id}">Conferma</button>
+          <button class="secondary small" data-action="market-no" data-id="${r.id}">Rifiuta</button>
+        </span>
+      </div>`).join('')}
+    </div>` : ''}
+    <div class="farms">${(a.markets ?? []).map((m) => {
+      const [label, tone] = (MARKET_STATUS.find(([s]) => s === m.status) ?? MARKET_STATUS[1]).slice(1)
+      return `
+      <a class="card farm-row ${m.status === 'published' ? 'green' : ''}" href="#/mercato/${encodeURIComponent(m.slug)}">
+        <span class="grow">
+          <strong>${esc(m.name_it)}</strong>
+          <small class="muted">${esc(marketWhen(m))} · ${esc(m.place)}, ${esc(municipalityName('it', m.municipality))}</small>
+          <small class="muted">${m.farms.length === 1 ? '1 maso' : `${m.farms.length} masi`}</small>
+        </span>
+        <span class="side">${pill([label, tone])}</span>
+      </a>`
+    }).join('') || '<p class="muted">Ancora nessun mercato.</p>'}</div>`
+}
+
+/** Il modulo di un mercato, nuovo o esistente: nomi, luogo con la mappa, giorno e ore, stato, masi. */
+export function market(a) {
+  const isNew = a.route.param === 'nuovo'
+  const m = isNew ? { name_it: '', name_de: '', place: '', municipality: '', weekday: 7, opens_at: 480, closes_at: 720, status: 'draft', farms: [] }
+    : (a.markets ?? []).find((x) => x.slug === a.route.param)
+  if (!m) return '<p class="muted">Mercato non trovato.</p>'
+  const coords = m.lat !== undefined && m.lat !== null ? `${m.lat}, ${m.lng}` : ''
+  const inside = new Set(m.farms.map((f) => f.slug))
+  // Prima i masi già nel mercato (nel loro ordine), poi gli altri pubblicati.
+  const farms = [...m.farms, ...(a.farms ?? []).filter((f) => !inside.has(f.slug) && f.status === 'published')]
+  return `
+    <a class="back" href="#/mercati">← Mercati</a>
+    <h1>${isNew ? 'Nuovo mercato' : esc(m.name_it)}</h1>
+    <form data-form="market" class="card stack">
+      <fieldset class="plain grid">
+        <legend>Il mercato</legend>
+        <label class="stack small">Nome in italiano *
+          <input name="name_it" required minlength="3" maxlength="120" value="${esc(m.name_it)}" placeholder="Mercato contadino di …"></label>
+        <label class="stack small">Nome in tedesco
+          <input name="name_de" maxlength="120" value="${esc(m.name_de)}" placeholder="Bauernmarkt …"></label>
+        <div class="stack small wide">
+          <span>Dove *</span>
+          <div data-ref="luogo"></div>
+          <input type="hidden" name="municipality" value="${esc(m.municipality ? municipalityName('it', m.municipality) : '')}">
+          <input type="hidden" name="address" value="${esc(m.place)}">
+          <input type="hidden" name="coordinates" value="${esc(coords)}">
+        </div>
+        <label class="stack small">Giorno *
+          <select name="weekday">${WEEK.map((d) => `<option value="${d}" ${d === m.weekday ? 'selected' : ''}>${esc(capitalize(weekdayName(d, 'it')))}</option>`).join('')}</select></label>
+        <label class="stack small">Dalle *
+          <input type="time" name="opens" required value="${toClock(m.opens_at)}"></label>
+        <label class="stack small">Alle *
+          <input type="time" name="closes" required value="${toClock(m.closes_at)}"></label>
+        <label class="stack small">Stato
+          <select name="status">${MARKET_STATUS.map(([s, l]) => `<option value="${s}" ${s === m.status ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+      </fieldset>
+      <fieldset class="plain">
+        <legend>Masi che ci vanno</legend>
+        <div class="market-farms">${farms.map((f) => `
+          <label class="inline"><input type="checkbox" name="farm" value="${esc(f.slug)}" ${inside.has(f.slug) ? 'checked' : ''}> ${esc(f.name)}</label>`).join('') || '<p class="muted">Ancora nessun maso pubblicato.</p>'}
+        </div>
+      </fieldset>
+      <button type="submit" class="primary wide">${isNew ? 'Crea il mercato' : 'Salva'}</button>
+    </form>`
 }
 
 const SUGGESTION_STATUS = [['open', 'Da guardare'], ['contacted', 'Contattato'], ['published', 'Pubblicato'], ['declined', 'Non adatto']]

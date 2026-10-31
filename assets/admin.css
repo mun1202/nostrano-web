@@ -131,3 +131,6 @@ body.admin main > .row:first-child { margin-bottom: 16px; }
 .photo-review figure { display: grid; gap: 10px; margin: 0; }
 .photo-review img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--radius-sm); }
 .photo-review figcaption { display: grid; gap: 2px; }
+
+/* Masi di un mercato: caselle su più colonne. */
+.market-farms { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px 16px; }

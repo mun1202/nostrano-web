@@ -1,10 +1,11 @@
 // Pannello admin: si apre con un link di accesso (https://ilmiocontadino.com/admin/<codice>), poi il browser resta abilitato.
 // Da qui si creano le schede in bozza, si invitano i masi su WhatsApp e si pubblica.
-import { ROOT, linkCode, removeUploaded, rpc, shrink, upload } from './api.js?v=4c1a21cc08'
-import { MUNICIPALITY_CODES, municipalityCode, municipalityName, municipalityOf } from './i18n.js?v=4c1a21cc08'
-import * as views from './admin-views.js?v=4c1a21cc08'
-import { sceltaLuogo } from '../sito/luogo.js?v=4c1a21cc08'
-import { TESTI } from '../sito/testi.js?v=4c1a21cc08'
+import { ROOT, linkCode, removeUploaded, rpc, shrink, upload } from './api.js?v=a4bd50e540'
+import { MUNICIPALITY_CODES, municipalityCode, municipalityName, municipalityOf } from './i18n.js?v=a4bd50e540'
+import * as views from './admin-views.js?v=a4bd50e540'
+import { fromClock } from './days.js?v=a4bd50e540'
+import { sceltaLuogo } from '../sito/luogo.js?v=a4bd50e540'
+import { TESTI } from '../sito/testi.js?v=a4bd50e540'
 
 const root = document.querySelector('#app')
 const navigation = document.querySelector('#nav')
@@ -29,6 +30,7 @@ let editing = false
 const SCREENS = {
   '': views.overview, masi: views.farms, maso: views.farm, nuovo: views.newFarm,
   segnalazioni: views.reports, suggeriti: views.suggestions, prodotti: views.products, accessi: views.devices,
+  mercati: views.markets, mercato: views.market,
 }
 
 function render() {
@@ -57,6 +59,7 @@ const ERRORS = {
   incomplete: 'Mancano dei dati obbligatori.',
   bad_name: 'Controlla il nome.',
   bad_photos: 'Troppe foto (al massimo 10).',
+  bad_market: 'Controlla il mercato: nome, luogo sulla mappa, giorno e orari (la fine dopo l\'inizio).',
   bad_hours: 'Controlla gli orari.',
   published: 'Una scheda pubblicata va prima nascosta.',
   not_found: 'Non trovato: forse è stato appena tolto.',
@@ -85,6 +88,8 @@ async function load() {
   const { name, param, query } = a.route
   // I numeri nel menu servono ovunque.
   const overview = rpc('admin_overview').then((o) => { a.overview = o })
+  // Il numero delle richieste dei masi per i mercati, accanto a «Mercati» nel menu.
+  const marketRequests = rpc('admin_market_requests').then((r) => { a.marketRequests = r }).catch(() => {})
   switch (name) {
     case '':
       [a.farms, a.photos] = await Promise.all([rpc('admin_farms'), rpc('admin_photo_submissions').catch(() => [])])
@@ -105,6 +110,12 @@ async function load() {
     case 'segnalazioni':
       a.reports = await rpc('admin_reports')
       break
+    case 'mercati':
+      a.markets = await rpc('admin_markets')
+      break
+    case 'mercato':
+      [a.markets, a.farms] = await Promise.all([rpc('admin_markets'), rpc('admin_farms')])
+      break
     case 'suggeriti':
       a.suggestions = await rpc('admin_suggestions')
       break
@@ -115,7 +126,7 @@ async function load() {
       a.devices = await rpc('admin_devices')
       break
   }
-  await overview
+  await Promise.all([overview, marketRequests])
 }
 
 async function show() {
@@ -356,6 +367,10 @@ root.addEventListener('click', (event) => {
     }
     case 'report':
       return act(() => rpc('admin_report_set', { p_id: Number(id), p_status: status }), status === 'handled' ? 'Segnata come gestita' : 'Riaperta')
+    case 'market-ok':
+    case 'market-no':
+      return act(() => rpc('admin_market_request_review', { p_id: Number(id), p_ok: action === 'market-ok' }),
+        action === 'market-ok' ? 'Fatto: il mercato è aggiornato' : 'Richiesta rifiutata')
     // Foto mandate dai masi: pubblicata va in fondo alle foto della scheda; scartata, il file si toglie.
     case 'photo-ok':
       return act(() => rpc('admin_photo_review', { p_id: Number(id), p_ok: true }), 'Foto pubblicata sulla scheda')
@@ -424,6 +439,23 @@ root.addEventListener('submit', async (event) => {
     case 'farm': {
       const farm = farmData(form)
       if (farm) act(() => rpc('admin_farm_save', { p_slug: a.farm.slug, p_data: farm }), 'Dati salvati')
+      return
+    }
+    case 'market': {
+      const coordinates = parseCoordinates(String(data.get('coordinates') ?? ''))
+      if (!coordinates || !String(data.get('address') ?? '').trim()) {
+        toast('Cerca e conferma dove si tiene il mercato.', true)
+        return form.querySelector('[data-ref="luogo"] input')?.focus()
+      }
+      const isNew = a.route.param === 'nuovo'
+      const slug = await act(() => rpc('admin_market_save', { p_slug: isNew ? null : a.route.param, p_data: {
+        name_it: String(data.get('name_it')).trim(), name_de: String(data.get('name_de') ?? '').trim(),
+        place: String(data.get('address')).trim(), municipality: municipalityCode(String(data.get('municipality') ?? '')),
+        ...coordinates, weekday: Number(data.get('weekday')),
+        opens_at: fromClock(String(data.get('opens'))), closes_at: fromClock(String(data.get('closes'))),
+        status: data.get('status'), farms: data.getAll('farm'),
+      } }), isNew ? 'Mercato creato' : 'Mercato salvato')
+      if (slug && isNew) location.hash = `#/mercato/${encodeURIComponent(slug)}`
       return
     }
     case 'consent':

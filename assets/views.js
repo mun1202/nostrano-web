@@ -1,6 +1,6 @@
 // Le parti della pagina, come HTML. Ogni testo che arriva dal database o dai clienti passa da esc().
-import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=4c1a21cc08'
-import { WEEK, addDays, dayRanges, formatDay, formatInstant, minuteNowRome, openDays, toClock, todayRome, weekday, weekdayName } from './days.js?v=4c1a21cc08'
+import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=a4bd50e540'
+import { WEEK, addDays, dayRanges, formatDay, formatInstant, minuteNowRome, openDays, toClock, todayRome, weekday, weekdayName } from './days.js?v=a4bd50e540'
 
 export const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
@@ -141,6 +141,33 @@ export function farm(s) {
       <button type="submit" class="primary wide">${t(s.lang, 'saveFarm')}</button>
     </form>
 `
+}
+
+/**
+ * I mercati contadini della zona: il maso dice «Ci vado» o «Non ci vado più», e l'admin conferma. Una richiesta in
+ * sospeso si annulla chiedendo di nuovo quello che è già vero.
+ */
+export function markets(s) {
+  const list = s.markets ?? []
+  if (s.admin || !list.length) return ''
+  const name = (m) => (s.lang === 'de' ? m.name_de : m.name_it)
+  return `
+    <h2>${t(s.lang, 'marketsTitle')}</h2>
+    <p class="muted small">${t(s.lang, 'marketsHelp')}</p>
+    <div class="card list">${list.map((m) => {
+      const state = m.pending === true ? 'marketJoinPending' : m.pending === false ? 'marketLeavePending' : m.member ? 'marketIn' : null
+      const button = m.pending !== null
+        ? `<button type="button" class="secondary small" data-action="market" data-id="${esc(m.slug)}" data-status="${m.member}">${t(s.lang, 'marketCancel')}</button>`
+        : `<button type="button" class="${m.member ? 'secondary' : 'primary'} small" data-action="market" data-id="${esc(m.slug)}" data-status="${!m.member}">${t(s.lang, m.member ? 'marketLeave' : 'marketJoin')}</button>`
+      return `
+      <div class="row">
+        <span><strong>${esc(name(m))}</strong><br>
+          <small class="muted">${esc(capitalize(weekdayName(m.weekday, s.lang)))} ${toClock(m.opens_at)}–${toClock(m.closes_at)} · ${esc(m.place)}</small>
+          ${state ? `<br><small class="${m.member && m.pending === null ? 'green' : 'muted'}">${t(s.lang, state)}</small>` : ''}</span>
+        ${button}
+      </div>`
+    }).join('')}
+    </div>`
 }
 
 /**

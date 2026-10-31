@@ -1,13 +1,13 @@
 // Pagina del produttore: si apre dal link personale https://ilmiocontadino.com/modifica/<token>.
 // Fa le stesse cose dell'area produttore dell'app, con le stesse funzioni del database.
-import { ROOT, accountEmail, linkCode, removeUploaded, rpc, sendCode, shrink, signOut, upload, verifyCode } from './api.js?v=4c1a21cc08'
-import { errorText, initialLanguage, municipalityCode, municipalityName, municipalityOf, parseAmount, rememberLanguage, t } from './i18n.js?v=4c1a21cc08'
-import { sceltaLuogo } from '../sito/luogo.js?v=4c1a21cc08'
-import { TESTI } from '../sito/testi.js?v=4c1a21cc08'
-import { WEEK, addDays, fromClock, todayRome } from './days.js?v=4c1a21cc08'
-import * as views from './views.js?v=4c1a21cc08'
-import * as notify from './notify.js?v=4c1a21cc08'
-import { icon } from './icons.js?v=4c1a21cc08'
+import { ROOT, accountEmail, linkCode, removeUploaded, rpc, sendCode, shrink, signOut, upload, verifyCode } from './api.js?v=a4bd50e540'
+import { errorText, initialLanguage, municipalityCode, municipalityName, municipalityOf, parseAmount, rememberLanguage, t } from './i18n.js?v=a4bd50e540'
+import { sceltaLuogo } from '../sito/luogo.js?v=a4bd50e540'
+import { TESTI } from '../sito/testi.js?v=a4bd50e540'
+import { WEEK, addDays, fromClock, todayRome } from './days.js?v=a4bd50e540'
+import * as views from './views.js?v=a4bd50e540'
+import * as notify from './notify.js?v=a4bd50e540'
+import { icon } from './icons.js?v=a4bd50e540'
 
 const root = document.querySelector('#app')
 const nav = document.querySelector('#nav')
@@ -21,7 +21,7 @@ const PAGES = [
   { route: 'prodotti', icon: 'package', label: 'nav_products', sections: ['products'], side: ['productsPreview'] },
   { route: 'orari', icon: 'clock', label: 'nav_hours', sections: ['hours', 'closures'], side: ['hoursPreview'] },
   { route: 'novita', icon: 'megaphone', label: 'nav_notice', sections: ['notice'], side: ['noticePreview'] },
-  { route: 'maso', icon: 'home', label: 'nav_farm', sections: ['farm', 'details', 'footer'], side: ['farmPreview'] },
+  { route: 'maso', icon: 'home', label: 'nav_farm', sections: ['farm', 'details', 'markets', 'footer'], side: ['farmPreview'] },
 ]
 
 const currentRoute = () => location.hash.match(/^#\/([a-z]*)/)?.[1] ?? ''
@@ -180,10 +180,11 @@ async function reload() {
     Object.assign(s, { farm, area: { stats: {}, demand: [] }, requests: [] })
     return
   }
-  const [farm, area, requests, pendingPhotos] = await Promise.all([
-    rpc('producer_farm'), rpc('producer_area'), rpc('producer_requests'), rpc('producer_photos_pending').catch(() => []),
+  const [farm, area, requests, pendingPhotos, markets] = await Promise.all([
+    rpc('producer_farm'), rpc('producer_area'), rpc('producer_requests'),
+    rpc('producer_photos_pending').catch(() => []), rpc('producer_markets').catch(() => []),
   ])
-  Object.assign(s, { farm, area, requests, pendingPhotos })
+  Object.assign(s, { farm, area, requests, pendingPhotos, markets })
 }
 
 /** Un'azione verso il server: poi ricarica tutto, così la pagina mostra quello che c'è davvero. */
@@ -379,6 +380,12 @@ root.addEventListener('click', (event) => {
     }
     case 'closed-today':
       return toggleClosedToday()
+    case 'market': {
+      // data-status: true «Ci vado», false «Non ci vado più»; uguale a com'è già, annulla la richiesta in sospeso.
+      const join = status === 'true'
+      const cancel = s.markets.find((m) => m.slug === id)?.member === join
+      return act(() => rpc('producer_market_request', { p_market: id, p_join: join }), t(s.lang, cancel ? 'marketCancelled' : 'marketSent'))
+    }
     case 'photo-cover': {
       const photos = [...s.farm.photos]
       photos.unshift(...photos.splice(Number(day), 1))
