@@ -1,10 +1,10 @@
 // Pannello admin: si apre con un link di accesso (https://ilmiocontadino.com/admin/<codice>), poi il browser resta abilitato.
 // Da qui si creano le schede in bozza, si invitano i masi su WhatsApp e si pubblica.
-import { ROOT, linkCode, removeUploaded, rpc, upload } from './api.js?v=814dc9da84'
-import { MUNICIPALITY_CODES, municipalityName } from './i18n.js?v=814dc9da84'
-import * as views from './admin-views.js?v=814dc9da84'
-import { sceltaLuogo } from '../sito/luogo.js?v=814dc9da84'
-import { TESTI } from '../sito/testi.js?v=814dc9da84'
+import { ROOT, linkCode, removeUploaded, rpc, shrink, upload } from './api.js?v=4c1a21cc08'
+import { MUNICIPALITY_CODES, municipalityCode, municipalityName, municipalityOf } from './i18n.js?v=4c1a21cc08'
+import * as views from './admin-views.js?v=4c1a21cc08'
+import { sceltaLuogo } from '../sito/luogo.js?v=4c1a21cc08'
+import { TESTI } from '../sito/testi.js?v=4c1a21cc08'
 
 const root = document.querySelector('#app')
 const navigation = document.querySelector('#nav')
@@ -87,7 +87,7 @@ async function load() {
   const overview = rpc('admin_overview').then((o) => { a.overview = o })
   switch (name) {
     case '':
-      a.farms = await rpc('admin_farms')
+      [a.farms, a.photos] = await Promise.all([rpc('admin_farms'), rpc('admin_photo_submissions').catch(() => [])])
       await loadCalendar()
       break
     case 'masi':
@@ -160,22 +160,6 @@ async function act(action, success) {
 }
 
 // Modulo della scheda -------------------------------------------------------------------------
-
-/** "Bolzano", "Bozen" o "bolzano" diventano il codice; un comune nuovo resta come scritto. */
-// I nomi ufficiali lunghi dei comuni in elenco, come arrivano dalla ricerca dell'indirizzo. Non "comincia con":
-// Bolzano Vicentino non è Bolzano.
-const OFFICIAL_NAMES = {
-  appiano: ['Appiano sulla Strada del Vino', 'Eppan an der Weinstraße'],
-  caldaro: ['Caldaro sulla Strada del Vino', 'Kaltern an der Weinstraße'],
-  sanGenesio: ['San Genesio Atesino'],
-  cornedo: ["Cornedo all'Isarco"],
-}
-
-function municipalityCode(text) {
-  const value = text.trim().toLowerCase()
-  return MUNICIPALITY_CODES.find((code) => [code, municipalityName('it', code), municipalityName('de', code), ...(OFFICIAL_NAMES[code] ?? [])]
-    .some((name) => name.toLowerCase() === value)) ?? text.trim()
-}
 
 /** Le coordinate del campo nascosto ("46.4983, 11.2611"); legge anche un link di Google Maps (@46.49,11.26 o ?q=…). */
 export function parseCoordinates(text) {
@@ -269,21 +253,6 @@ async function copy(text) {
 
 // Foto ----------------------------------------------------------------------------------------
 
-/** Rimpicciolisce a 1600 px di lato e salva in JPEG: le foto del telefono pesano troppo. */
-async function shrink(file) {
-  try {
-    const bitmap = await createImageBitmap(file)
-    const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height))
-    const canvas = Object.assign(document.createElement('canvas'), {
-      width: Math.round(bitmap.width * scale), height: Math.round(bitmap.height * scale),
-    })
-    canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height)
-    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.85))
-    return blob ?? file
-  } catch {
-    return file
-  }
-}
 
 async function addPhotos(files) {
   const f = a.farm
@@ -313,15 +282,6 @@ async function addPhotos(files) {
 // del modulo. La piccola mappa usa le tessere della mappa del sito.
 
 const placeMap = { tessere: config.mappa, font: `${ROOT}sito/mappa/font/`, libreria: `${ROOT}sito/vendor/maplibre/` }
-
-/** Il comune trovato com'è nell'elenco ("Appiano sulla Strada del Vino" → Appiano), altrimenti com'è. */
-function municipalityOf(found) {
-  for (const name of [found.comune, ...(found.comuni ?? [])]) {
-    const code = municipalityCode(name)
-    if (MUNICIPALITY_CODES.includes(code)) return municipalityName('it', code)
-  }
-  return found.comune
-}
 
 function mountPlace() {
   const box = root.querySelector('[data-ref="luogo"]')
@@ -396,6 +356,16 @@ root.addEventListener('click', (event) => {
     }
     case 'report':
       return act(() => rpc('admin_report_set', { p_id: Number(id), p_status: status }), status === 'handled' ? 'Segnata come gestita' : 'Riaperta')
+    // Foto mandate dai masi: pubblicata va in fondo alle foto della scheda; scartata, il file si toglie.
+    case 'photo-ok':
+      return act(() => rpc('admin_photo_review', { p_id: Number(id), p_ok: true }), 'Foto pubblicata sulla scheda')
+    case 'photo-no': {
+      const photo = a.photos.find((p) => String(p.id) === id)
+      return act(async () => {
+        await rpc('admin_photo_review', { p_id: Number(id), p_ok: false })
+        if (photo) await removeUploaded('farm-photos', [photo.url]).catch(() => {})
+      }, 'Foto scartata')
+    }
     case 'personal-link':
       if (!window.confirm('Creare un link personale nuovo? Quello di prima smette di funzionare; i dispositivi già abilitati restano.')) return
       return act(async () => {

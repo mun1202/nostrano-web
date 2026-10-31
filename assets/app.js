@@ -1,11 +1,13 @@
 // Pagina del produttore: si apre dal link personale https://ilmiocontadino.com/modifica/<token>.
 // Fa le stesse cose dell'area produttore dell'app, con le stesse funzioni del database.
-import { ROOT, accountEmail, linkCode, rpc, sendCode, signOut, verifyCode } from './api.js?v=814dc9da84'
-import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=814dc9da84'
-import { WEEK, addDays, fromClock, todayRome } from './days.js?v=814dc9da84'
-import * as views from './views.js?v=814dc9da84'
-import * as notify from './notify.js?v=814dc9da84'
-import { icon } from './icons.js?v=814dc9da84'
+import { ROOT, accountEmail, linkCode, removeUploaded, rpc, sendCode, shrink, signOut, upload, verifyCode } from './api.js?v=4c1a21cc08'
+import { errorText, initialLanguage, municipalityCode, municipalityName, municipalityOf, parseAmount, rememberLanguage, t } from './i18n.js?v=4c1a21cc08'
+import { sceltaLuogo } from '../sito/luogo.js?v=4c1a21cc08'
+import { TESTI } from '../sito/testi.js?v=4c1a21cc08'
+import { WEEK, addDays, fromClock, todayRome } from './days.js?v=4c1a21cc08'
+import * as views from './views.js?v=4c1a21cc08'
+import * as notify from './notify.js?v=4c1a21cc08'
+import { icon } from './icons.js?v=4c1a21cc08'
 
 const root = document.querySelector('#app')
 const nav = document.querySelector('#nav')
@@ -19,7 +21,7 @@ const PAGES = [
   { route: 'prodotti', icon: 'package', label: 'nav_products', sections: ['products'], side: ['productsPreview'] },
   { route: 'orari', icon: 'clock', label: 'nav_hours', sections: ['hours', 'closures'], side: ['hoursPreview'] },
   { route: 'novita', icon: 'megaphone', label: 'nav_notice', sections: ['notice'], side: ['noticePreview'] },
-  { route: 'maso', icon: 'home', label: 'nav_farm', sections: ['farm', 'footer'], side: ['farmPreview'] },
+  { route: 'maso', icon: 'home', label: 'nav_farm', sections: ['farm', 'details', 'footer'], side: ['farmPreview'] },
 ]
 
 const currentRoute = () => location.hash.match(/^#\/([a-z]*)/)?.[1] ?? ''
@@ -74,6 +76,45 @@ function render() {
   const wide = page?.side ? ' wide' : ''
   root.innerHTML = `${ADMIN_SLUG ? views.adminBar(s, ADMIN_SLUG) : ''}${section('header')}<div class="page ${names.length === 1 || names[1] === 'footer' || page?.side ? 'single' : ''}${wide}">${body}</div>`
   renderNav()
+  mountPlace()
+}
+
+// «Indirizzo del maso» (web/sito/luogo.js, lo stesso del pannello): confermato il punto, si salva subito.
+const config = window.NOSTRANO_CONFIG ?? {}
+function mountPlace() {
+  const box = root.querySelector('[data-ref="luogo"]')
+  if (!box) return
+  const f = s.farm
+  sceltaLuogo({
+    contenitore: box,
+    testi: TESTI[s.lang].luogo,
+    lang: s.lang,
+    classi: { primario: 'primary', link: 'link' },
+    cartina: config.mappa ? { tessere: config.mappa, font: `${ROOT}sito/mappa/font/`, libreria: `${ROOT}sito/vendor/maplibre/` } : null,
+    iniziale: { lat: f.lat, lng: f.lng, indirizzo: f.address, comune: municipalityName(s.lang, f.municipality) },
+    cambia: (found) => act(() => rpc('producer_set_details', { p_data: {
+      address: found.indirizzo || municipalityOf(found), municipality: municipalityCode(municipalityOf(found)), lat: found.lat, lng: found.lng,
+    } }), t(s.lang, 'placeSaved')),
+  })
+}
+
+// Foto nuove: rimpicciolite, caricate nella cartella del maso (maso/<slug>/) e messe in coda per l'admin.
+async function addPhotos(files) {
+  const room = 10 - s.farm.photos.length - (s.pendingPhotos?.length ?? 0)
+  const chosen = [...files].slice(0, Math.max(0, room))
+  if (!chosen.length) return toast(t(s.lang, 'photosFull'), true)
+  s.uploading = true
+  renderSection('details')
+  await act(async () => {
+    try {
+      for (const file of chosen) {
+        const name = `maso/${s.farm.slug}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`
+        await rpc('producer_photo_submit', { p_url: await upload('farm-photos', name, await shrink(file)) })
+      }
+    } finally {
+      s.uploading = false
+    }
+  }, t(s.lang, 'photosSent', chosen.length))
 }
 
 function renderNav() {
@@ -87,6 +128,7 @@ function renderSection(name) {
   rememberOpen()
   const section = root.querySelector(`#s-${name}`)
   if (section) section.innerHTML = views[name](s)
+  if (name === 'details') mountPlace()
   if (name === 'requests') {
     // Le richieste stanno anche nella panoramica e nel calendario, e il numero nel menu.
     for (const other of ['inbox', 'calendar']) {
@@ -138,8 +180,10 @@ async function reload() {
     Object.assign(s, { farm, area: { stats: {}, demand: [] }, requests: [] })
     return
   }
-  const [farm, area, requests] = await Promise.all([rpc('producer_farm'), rpc('producer_area'), rpc('producer_requests')])
-  Object.assign(s, { farm, area, requests })
+  const [farm, area, requests, pendingPhotos] = await Promise.all([
+    rpc('producer_farm'), rpc('producer_area'), rpc('producer_requests'), rpc('producer_photos_pending').catch(() => []),
+  ])
+  Object.assign(s, { farm, area, requests, pendingPhotos })
 }
 
 /** Un'azione verso il server: poi ricarica tutto, così la pagina mostra quello che c'è davvero. */
@@ -335,6 +379,26 @@ root.addEventListener('click', (event) => {
     }
     case 'closed-today':
       return toggleClosedToday()
+    case 'photo-cover': {
+      const photos = [...s.farm.photos]
+      photos.unshift(...photos.splice(Number(day), 1))
+      return act(() => rpc('producer_set_details', { p_data: { photos } }), t(s.lang, 'photoCoverDone'))
+    }
+    case 'photo-remove': {
+      const gone = s.farm.photos[Number(day)]
+      return act(async () => {
+        await rpc('producer_set_details', { p_data: { photos: s.farm.photos.filter((_, i) => i !== Number(day)) } })
+        // Se era una foto caricata dal maso, il file si toglie dalla sua cartella (le altre restano).
+        await removeUploaded('farm-photos', [gone].filter((u) => u.includes(`/farm-photos/maso/${s.farm.slug}/`))).catch(() => {})
+      }, t(s.lang, 'photoRemoved'))
+    }
+    case 'photo-withdraw': {
+      const photo = s.pendingPhotos.find((p) => String(p.id) === id)
+      return act(async () => {
+        await rpc('producer_photo_withdraw', { p_id: Number(id) })
+        if (photo) await removeUploaded('farm-photos', [photo.url]).catch(() => {})
+      }, t(s.lang, 'photoWithdrawn'))
+    }
     case 'remove-notice':
       return save({ notice_text: null, notice_until: null }, t(s.lang, 'noticeRemoved'))
     case 'access-open':
@@ -384,7 +448,9 @@ root.addEventListener('click', (event) => {
 root.addEventListener('change', (event) => {
   const element = event.target
   const { action, kind } = element.dataset
-  if (action === 'accepts') {
+  if (action === 'photo-add') {
+    addPhotos(element.files)
+  } else if (action === 'accepts') {
     save({ accepts_requests: element.checked }, t(s.lang, element.checked ? 'requestsOn' : 'requestsOff'))
   } else if (action === 'available') {
     save({ products: productList().map((p) => (p.kind === kind ? { ...p, available: element.checked } : p)) }, t(s.lang, 'saved'))
@@ -468,6 +534,8 @@ root.addEventListener('submit', (event) => {
     }
     case 'custom':
       return addCustom(String(data.get('name') ?? '').trim(), data.get('category'), data.get('unit'))
+    case 'phone':
+      return act(() => rpc('producer_set_details', { p_data: { phone: String(data.get('phone') ?? '').trim() } }), t(s.lang, 'phoneSaved'))
     case 'change':
       // Indirizzo, foto e telefono li cambia l'admin: arriva tra le segnalazioni del pannello, segnata «dal maso».
       return act(async () => {

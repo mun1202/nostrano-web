@@ -165,12 +165,13 @@ export async function upload(bucket, path, file) {
     const data = await response.json().catch(() => ({}))
     throw new ApiError(data.error || data.message || 'upload_failed', response.status)
   }
-  return `${url}/storage/v1/object/public/${bucket}/${path}`
+  // Sempre un indirizzo intero: in prova `url` è /_supabase, e la foto si deve aprire anche da altre pagine.
+  return new URL(`${url}/storage/v1/object/public/${bucket}/${path}`, location.href).href
 }
 
 /** Toglie da Supabase Storage i file indicati con il loro indirizzo pubblico; gli altri indirizzi restano. */
 export async function removeUploaded(bucket, publicUrls) {
-  const prefix = `${url}/storage/v1/object/public/${bucket}/`
+  const prefix = new URL(`${url}/storage/v1/object/public/${bucket}/`, location.href).href
   const prefixes = publicUrls.filter((u) => u.startsWith(prefix)).map((u) => decodeURIComponent(u.slice(prefix.length)))
   if (!prefixes.length) return
   await fetch(`${url}/storage/v1/object/${bucket}`, {
@@ -178,4 +179,20 @@ export async function removeUploaded(bucket, publicUrls) {
     headers: { apikey: key, Authorization: `Bearer ${await accessToken()}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ prefixes }),
   }).catch(() => { /* resta un file in più, non un errore per chi usa il pannello */ })
+}
+
+/** Rimpicciolisce a 1600 px di lato e salva in JPEG: le foto del telefono pesano troppo (pannello e pagina del maso). */
+export async function shrink(file) {
+  try {
+    const bitmap = await createImageBitmap(file)
+    const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height))
+    const canvas = Object.assign(document.createElement('canvas'), {
+      width: Math.round(bitmap.width * scale), height: Math.round(bitmap.height * scale),
+    })
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.85))
+    return blob ?? file
+  } catch {
+    return file
+  }
 }

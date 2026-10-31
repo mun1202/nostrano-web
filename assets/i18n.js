@@ -247,9 +247,33 @@ const it = {
   vendingText: 'Un distributore o una casetta self-service, giorno e notte.',
   saveFarm: 'Salva',
   farmSaved: 'Scheda aggiornata',
-  changeTitle: 'Indirizzo, foto e telefono',
-  changeHelp: 'Li cambiamo noi: scrivi cosa va cambiato e ti rispondiamo su WhatsApp. Per le foto, scrivi che ne hai di nuove e te le chiediamo.',
-  changePlaceholder: 'Per esempio: il telefono nuovo è 333 1234567',
+  changeTitle: 'Altro da cambiare?',
+  changeHelp: 'Il nome del maso o qualcosa che qui non trovi: scrivici e lo cambiamo noi, ti rispondiamo su WhatsApp.',
+  changePlaceholder: 'Per esempio: il nome giusto è Maso Ventolino di sopra',
+  detailsTitle: 'Dove sei, telefono e foto',
+  placeTitle: 'Indirizzo del maso',
+  placeHelp: 'Cerca l\'indirizzo e conferma il punto sulla mappa: i clienti arrivano lì con «Indicazioni».',
+  placeSaved: 'Indirizzo aggiornato',
+  phoneTitle: 'Telefono del maso',
+  phoneHelp: 'Quello che i clienti chiamano con «Chiama». Vuoto: il pulsante non c\'è.',
+  phoneSaved: 'Telefono aggiornato',
+  photosTitle: 'Foto',
+  photosHelp: 'La prima è la copertina. Le foto nuove compaiono sulla scheda dopo un nostro controllo, di solito in giornata.',
+  photosNone: 'Ancora nessuna foto.',
+  photosAdd: 'Aggiungi foto',
+  photosUploading: 'Carico le foto…',
+  photosFull: 'Ci sono già 10 foto: per aggiungerne togline qualcuna.',
+  photosSent: ['Foto mandata: la controlliamo e la pubblichiamo', '{0} foto mandate: le controlliamo e le pubblichiamo'],
+  photoCover: 'Copertina',
+  photoMakeCover: 'Copertina',
+  photoPending: 'In attesa',
+  photoWithdraw: 'Ritira',
+  photoRemoved: 'Foto tolta',
+  photoCoverDone: 'Copertina cambiata',
+  photoWithdrawn: 'Foto ritirata',
+  error_bad_place: 'Cerca e conferma l\'indirizzo sulla mappa.',
+  error_bad_phone: 'Il numero è troppo lungo.',
+  error_bad_photos: 'Foto non valida o troppe foto.',
   changeSend: 'Invia la richiesta',
   changeSent: 'Inviata: ti rispondiamo su WhatsApp',
   error_too_many_changes: 'Hai già mandato molte richieste oggi: riprova domani.',
@@ -526,9 +550,33 @@ const de = {
   vendingText: 'Ein Automat oder ein Selbstbedienungshäuschen, Tag und Nacht.',
   saveFarm: 'Speichern',
   farmSaved: 'Profil aktualisiert',
-  changeTitle: 'Adresse, Fotos und Telefon',
-  changeHelp: 'Die ändern wir: Schreib, was geändert werden soll, wir antworten dir auf WhatsApp. Für Fotos schreib einfach, dass du neue hast, und wir fragen danach.',
-  changePlaceholder: 'Zum Beispiel: Die neue Nummer ist 333 1234567',
+  changeTitle: 'Noch etwas zu ändern?',
+  changeHelp: 'Der Name des Hofs oder etwas, das du hier nicht findest: Schreib uns, wir ändern es und antworten dir per WhatsApp.',
+  changePlaceholder: 'Zum Beispiel: Der richtige Name ist Oberer Ventolinohof',
+  detailsTitle: 'Wo du bist, Telefon und Fotos',
+  placeTitle: 'Adresse des Hofs',
+  placeHelp: 'Such die Adresse und bestätige den Punkt auf der Karte: Mit „Route“ kommen die Kunden dorthin.',
+  placeSaved: 'Adresse aktualisiert',
+  phoneTitle: 'Telefon des Hofs',
+  phoneHelp: 'Die Nummer, die Kunden mit „Anrufen“ wählen. Leer: Es gibt keinen Knopf.',
+  phoneSaved: 'Telefon aktualisiert',
+  photosTitle: 'Fotos',
+  photosHelp: 'Das erste ist das Titelbild. Neue Fotos erscheinen nach unserer Kontrolle auf dem Profil, meist am selben Tag.',
+  photosNone: 'Noch keine Fotos.',
+  photosAdd: 'Fotos hinzufügen',
+  photosUploading: 'Fotos werden geladen …',
+  photosFull: 'Es gibt schon 10 Fotos: Entferne zuerst welche.',
+  photosSent: ['Foto gesendet: Wir prüfen und veröffentlichen es', '{0} Fotos gesendet: Wir prüfen und veröffentlichen sie'],
+  photoCover: 'Titelbild',
+  photoMakeCover: 'Als Titelbild',
+  photoPending: 'Wird geprüft',
+  photoWithdraw: 'Zurückziehen',
+  photoRemoved: 'Foto entfernt',
+  photoCoverDone: 'Titelbild geändert',
+  photoWithdrawn: 'Foto zurückgezogen',
+  error_bad_place: 'Such die Adresse und bestätige sie auf der Karte.',
+  error_bad_phone: 'Die Nummer ist zu lang.',
+  error_bad_photos: 'Ungültiges Foto oder zu viele Fotos.',
   changeSend: 'Anfrage senden',
   changeSent: 'Gesendet: Wir antworten dir auf WhatsApp',
   error_too_many_changes: 'Du hast heute schon viele Anfragen geschickt: Versuch es morgen wieder.',
@@ -651,4 +699,29 @@ export function errorText(lang, error) {
 export function municipalityName(lang, code) {
   const names = MUNICIPALITIES[code]
   return names ? names[lang === 'de' ? 1 : 0] : code
+}
+
+/** "Bolzano", "Bozen" o "bolzano" diventano il codice; un comune nuovo resta come scritto. */
+// I nomi ufficiali lunghi dei comuni in elenco, come arrivano dalla ricerca dell'indirizzo. Non "comincia con":
+// Bolzano Vicentino non è Bolzano.
+const OFFICIAL_NAMES = {
+  appiano: ['Appiano sulla Strada del Vino', 'Eppan an der Weinstraße'],
+  caldaro: ['Caldaro sulla Strada del Vino', 'Kaltern an der Weinstraße'],
+  sanGenesio: ['San Genesio Atesino'],
+  cornedo: ["Cornedo all'Isarco"],
+}
+
+export function municipalityCode(text) {
+  const value = text.trim().toLowerCase()
+  return MUNICIPALITY_CODES.find((code) => [code, municipalityName('it', code), municipalityName('de', code), ...(OFFICIAL_NAMES[code] ?? [])]
+    .some((name) => name.toLowerCase() === value)) ?? text.trim()
+}
+
+/** Il comune trovato com'è nell'elenco ("Appiano sulla Strada del Vino" → Appiano), altrimenti com'è. */
+export function municipalityOf(found) {
+  for (const name of [found.comune, ...(found.comuni ?? [])]) {
+    const code = municipalityCode(name)
+    if (MUNICIPALITY_CODES.includes(code)) return municipalityName('it', code)
+  }
+  return found.comune
 }

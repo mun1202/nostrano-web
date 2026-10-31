@@ -138,7 +138,7 @@ export function km(d, c) {
 
 // Codici Unsplash per i masi di prova, indirizzi completi per le foto caricate dall'admin.
 export const foto = (id, w) =>
-  id.startsWith('https://') ? id : `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=75`
+  /^https?:\/\//.test(id) ? id : `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=75`
 
 export const linkMaso = (slug, c) => `${c.base}produttori/${encodeURIComponent(slug)}/`
 

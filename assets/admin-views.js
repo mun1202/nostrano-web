@@ -1,8 +1,8 @@
 // Le schermate del pannello admin, come HTML. Solo in italiano: lo usa chi gestisce Il mio contadino.
-import { esc } from './views.js?v=814dc9da84'
-import { CATEGORY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=814dc9da84'
-import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=814dc9da84'
-import { icon } from './icons.js?v=814dc9da84'
+import { esc } from './views.js?v=4c1a21cc08'
+import { CATEGORY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=4c1a21cc08'
+import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=4c1a21cc08'
+import { icon } from './icons.js?v=4c1a21cc08'
 
 const ROOT = window.NOSTRANO_ROOT ?? '/'
 const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1)
@@ -133,6 +133,20 @@ export function overview(a) {
       ${tiles.map(([value, label, href, tone]) => tile(value, label, href, value ? tone : '')).join('')}
     </div>`}
     <p class="muted small">${summary(o)}</p>
+    ${(a.photos ?? []).length ? `
+    <h2>Foto da controllare</h2>
+    <p class="muted small">Le hanno mandate i masi dalla loro pagina. «Pubblica» le mette in fondo alle foto della scheda.</p>
+    <div class="photo-review">${a.photos.map((p) => `
+      <figure class="card">
+        <img src="${esc(p.url)}" alt="" loading="lazy">
+        <figcaption><a href="#/maso/${encodeURIComponent(p.farm)}"><strong>${esc(p.farm_name)}</strong></a>
+          <small class="muted">${dateText(p.created_at, true)} · ${p.photos}/10 foto sulla scheda</small></figcaption>
+        <div class="row">
+          <button class="primary small" data-action="photo-ok" data-id="${p.id}" ${p.photos >= 10 ? 'disabled' : ''}>Pubblica</button>
+          <button class="secondary small" data-action="photo-no" data-id="${p.id}">Scarta</button>
+        </div>
+      </figure>`).join('')}
+    </div>` : ''}
     <div class="columns">
     <div>
     <h2>Da fare</h2>
@@ -395,7 +409,7 @@ function publishBox(f) {
 
 /** Le foto di prova sono codici Unsplash; quelle caricate sono indirizzi completi. */
 export const photoUrl = (photo, width = 400) =>
-  photo.startsWith('https://') ? photo : `https://images.unsplash.com/photo-${photo}?w=${width}&q=70`
+  /^https?:\/\//.test(photo) ? photo : `https://images.unsplash.com/photo-${photo}?w=${width}&q=70`
 
 function photosBox(a, f) {
   return `

@@ -1,6 +1,6 @@
 // Le parti della pagina, come HTML. Ogni testo che arriva dal database o dai clienti passa da esc().
-import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=814dc9da84'
-import { WEEK, addDays, dayRanges, formatDay, formatInstant, minuteNowRome, openDays, toClock, todayRome, weekday, weekdayName } from './days.js?v=814dc9da84'
+import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=4c1a21cc08'
+import { WEEK, addDays, dayRanges, formatDay, formatInstant, minuteNowRome, openDays, toClock, todayRome, weekday, weekdayName } from './days.js?v=4c1a21cc08'
 
 export const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
@@ -140,14 +140,59 @@ export function farm(s) {
       ${toggle('vending', 'vending', 'vendingText', f.has_vending_24h)}
       <button type="submit" class="primary wide">${t(s.lang, 'saveFarm')}</button>
     </form>
-    ${s.admin ? '' : `
+`
+}
+
+/**
+ * Indirizzo, telefono e foto: il maso li cambia da solo (producer_set_details). Le foto nuove le carica nella sua
+ * cartella e restano «In attesa» finché l'admin non le pubblica. Per il resto (il nome…) c'è «Chiedi una modifica».
+ */
+export function details(s) {
+  if (s.admin) return ''
+  const f = s.farm
+  const pending = s.pendingPhotos ?? []
+  const full = f.photos.length + pending.length >= 10
+  const photo = (inner, extra = '') => `<figure class="photo-item${extra}">${inner}</figure>`
+  return `
+    <h2>${t(s.lang, 'detailsTitle')}</h2>
+    <div class="card stack">
+      <strong>${t(s.lang, 'placeTitle')}</strong>
+      <small class="muted">${t(s.lang, 'placeHelp')}</small>
+      <div data-ref="luogo"></div>
+    </div>
+    <form data-form="phone" class="card stack">
+      <label class="stack"><strong>${t(s.lang, 'phoneTitle')}</strong>
+        <small class="muted">${t(s.lang, 'phoneHelp')}</small>
+        <input name="phone" type="tel" maxlength="60" autocomplete="tel" value="${esc(f.phone ?? '')}" placeholder="0471 123456">
+      </label>
+      <button type="submit" class="secondary">${t(s.lang, 'save')}</button>
+    </form>
+    <div class="card stack">
+      <strong>${t(s.lang, 'photosTitle')}</strong>
+      <small class="muted">${t(s.lang, 'photosHelp')}</small>
+      ${f.photos.length || pending.length ? `<div class="photo-grid">
+        ${f.photos.map((url, i) => photo(`<img src="${esc(photoUrl(url, 480))}" alt="" loading="lazy">
+          ${i === 0 ? `<span class="pill photo-tag">${t(s.lang, 'photoCover')}</span>` : ''}
+          <div class="photo-actions">
+            ${i ? `<button type="button" class="secondary small" data-action="photo-cover" data-day="${i}">${t(s.lang, 'photoMakeCover')}</button>` : ''}
+            <button type="button" class="secondary small" data-action="photo-remove" data-day="${i}">${t(s.lang, 'remove')}</button>
+          </div>`)).join('')}
+        ${pending.map((p) => photo(`<img src="${esc(p.url)}" alt="" loading="lazy">
+          <span class="pill photo-tag">${t(s.lang, 'photoPending')}</span>
+          <div class="photo-actions"><button type="button" class="secondary small" data-action="photo-withdraw" data-id="${p.id}">${t(s.lang, 'photoWithdraw')}</button></div>`, ' pending')).join('')}
+      </div>` : `<p class="muted">${t(s.lang, 'photosNone')}</p>`}
+      ${full ? `<p class="muted small">${t(s.lang, 'photosFull')}</p>` : `
+      <label class="button secondary photo-add">${t(s.lang, s.uploading ? 'photosUploading' : 'photosAdd')}
+        <input type="file" accept="image/*" multiple data-action="photo-add" hidden ${s.uploading ? 'disabled' : ''}>
+      </label>`}
+    </div>
     <form data-form="change" class="card stack">
       <label class="stack"><strong>${t(s.lang, 'changeTitle')}</strong>
         <small class="muted">${t(s.lang, 'changeHelp')}</small>
         <textarea name="message" rows="3" maxlength="1000" required placeholder="${esc(t(s.lang, 'changePlaceholder'))}"></textarea>
       </label>
       <button type="submit" class="secondary">${t(s.lang, 'changeSend')}</button>
-    </form>`}`
+    </form>`
 }
 
 export function confirm(s) {
@@ -682,7 +727,7 @@ export function footer(s) {
 // Anteprime (colonna a destra sul computer): come i clienti vedono la parte della scheda che si sta modificando.
 
 const photoUrl = (photo, width = 400) =>
-  photo.startsWith('https://') ? photo : `https://images.unsplash.com/photo-${photo}?auto=format&fit=crop&w=${width}&q=70`
+  /^https?:\/\//.test(photo) ? photo : `https://images.unsplash.com/photo-${photo}?auto=format&fit=crop&w=${width}&q=70`
 
 const previewCard = (s, title, body) => `
     <div class="card preview">

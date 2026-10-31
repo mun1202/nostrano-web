@@ -5,9 +5,9 @@
 //           segnaposto, e si può anche toccare il maso direttamente. "Conferma l'indirizzo".
 //   fatto   una riga con l'indirizzo e "Cambia".
 // cambia(luogo) arriva alla conferma: { indirizzo, comune, comuni, lat, lng }. Senza cartina non c'è la mappa.
-import { esc } from './comune.js?v=814dc9da84'
-import { cercaIndirizzo, luogoDelPunto } from './indirizzo.js?v=814dc9da84'
-import { mappaPunto } from './punto.js?v=814dc9da84'
+import { esc } from './comune.js?v=4c1a21cc08'
+import { cercaIndirizzo, luogoDelPunto } from './indirizzo.js?v=4c1a21cc08'
+import { mappaPunto } from './punto.js?v=4c1a21cc08'
 
 // La pausa dopo l'ultima lettera prima di cercare: a ogni lettera sarebbero troppe richieste per Photon.
 const PAUSA = 450
