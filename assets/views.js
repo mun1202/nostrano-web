@@ -1,6 +1,6 @@
 // Le parti della pagina, come HTML. Ogni testo che arriva dal database o dai clienti passa da esc().
-import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=66128a0433'
-import { WEEK, addDays, dayRanges, formatDay, formatInstant, minuteNowRome, openDays, toClock, todayRome, weekday, weekdayName } from './days.js?v=66128a0433'
+import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=d14949dd38'
+import { WEEK, addDays, dayRanges, formatDay, formatInstant, minuteNowRome, openDays, toClock, todayRome, weekday, weekdayName } from './days.js?v=d14949dd38'
 
 export const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
@@ -182,10 +182,7 @@ function proposalForm(s, request) {
 function requestCard(s, request) {
   return `
     <article class="card request">
-      <div class="row">
-        <div><strong>${esc(request.name)}</strong><br><span class="muted small">${esc(capitalize(formatDay(request.day, s.lang)))}</span></div>
-        <button class="link danger small" data-action="block" data-id="${esc(request.id)}">${t(s.lang, 'block')}</button>
-      </div>
+      <div><strong>${esc(request.name)}</strong><br><span class="muted small">${esc(capitalize(formatDay(request.day, s.lang)))}</span></div>
       ${linesHtml(s, request)}
       ${request.note ? `<p class="muted"><em>“${esc(request.note)}”</em></p>` : ''}
       ${s.proposing === request.id ? proposalForm(s, request) : `
@@ -194,6 +191,8 @@ function requestCard(s, request) {
           <button class="secondary" data-action="answer" data-status="declined" data-id="${esc(request.id)}">${t(s.lang, 'dontHave')}</button>
           <button class="secondary" data-action="propose" data-id="${esc(request.id)}">${t(s.lang, 'otherDay')}</button>
         </div>`}
+      <!-- Serve di rado: in fondo e in grigio, non accanto al nome del cliente (nell'app sta nel menu «…»). -->
+      <button class="link danger small request-block" data-action="block" data-id="${esc(request.id)}">${t(s.lang, 'block')}</button>
     </article>`
 }
 

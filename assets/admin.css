@@ -27,8 +27,8 @@ body.admin h1 { font-size: 24px; }
 .faded { opacity: 0.55; }
 
 .pill.green { background: var(--green-soft); color: var(--green); }
-.pill.terracotta { background: var(--terracotta-soft); color: var(--terracotta); }
-.pill.blue { background: var(--blue-soft); color: var(--blue); }
+.pill.terracotta { color: var(--amber); }
+.pill.blue { color: var(--ink); }
 
 /* Panoramica: numeri sobri; quelli che chiedono attenzione hanno il numero colorato. */
 .tiles.four { grid-template-columns: repeat(4, 1fr); }
@@ -38,7 +38,7 @@ a.tile:hover { border-color: #d4d4d8; box-shadow: 0 2px 8px rgba(24, 24, 27, 0.0
 .tile { flex-direction: column-reverse; justify-content: flex-end; }
 .tile.green strong { color: var(--green); }
 .tile.amber strong { color: var(--amber); }
-.tile.terracotta strong { color: var(--terracotta); }
+.tile.terracotta strong { color: var(--amber); }
 
 .filters { display: flex; flex-direction: column; gap: 10px; margin: 16px 0 12px; }
 .filters input[type="search"] { width: 100%; }
@@ -73,9 +73,9 @@ a.tile:hover { border-color: #d4d4d8; box-shadow: 0 2px 8px rgba(24, 24, 27, 0.0
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 .farm-row.green { border-left-color: var(--green); }
-.farm-row.amber { border-left-color: #d29b2c; }
-.farm-row.blue { border-left-color: #5b84b8; }
-.farm-row.terracotta { border-left-color: var(--terracotta); }
+.farm-row.amber { border-left-color: var(--amber); }
+.farm-row.blue { border-left-color: var(--line-strong); }
+.farm-row.terracotta { border-left-color: var(--amber); }
 .farm-row:hover { box-shadow: 0 2px 8px rgba(24, 24, 27, 0.07); }
 
 .page-head { margin: 0 0 8px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }

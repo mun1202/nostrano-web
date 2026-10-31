@@ -1,11 +1,11 @@
 // Pagina del produttore: si apre dal link personale https://ilmiocontadino.com/modifica/<token>.
 // Fa le stesse cose dell'area produttore dell'app, con le stesse funzioni del database.
-import { ROOT, accountEmail, linkCode, rpc, sendCode, signOut, verifyCode } from './api.js?v=66128a0433'
-import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=66128a0433'
-import { WEEK, fromClock, todayRome } from './days.js?v=66128a0433'
-import * as views from './views.js?v=66128a0433'
-import * as notify from './notify.js?v=66128a0433'
-import { icon } from './icons.js?v=66128a0433'
+import { ROOT, accountEmail, linkCode, rpc, sendCode, signOut, verifyCode } from './api.js?v=d14949dd38'
+import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=d14949dd38'
+import { WEEK, fromClock, todayRome } from './days.js?v=d14949dd38'
+import * as views from './views.js?v=d14949dd38'
+import * as notify from './notify.js?v=d14949dd38'
+import { icon } from './icons.js?v=d14949dd38'
 
 const root = document.querySelector('#app')
 const nav = document.querySelector('#nav')
@@ -79,7 +79,7 @@ function render() {
 function renderNav() {
   const waiting = s.requests.filter(views.isWaiting).length
   nav.innerHTML = visiblePages().map((p) => `
-    <a href="#/${p.route}" ${p.route === s.route ? 'aria-current="page"' : ''}>${icon(p.icon)}<span>${t(s.lang, p.label)}</span>${
+    <a href="#/${p.route}" ${p.route === s.route ? 'aria-current="page"' : ''}>${icon(p.icon)}<span class="label">${t(s.lang, p.label)}</span><span class="label-short">${t(s.lang, `${p.label}_short`)}</span>${
       p.route === 'richieste' && waiting ? `<span class="count">${waiting}</span>` : ''}</a>`).join('')
 }
 
