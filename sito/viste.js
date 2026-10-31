@@ -5,7 +5,7 @@ import {
   dataEstesa, esc, fasce, fasceTesto, filtriAttivi, foto, giorniA, giorniDa, giorno, icona, maiuscola, nomeProdotto,
   normalizza, novita, oraScelta, orario, prezzo, prodottiPresenti, riassunto, riassuntoCosa, riassuntoDove,
   riassuntoQuando, stato, titolo,
-} from './comune.js?v=1e72ab56fe'
+} from './comune.js?v=764ded37ff'
 
 // Home ---------------------------------------------------------------------------------------------
 
@@ -175,8 +175,8 @@ export const passiTelefono = (aperto, r, c, farms, ui) => PASSI.map((p) => {
 export const vistaBottoni = (c) =>
   `<button type="button" data-vista="list" aria-label="${esc(c.T.elenco)}" aria-pressed="true">${icona('list')}<span>${esc(c.T.elenco)}</span></button>` +
   `<button type="button" data-vista="grid" aria-label="${esc(c.T.fotoGrandi)}" aria-pressed="false">${icona('grid')}<span>${esc(c.T.foto)}</span></button>` +
-  // La mappa c'è solo se il sito ha il file della cartina (npm run mappa:prepara).
-  (c.sito?.cartina ? `<button type="button" data-vista="mappa" aria-label="${esc(c.T.mappa)}" aria-pressed="false">${icona('map')}<span>${esc(c.T.mappa)}</span></button>` : '')
+  // La mappa c'è solo se il sito la ha (mappa in impostazioni.mjs).
+  (c.sito?.mappa ? `<button type="button" data-vista="mappa" aria-label="${esc(c.T.mappa)}" aria-pressed="false">${icona('map')}<span>${esc(c.T.mappa)}</span></button>` : '')
 
 export const promesse = (c) => c.T.promesse.map((t) => `<li>${icona('check')}${esc(t)}</li>`).join('')
 

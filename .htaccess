@@ -14,7 +14,6 @@ Require valid-user
 AddType text/javascript .js .mjs
 AddType application/manifest+json .webmanifest
 AddType application/x-protobuf .pbf
-AddType application/octet-stream .pmtiles
 
 RewriteEngine On
 RewriteCond %{HTTPS} off [OR]
@@ -24,14 +23,14 @@ RewriteRule ^ https://ilmiocontadino.com%{REQUEST_URI} [L,R=301]
 <IfModule mod_headers.c>
   Header always set X-Content-Type-Options "nosniff"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
-  # Pagine sempre fresche; script e stili hanno "?v=" e possono restare in cache; cartina e caratteri cambiano di rado.
+  # Pagine sempre fresche; script e stili hanno "?v=" e possono restare in cache; i caratteri della mappa cambiano di rado.
   <FilesMatch "\.html$">
     Header set Cache-Control "no-cache"
   </FilesMatch>
   <FilesMatch "\.(js|mjs|css)$">
     Header set Cache-Control "public, max-age=86400"
   </FilesMatch>
-  <FilesMatch "\.(pmtiles|pbf|png|svg|webmanifest)$">
+  <FilesMatch "\.(pbf|png|svg|webmanifest)$">
     Header set Cache-Control "public, max-age=604800"
   </FilesMatch>
 </IfModule>

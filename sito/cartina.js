@@ -1,9 +1,8 @@
 // La vista "Mappa" della home e delle pagine dei paesi e dei prodotti: MapLibre (in sito/vendor/maplibre, caricato
-// solo quando si apre la vista) con le tessere di mappa/zona.pmtiles lette a pezzi dal nostro sito. Niente servizi di
-// mappe e niente account: i dati sono di OpenStreetMap, ritagliati da npm run mappa:prepara.
+// solo quando si apre la vista) con le tessere di OpenStreetMap di OpenFreeMap, per tutta l'Italia (mappa in
+// web/genera/impostazioni.mjs). Niente account né chiavi; i caratteri stanno sul nostro sito.
 // Colori naturali e vivi (boschi verdi, acqua azzurra, strade principali gialle): i segnaposti bianchi restano in primo piano.
-import { aperto, categoria, esc, icona, scheda, stato } from './comune.js?v=1e72ab56fe'
-import { GZIP, archivio } from './pmtiles.js?v=1e72ab56fe'
+import { aperto, categoria, esc, icona, scheda, stato } from './comune.js?v=764ded37ff'
 
 const CHIARO = {
   terra: '#f2efe4',
@@ -40,92 +39,73 @@ function caricaLibreria(cartella) {
   return libreria
 }
 
-// Il file della cartina letto a pezzi. Se il server non sa rispondere a pezzi (Range), lo si scarica intero una volta.
-function archivioDa(url) {
-  let intero = null
-  const leggi = async (offset, length) => {
-    if (intero) return new Uint8Array(await intero, offset, length)
-    const r = await fetch(url, { headers: { Range: `bytes=${offset}-${offset + length - 1}` } })
-    if (r.status === 206) return new Uint8Array(await r.arrayBuffer())
-    if (!r.ok) throw new Error(`cartina ${r.status}`)
-    intero = r.arrayBuffer()
-    return new Uint8Array(await intero, offset, length)
-  }
-  const decomprimi = async (byte, compressione) => {
-    if (compressione !== GZIP) return byte
-    const flusso = new Blob([byte]).stream().pipeThrough(new DecompressionStream('gzip'))
-    return new Uint8Array(await new Response(flusso).arrayBuffer())
-  }
-  return archivio(leggi, decomprimi)
-}
-
-/** Lo stile della cartina: pochi livelli, i nomi nella lingua della pagina. */
+/**
+ * Lo stile della cartina sulle tessere di OpenFreeMap (schema OpenMapTiles): pochi livelli, i nomi nella lingua della
+ * pagina. Gallerie e ponti si disegnano come le strade normali, senza distinzioni: alla scala dei masi bastano.
+ */
 function stile(cartina, lang, colori = CHIARO) {
-  const nome = ['coalesce', ['get', `name:${lang}`], ['get', 'name']]
-  const tipo = (...k) => ['in', ['get', 'kind'], ['literal', k]]
+  // Fuori dall'Italia il nome nella lingua della pagina spesso manca: allora quello in alfabeto latino, che i nostri
+  // caratteri sanno scrivere (Tunisi e non تونس).
+  const nome = ['coalesce', ['get', `name:${lang}`], ['get', 'name:latin'], ['get', 'name']]
+  const classe = (...k) => ['in', ['get', 'class'], ['literal', k]]
+  const senzaGallerie = (filtro) => ['all', ['!=', ['get', 'brunnel'], 'tunnel'], filtro]
   const larghezza = (pezzi) => ['interpolate', ['exponential', 1.6], ['zoom'], ...pezzi]
+  const PRINCIPALI = ['motorway', 'trunk', 'primary', 'secondary', 'tertiary']
   return {
     version: 8,
     glyphs: cartina.font,
     sources: {
-      zona: {
-        type: 'vector',
-        tiles: ['nostrano://zona/{z}/{x}/{y}'],
-        minzoom: 0,
-        maxzoom: cartina.maxZoom,
-        bounds: cartina.limiti,
-        attribution: '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a> · <a href="https://protomaps.com" target="_blank" rel="noopener">Protomaps</a>',
-      },
+      // L'indirizzo TileJSON dice dove stanno le tessere e porta l'attribuzione (OpenFreeMap, OpenMapTiles, OpenStreetMap).
+      italia: { type: 'vector', url: cartina.tessere },
     },
     layers: [
       { id: 'sfondo', type: 'background', paint: { 'background-color': colori.terra } },
-      { id: 'terra', type: 'fill', source: 'zona', 'source-layer': 'earth', paint: { 'fill-color': colori.terra } },
-      { id: 'copertura', type: 'fill', source: 'zona', 'source-layer': 'landcover', paint: {
-        'fill-color': ['match', ['get', 'kind'], ['forest', 'scrub'], colori.bosco, 'glacier', colori.ghiaccio, 'urban_area', colori.citta, colori.campi],
+      { id: 'copertura', type: 'fill', source: 'italia', 'source-layer': 'landcover', paint: {
+        'fill-color': ['match', ['get', 'class'], 'wood', colori.bosco, 'ice', colori.ghiaccio, ['grass', 'farmland', 'wetland'], colori.campi, colori.terra],
       } },
-      { id: 'boschi', type: 'fill', source: 'zona', 'source-layer': 'landuse', filter: tipo('forest', 'wood', 'scrub', 'nature_reserve', 'national_park', 'protected_area', 'park'), paint: { 'fill-color': colori.bosco } },
-      { id: 'campi', type: 'fill', source: 'zona', 'source-layer': 'landuse', filter: tipo('farmland', 'orchard', 'vineyard', 'meadow', 'grassland', 'allotments'), paint: { 'fill-color': colori.campi } },
-      { id: 'abitato', type: 'fill', source: 'zona', 'source-layer': 'landuse', filter: tipo('residential', 'industrial', 'commercial', 'retail', 'railway', 'military'), paint: { 'fill-color': colori.citta } },
-      { id: 'ghiacciai', type: 'fill', source: 'zona', 'source-layer': 'landuse', filter: tipo('glacier'), paint: { 'fill-color': colori.ghiaccio } },
-      { id: 'acqua', type: 'fill', source: 'zona', 'source-layer': 'water', filter: ['==', ['geometry-type'], 'Polygon'], paint: { 'fill-color': colori.acqua } },
-      { id: 'fiumi', type: 'line', source: 'zona', 'source-layer': 'water', filter: ['==', ['geometry-type'], 'LineString'], paint: {
-        'line-color': colori.acqua, 'line-width': larghezza([9, 0.5, 14, ['match', ['get', 'kind'], 'river', 4, 1.5]]),
+      { id: 'parchi', type: 'fill', source: 'italia', 'source-layer': 'park', paint: { 'fill-color': colori.bosco, 'fill-opacity': 0.5 } },
+      { id: 'abitato', type: 'fill', source: 'italia', 'source-layer': 'landuse', filter: classe('residential', 'suburb', 'neighbourhood', 'industrial', 'commercial', 'retail', 'railway', 'military'), paint: { 'fill-color': colori.citta } },
+      { id: 'acqua', type: 'fill', source: 'italia', 'source-layer': 'water', filter: ['!=', ['get', 'brunnel'], 'tunnel'], paint: { 'fill-color': colori.acqua } },
+      { id: 'fiumi', type: 'line', source: 'italia', 'source-layer': 'waterway', minzoom: 8, filter: ['!=', ['get', 'brunnel'], 'tunnel'], paint: {
+        'line-color': colori.acqua, 'line-width': larghezza([8, 0.5, 14, ['match', ['get', 'class'], 'river', 4, 1.5]]),
       } },
-      { id: 'edifici', type: 'fill', source: 'zona', 'source-layer': 'buildings', minzoom: 13, paint: { 'fill-color': colori.edifici, 'fill-opacity': ['interpolate', ['linear'], ['zoom'], 13, 0, 14, 1] } },
-      { id: 'confini', type: 'line', source: 'zona', 'source-layer': 'boundaries', filter: tipo('country', 'region'), paint: {
-        'line-color': colori.confini, 'line-width': ['match', ['get', 'kind'], 'country', 1.4, 0.9], 'line-dasharray': [3, 2],
+      { id: 'edifici', type: 'fill', source: 'italia', 'source-layer': 'building', minzoom: 13, paint: { 'fill-color': colori.edifici, 'fill-opacity': ['interpolate', ['linear'], ['zoom'], 13, 0, 14, 1] } },
+      // Confini di stato e di regione; quelli in mare no.
+      { id: 'confini', type: 'line', source: 'italia', 'source-layer': 'boundary', filter: ['all', ['in', ['get', 'admin_level'], ['literal', [2, 4]]], ['!=', ['get', 'maritime'], 1]], paint: {
+        'line-color': colori.confini, 'line-width': ['match', ['get', 'admin_level'], 2, 1.4, 0.9], 'line-dasharray': [3, 2],
       } },
-      { id: 'sentieri', type: 'line', source: 'zona', 'source-layer': 'roads', minzoom: 13, filter: tipo('path'), paint: {
+      { id: 'sentieri', type: 'line', source: 'italia', 'source-layer': 'transportation', minzoom: 13, filter: senzaGallerie(classe('path', 'track')), paint: {
         'line-color': colori.sentieri, 'line-width': 0.8, 'line-dasharray': [2, 1.5],
       } },
-      { id: 'ferrovia', type: 'line', source: 'zona', 'source-layer': 'roads', minzoom: 10, filter: tipo('rail'), paint: {
+      { id: 'ferrovia', type: 'line', source: 'italia', 'source-layer': 'transportation', minzoom: 10, filter: senzaGallerie(classe('rail')), paint: {
         'line-color': colori.ferrovia, 'line-width': 1, 'line-dasharray': [3, 2],
       } },
-      { id: 'bordo-strade', type: 'line', source: 'zona', 'source-layer': 'roads', minzoom: 11, filter: tipo('minor_road', 'other'), layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: {
+      { id: 'bordo-strade', type: 'line', source: 'italia', 'source-layer': 'transportation', minzoom: 11, filter: senzaGallerie(classe('minor', 'service')), layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: {
         'line-color': colori.bordoStrade, 'line-width': larghezza([11, 0.5, 15, 7]),
       } },
-      { id: 'bordo-principali', type: 'line', source: 'zona', 'source-layer': 'roads', minzoom: 7, filter: tipo('major_road', 'highway'), layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: {
-        'line-color': ['match', ['get', 'kind'], 'highway', colori.bordoAutostrade, colori.bordoStrade],
-        'line-width': larghezza([7, 1, 15, ['match', ['get', 'kind'], 'highway', 12, 10]]),
+      { id: 'bordo-principali', type: 'line', source: 'italia', 'source-layer': 'transportation', minzoom: 6, filter: senzaGallerie(classe(...PRINCIPALI)), layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: {
+        'line-color': ['match', ['get', 'class'], 'motorway', colori.bordoAutostrade, colori.bordoStrade],
+        'line-width': larghezza([6, 1, 15, ['match', ['get', 'class'], 'motorway', 12, 10]]),
       } },
-      { id: 'strade', type: 'line', source: 'zona', 'source-layer': 'roads', minzoom: 12, filter: tipo('minor_road', 'other'), layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: {
+      { id: 'strade', type: 'line', source: 'italia', 'source-layer': 'transportation', minzoom: 12, filter: senzaGallerie(classe('minor', 'service')), layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: {
         'line-color': colori.strade, 'line-width': larghezza([12, 0.5, 15, 5]),
       } },
-      { id: 'principali', type: 'line', source: 'zona', 'source-layer': 'roads', minzoom: 8, filter: tipo('major_road', 'highway'), layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: {
+      { id: 'principali', type: 'line', source: 'italia', 'source-layer': 'transportation', minzoom: 7, filter: senzaGallerie(classe(...PRINCIPALI)), layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: {
         // Strade principali e autostrade in giallo chiaro, come sulle mappe di tutti i giorni: ci si orienta prima.
-        'line-color': colori.principali, 'line-width': larghezza([8, 0.5, 15, ['match', ['get', 'kind'], 'highway', 9, 7.5]]),
+        'line-color': colori.principali, 'line-width': larghezza([7, 0.5, 15, ['match', ['get', 'class'], 'motorway', 9, 7.5]]),
       } },
-      { id: 'nomi-strade', type: 'symbol', source: 'zona', 'source-layer': 'roads', minzoom: 14, filter: tipo('major_road', 'minor_road'), layout: {
+      { id: 'nomi-strade', type: 'symbol', source: 'italia', 'source-layer': 'transportation_name', minzoom: 14, filter: classe(...PRINCIPALI, 'minor'), layout: {
         'symbol-placement': 'line', 'text-field': nome, 'text-font': ['Noto Sans Regular'], 'text-size': 11,
       }, paint: { 'text-color': colori.testoTenue, 'text-halo-color': colori.alone, 'text-halo-width': 1.5 } },
-      { id: 'nomi-acqua', type: 'symbol', source: 'zona', 'source-layer': 'water', minzoom: 11, filter: ['==', ['geometry-type'], 'Point'], layout: {
+      { id: 'nomi-acqua', type: 'symbol', source: 'italia', 'source-layer': 'water_name', minzoom: 11, layout: {
         'text-field': nome, 'text-font': ['Noto Sans Regular'], 'text-size': 11,
       }, paint: { 'text-color': '#5f8196', 'text-halo-color': colori.alone, 'text-halo-width': 1.2 } },
-      { id: 'paesi', type: 'symbol', source: 'zona', 'source-layer': 'places', filter: tipo('locality'), layout: {
+      { id: 'paesi', type: 'symbol', source: 'italia', 'source-layer': 'place', filter: classe('city', 'town', 'village', 'hamlet'), layout: {
         'text-field': nome,
-        'text-font': ['case', ['in', ['get', 'kind_detail'], ['literal', ['city', 'town']]], ['literal', ['Noto Sans Medium']], ['literal', ['Noto Sans Regular']]],
-        'text-size': ['interpolate', ['linear'], ['zoom'], 8, ['match', ['get', 'kind_detail'], 'city', 13, 'town', 12, 10.5], 14, ['match', ['get', 'kind_detail'], 'city', 17, 'town', 15, 13]],
-        'symbol-sort-key': ['get', 'min_zoom'],
+        'text-font': ['case', classe('city', 'town'), ['literal', ['Noto Sans Medium']], ['literal', ['Noto Sans Regular']]],
+        'text-size': ['interpolate', ['linear'], ['zoom'], 6, ['match', ['get', 'class'], 'city', 13, 'town', 11, 10], 14, ['match', ['get', 'class'], 'city', 17, 'town', 15, 13]],
+        // Prima le città, poi i paesi più grandi: con tutta l'Italia i nomi si contendono lo spazio.
+        'symbol-sort-key': ['get', 'rank'],
         'text-max-width': 8,
         // Sotto il punto del paese: i segnaposti dei masi (sopra la cartina) coprono meno i nomi.
         'text-anchor': 'top',
@@ -136,7 +116,7 @@ function stile(cartina, lang, colori = CHIARO) {
 }
 
 /**
- * La cartina in "contenitore". cartina: { file, font, libreria, limiti, maxZoom } dal generatore.
+ * La cartina in "contenitore". cartina: { tessere, font, libreria, limiti } dal generatore.
  * prepara(elemento): chi la usa sistema la scheda aperta (i cuori dei preferiti).
  * Restituisce { mostra(lista, opzioni), posizione(punto), ridisegna() }.
  */
@@ -147,7 +127,6 @@ export async function creaCartina({ contenitore, cartina: dalGeneratore, c, prep
   const pieno = (p) => new URL(p, location.href).href
   const cartina = {
     ...dalGeneratore,
-    file: pieno(dalGeneratore.file),
     libreria: pieno(dalGeneratore.libreria),
     font: `${pieno(dalGeneratore.font)}{fontstack}/{range}.pbf`,
   }
@@ -157,20 +136,15 @@ export async function creaCartina({ contenitore, cartina: dalGeneratore, c, prep
     contenitore.querySelector('.cartina-carica').textContent = T.mappaNo
     throw new Error('webgl')
   }
-  const zona = archivioDa(cartina.file)
-  maplibregl.addProtocol('nostrano', async ({ url }) => {
-    const [z, x, y] = url.split('/').slice(-3).map(Number)
-    return { data: (await zona.tessera(z, x, y)) ?? new Uint8Array(0) }
-  })
-
   const [o, s, e, n] = cartina.limiti
-  const margine = 0.15
+  const margine = 0.1
   const map = new maplibregl.Map({
     container: contenitore.querySelector('.cartina-mappa'),
     style: stile(cartina, c.lang),
     bounds: cartina.limiti,
     maxBounds: [o - (e - o) * margine, s - (n - s) * margine, e + (e - o) * margine, n + (n - s) * margine],
-    minZoom: 8,
+    // Da tutta l'Italia al singolo maso.
+    minZoom: 4,
     maxZoom: 17,
     attributionControl: { compact: true },
     dragRotate: false,

@@ -1,9 +1,9 @@
 // Pagine semplici del sito pubblico (mercati, come funziona, privacy…): la barra in alto e, dove ci sono
 // schede di masi, lo stato "aperto ora" ricalcolato ogni minuto, come nella home.
-import { badge, rigaStato, stato } from './comune.js?v=1e72ab56fe'
-import { adesso, barra, frammento, ogniMinuto, pagina } from './browser.js?v=1e72ab56fe'
-import { suggerisci } from './suggerisci.js?v=1e72ab56fe'
-import { account } from './accedi.js?v=1e72ab56fe'
+import { badge, rigaStato, stato } from './comune.js?v=764ded37ff'
+import { adesso, barra, frammento, ogniMinuto, pagina } from './browser.js?v=764ded37ff'
+import { suggerisci } from './suggerisci.js?v=764ded37ff'
+import { account } from './accedi.js?v=764ded37ff'
 
 barra()
 suggerisci()
