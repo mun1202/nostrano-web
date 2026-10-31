@@ -1,10 +1,10 @@
 // Pannello admin: si apre con un link di accesso (https://ilmiocontadino.com/admin/<codice>), poi il browser resta abilitato.
 // Da qui si creano le schede in bozza, si invitano i masi su WhatsApp e si pubblica.
-import { ROOT, linkCode, removeUploaded, rpc, upload } from './api.js?v=d14949dd38'
-import { MUNICIPALITY_CODES, municipalityName } from './i18n.js?v=d14949dd38'
-import * as views from './admin-views.js?v=d14949dd38'
-import { sceltaLuogo } from '../sito/luogo.js?v=d14949dd38'
-import { TESTI } from '../sito/testi.js?v=d14949dd38'
+import { ROOT, linkCode, removeUploaded, rpc, upload } from './api.js?v=61e746c333'
+import { MUNICIPALITY_CODES, municipalityName } from './i18n.js?v=61e746c333'
+import * as views from './admin-views.js?v=61e746c333'
+import { sceltaLuogo } from '../sito/luogo.js?v=61e746c333'
+import { TESTI } from '../sito/testi.js?v=61e746c333'
 
 const root = document.querySelector('#app')
 const navigation = document.querySelector('#nav')

@@ -363,7 +363,7 @@ const it = {
   spiegazioni: {
     waiting: (fino) => `Il maso non ha ancora risposto. Se non risponde entro ${fino}, la richiesta scade.`,
     accepted: 'Te lo tiene da parte: passa nel giorno scelto, negli orari di apertura. Paghi al maso.',
-    other_day: 'Il maso ti propone un altro giorno e lo tiene da parte per quello. Se non ti va bene, annulla.',
+    other_day: 'Il maso ti propone un altro giorno e lo tiene da parte per quello. Confermalo con «Va bene», o annulla se non ti va.',
     declined: "Questa volta non ce l'ha. Puoi chiedere un'altra volta o chiamare.",
     cancelled: 'Hai annullato la richiesta.',
     expired: 'Il maso non ha risposto in tempo. Puoi chiamare o riprovare.',
@@ -371,6 +371,7 @@ const it = {
     no_show: 'Il maso ha segnato che non sei passato.',
   },
   annullaRichiesta: 'Annulla',
+  vaBene: (g) => `Va bene ${g}`,
   annullareDomanda: 'Annullare la richiesta?',
   annullaConferma: 'Annulla la richiesta',
   tienila: 'Tienila',
@@ -750,7 +751,7 @@ const de = {
   spiegazioni: {
     waiting: (fino) => `Der Hof hat noch nicht geantwortet. Ohne Antwort bis ${fino} verfällt die Anfrage.`,
     accepted: 'Der Hof legt es dir zurück: Komm am gewählten Tag zu den Öffnungszeiten. Bezahlt wird am Hof.',
-    other_day: 'Der Hof schlägt dir einen anderen Tag vor und legt es dafür zurück. Wenn er dir nicht passt, zieh die Anfrage zurück.',
+    other_day: 'Der Hof schlägt dir einen anderen Tag vor und legt es dafür zurück. Bestätige mit „Passt“, oder zieh die Anfrage zurück.',
     declined: 'Diesmal hat er es nicht. Du kannst ein anderes Mal fragen oder anrufen.',
     cancelled: 'Du hast die Anfrage zurückgezogen.',
     expired: 'Der Hof hat nicht rechtzeitig geantwortet. Du kannst anrufen oder es erneut versuchen.',
@@ -758,6 +759,7 @@ const de = {
     no_show: 'Der Hof hat vermerkt, dass du nicht gekommen bist.',
   },
   annullaRichiesta: 'Zurückziehen',
+  vaBene: (g) => `${g} passt`,
   annullareDomanda: 'Anfrage zurückziehen?',
   annullaConferma: 'Anfrage zurückziehen',
   tienila: 'Behalten',

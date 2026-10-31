@@ -1,11 +1,11 @@
 // Pagina del produttore: si apre dal link personale https://ilmiocontadino.com/modifica/<token>.
 // Fa le stesse cose dell'area produttore dell'app, con le stesse funzioni del database.
-import { ROOT, accountEmail, linkCode, rpc, sendCode, signOut, verifyCode } from './api.js?v=d14949dd38'
-import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=d14949dd38'
-import { WEEK, fromClock, todayRome } from './days.js?v=d14949dd38'
-import * as views from './views.js?v=d14949dd38'
-import * as notify from './notify.js?v=d14949dd38'
-import { icon } from './icons.js?v=d14949dd38'
+import { ROOT, accountEmail, linkCode, rpc, sendCode, signOut, verifyCode } from './api.js?v=61e746c333'
+import { errorText, initialLanguage, parseAmount, rememberLanguage, t } from './i18n.js?v=61e746c333'
+import { WEEK, fromClock, todayRome } from './days.js?v=61e746c333'
+import * as views from './views.js?v=61e746c333'
+import * as notify from './notify.js?v=61e746c333'
+import { icon } from './icons.js?v=61e746c333'
 
 const root = document.querySelector('#app')
 const nav = document.querySelector('#nav')
@@ -460,6 +460,16 @@ root.addEventListener('submit', (event) => {
     }
     case 'custom':
       return addCustom(String(data.get('name') ?? '').trim(), data.get('category'), data.get('unit'))
+    case 'change':
+      // Indirizzo, foto e telefono li cambia l'admin: arriva tra le segnalazioni del pannello, segnata «dal maso».
+      return act(async () => {
+        try {
+          await rpc('producer_change_request', { p_message: String(data.get('message') ?? '').trim() })
+        } catch (error) {
+          if (error.code === 'too_many') error.code = 'too_many_changes'
+          throw error
+        }
+      }, t(s.lang, 'changeSent'))
     case 'farm':
       return save({
         description: String(data.get('description') ?? '').trim(),

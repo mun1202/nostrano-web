@@ -1,15 +1,16 @@
 // "Le mie richieste", /it/richieste/ e /de/richieste/: sono dati personali, quindi la pagina arriva vuota e si
 // costruisce qui dopo l'accesso, con my_requests come l'app (RequestsView.swift). Tre schede: Da ritirare, In attesa
-// e Storico; ogni card ha maso, giorno, riepilogo, stato e azioni (Indicazioni, Chiama, Annulla finché si può,
-// "Richiedi di nuovo"); un tocco apre il dettaglio con prodotti e prezzi di allora, nota, risposta e date.
+// e Storico; ogni card ha maso, giorno, riepilogo, stato e azioni ("Va bene" sul giorno proposto dal maso,
+// Indicazioni, Chiama, Annulla finché si può, "Richiedi di nuovo"); un tocco apre il dettaglio con prodotti e prezzi di allora, nota, risposta e date.
 // Si aggiorna all'apertura, quando si torna sulla pagina e ogni minuto mentre è aperta.
 import {
-  accettaRichieste, dataEstesa, esc, fasce, fasceTesto, giornoDellaData, giornoRitiro, gruppoRichiesta, icona,
-  istanteEsteso, maiuscola, nomeRiga, prezzo, quantita, richiestaInBreve, richiesteDi, siPuoAnnullare, statoRichiesta,
-} from './comune.js?v=d14949dd38'
-import { barra, foglio, mostraErrore, pagina } from './browser.js?v=d14949dd38'
-import { account, mieRichieste, segnaViste, sessioneSito } from './accedi.js?v=d14949dd38'
-import { suggerisci } from './suggerisci.js?v=d14949dd38'
+  accettaRichieste, dataEstesa, esc, fasce, fasceTesto, giorniA, giornoDellaData, giornoRitiro, gruppoRichiesta, icona,
+  istanteEsteso, maiuscola, nomeRiga, oraDi, prezzo, quantita, richiestaInBreve, richiesteDi, siPuoAnnullare,
+  statoRichiesta,
+} from './comune.js?v=61e746c333'
+import { barra, foglio, mostraErrore, pagina } from './browser.js?v=61e746c333'
+import { account, mieRichieste, segnaViste, sessioneSito } from './accedi.js?v=61e746c333'
+import { suggerisci } from './suggerisci.js?v=61e746c333'
 
 const { dati, c } = pagina('../')
 const T = c.T
@@ -42,6 +43,11 @@ function pillola(r) {
 function azioni(r) {
   const f = masi.get(r.farm)
   const parti = []
+  // Il maso ha proposto un altro giorno: si conferma con un tocco, così sa che passi.
+  if (statoRichiesta(r) === 'other_day' && r.other_day && giorniA(r.other_day, oraDi()) >= 0) {
+    const g = giornoDellaData(r.other_day)
+    parti.push(`<button class="chip-btn primary" type="button" data-va-bene="${esc(r.id)}">${icona('check')}${esc(T.vaBene(T.giornoBreve(g.wd, g.data.getUTCDate())))}</button>`)
+  }
   if (f) parti.push(`<a class="chip-btn" href="https://www.google.com/maps/dir/?api=1&destination=${f.lat},${f.lng}" target="_blank" rel="noopener">${icona('route')}${esc(T.indicazioni)}</a>`)
   if (f?.phone) parti.push(`<a class="chip-btn" href="tel:${esc(f.phone)}">${icona('phone')}${esc(T.chiama)}</a>`)
   if (siPuoAnnullare(r)) {
@@ -210,6 +216,19 @@ async function annulla() {
   if (!riuscito && $('richieste-errore')) mostraErrore($('richieste-errore'), T.erroreRete)
 }
 
+// "Va bene" sul giorno proposto: niente domanda prima, si può sempre annullare dopo.
+async function vaBene(bottone) {
+  bottone.disabled = true
+  let riuscito = true
+  try {
+    await sessioneSito().rpc('request_accept_other_day', { p_id: bottone.dataset.vaBene })
+  } catch {
+    riuscito = false
+  }
+  await carica()
+  if (!riuscito && $('richieste-errore')) mostraErrore($('richieste-errore'), T.erroreRete)
+}
+
 // Caricamento: all'apertura, tornando sulla pagina, ogni minuto ---------------------------------
 
 async function carica() {
@@ -259,6 +278,8 @@ document.addEventListener('click', (e) => {
   if (d) return apriDettaglio(d.dataset.dettaglio)
   const a = e.target.closest('[data-annulla]')
   if (a) return chiediAnnulla(a.dataset.annulla)
+  const v = e.target.closest('[data-va-bene]')
+  if (v) return vaBene(v)
 })
 $('dettaglio-chiudi').addEventListener('click', () => $('dettaglio').close())
 $('dettaglio').addEventListener('close', () => { aperta = null })

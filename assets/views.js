@@ -1,6 +1,6 @@
 // Le parti della pagina, come HTML. Ogni testo che arriva dal database o dai clienti passa da esc().
-import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=d14949dd38'
-import { WEEK, addDays, dayRanges, formatDay, formatInstant, minuteNowRome, openDays, toClock, todayRome, weekday, weekdayName } from './days.js?v=d14949dd38'
+import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=61e746c333'
+import { WEEK, addDays, dayRanges, formatDay, formatInstant, minuteNowRome, openDays, toClock, todayRome, weekday, weekdayName } from './days.js?v=61e746c333'
 
 export const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
@@ -139,7 +139,15 @@ export function farm(s) {
       ${toggle('shop', 'shop', 'shopText', f.has_farm_shop)}
       ${toggle('vending', 'vending', 'vendingText', f.has_vending_24h)}
       <button type="submit" class="primary wide">${t(s.lang, 'saveFarm')}</button>
-    </form>`
+    </form>
+    ${s.admin ? '' : `
+    <form data-form="change" class="card stack">
+      <label class="stack"><strong>${t(s.lang, 'changeTitle')}</strong>
+        <small class="muted">${t(s.lang, 'changeHelp')}</small>
+        <textarea name="message" rows="3" maxlength="1000" required placeholder="${esc(t(s.lang, 'changePlaceholder'))}"></textarea>
+      </label>
+      <button type="submit" class="secondary">${t(s.lang, 'changeSend')}</button>
+    </form>`}`
 }
 
 export function confirm(s) {

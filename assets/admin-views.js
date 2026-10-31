@@ -1,8 +1,8 @@
 // Le schermate del pannello admin, come HTML. Solo in italiano: lo usa chi gestisce Il mio contadino.
-import { esc } from './views.js?v=d14949dd38'
-import { CATEGORY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=d14949dd38'
-import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=d14949dd38'
-import { icon } from './icons.js?v=d14949dd38'
+import { esc } from './views.js?v=61e746c333'
+import { CATEGORY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=61e746c333'
+import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=61e746c333'
+import { icon } from './icons.js?v=61e746c333'
 
 const ROOT = window.NOSTRANO_ROOT ?? '/'
 const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1)
@@ -538,7 +538,7 @@ function reportRow(r, withFarm = true) {
   return `
     <div class="stack ${r.status === 'open' ? '' : 'faded'}">
       <div class="row">
-        <span class="small">${withFarm && r.farm ? `<a href="#/maso/${encodeURIComponent(r.farm)}"><strong>${esc(r.farm_name)}</strong></a> · ` : withFarm ? '<strong>Senza maso</strong> · ' : ''}<span class="muted">${dateText(r.created_at, true)}</span></span>
+        <span class="small">${withFarm && r.farm ? `<a href="#/maso/${encodeURIComponent(r.farm)}"><strong>${esc(r.farm_name)}</strong></a> · ` : withFarm ? '<strong>Senza maso</strong> · ' : ''}${r.from_farm ? '<span class="pill">dal maso: modifica</span> · ' : ''}<span class="muted">${dateText(r.created_at, true)}</span></span>
         <button class="secondary small" data-action="report" data-id="${r.id}" data-status="${r.status === 'open' ? 'handled' : 'open'}">${r.status === 'open' ? '✓ Gestita' : 'Riapri'}</button>
       </div>
       <p>${esc(r.message)}</p>
@@ -549,7 +549,8 @@ function reportRow(r, withFarm = true) {
 export function reports(a) {
   return `
     <h1>Segnalazioni</h1>
-    <p class="muted">Quello che le persone scrivono da «Segnala un problema» nella scheda di un maso.</p>
+    <p class="muted">Quello che le persone scrivono da «Segnala un problema» nella scheda di un maso, e le richieste di
+      modifica dei masi (indirizzo, foto, telefono), segnate «dal maso»: falle da «Modifica come il maso» o dalla scheda.</p>
     <div class="card list">${a.reports.length ? a.reports.map((r) => reportRow(r)).join('') : '<p class="muted">Nessuna segnalazione.</p>'}</div>`
 }
 

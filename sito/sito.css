@@ -1401,8 +1401,9 @@ a.chip { text-decoration: none; }
   transition: background-color 150ms ease, transform 160ms var(--ease-out);
 }
 .chip-btn .icon { width: 15px; height: 15px; }
+.chip-btn.primary { background: var(--ink); color: #fff; }
 .chip-btn:active { transform: scale(0.96); }
-@media (hover: hover) and (pointer: fine) { .chip-btn:hover { background: var(--line); } .req-open:hover strong { text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 3px; } }
+@media (hover: hover) and (pointer: fine) { .chip-btn:not(.primary):hover { background: var(--line); } .chip-btn.primary:hover { background: #27272a; } .req-open:hover strong { text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 3px; } }
 .req-history { margin: 0; padding: 0 14px; border: 1px solid var(--line); border-radius: 16px; list-style: none; }
 .req-history li + li { border-top: 1px solid var(--fill); }
 .req-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 10px; width: 100%; padding: 12px 0; border: 0; background: none; color: inherit; text-align: left; cursor: pointer; }

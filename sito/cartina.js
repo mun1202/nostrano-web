@@ -2,7 +2,7 @@
 // solo quando si apre la vista) con le tessere di OpenStreetMap di OpenFreeMap, per tutta l'Italia (mappa in
 // web/genera/impostazioni.mjs). Niente account né chiavi; i caratteri stanno sul nostro sito.
 // Colori naturali e vivi (boschi verdi, acqua azzurra, strade principali gialle): i segnaposti bianchi restano in primo piano.
-import { aperto, categoria, esc, icona, scheda, stato } from './comune.js?v=d14949dd38'
+import { aperto, categoria, esc, icona, scheda, stato } from './comune.js?v=61e746c333'
 
 const CHIARO = {
   terra: '#f2efe4',
