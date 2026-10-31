@@ -1,10 +1,10 @@
 // Pannello admin: si apre con un link di accesso (https://ilmiocontadino.com/admin/<codice>), poi il browser resta abilitato.
 // Da qui si creano le schede in bozza, si invitano i masi su WhatsApp e si pubblica.
-import { ROOT, linkCode, removeUploaded, rpc, upload } from './api.js?v=da1cc59c62'
-import { MUNICIPALITY_CODES, municipalityName } from './i18n.js?v=da1cc59c62'
-import * as views from './admin-views.js?v=da1cc59c62'
-import { sceltaLuogo } from '../sito/luogo.js?v=da1cc59c62'
-import { TESTI } from '../sito/testi.js?v=da1cc59c62'
+import { ROOT, linkCode, removeUploaded, rpc, upload } from './api.js?v=4ce0e02e69'
+import { MUNICIPALITY_CODES, municipalityName } from './i18n.js?v=4ce0e02e69'
+import * as views from './admin-views.js?v=4ce0e02e69'
+import { sceltaLuogo } from '../sito/luogo.js?v=4ce0e02e69'
+import { TESTI } from '../sito/testi.js?v=4ce0e02e69'
 
 const root = document.querySelector('#app')
 const navigation = document.querySelector('#nav')
@@ -332,7 +332,7 @@ function mountPlace() {
     contenitore: box,
     testi: TESTI.it.luogo,
     lang: 'it',
-    classi: { primario: 'primary', secondario: 'secondary', link: 'link' },
+    classi: { primario: 'primary', link: 'link' },
     cartina: config.mappa ? placeMap : null,
     iniziale: point && { ...point, indirizzo: form.elements.address.value, comune: form.elements.municipality.value },
     cambia: (found) => {

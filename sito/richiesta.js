@@ -8,10 +8,10 @@
 import {
   accettaRichieste, dataEstesa, esc, fasceTesto, fasce, giorniRichiesta, icona, maiuscola, nomeProdotto, passo, prezzo,
   quantita, unitaDi,
-} from './comune.js?v=da1cc59c62'
-import { adesso, foglio, mostraErrore } from './browser.js?v=da1cc59c62'
-import { apriAccesso, mieRichieste, progetto, sessioneSito } from './accedi.js?v=da1cc59c62'
-import { rpcPubblica } from './sessione.js?v=da1cc59c62'
+} from './comune.js?v=4ce0e02e69'
+import { adesso, foglio, mostraErrore } from './browser.js?v=4ce0e02e69'
+import { apriAccesso, mieRichieste, progetto, sessioneSito } from './accedi.js?v=4ce0e02e69'
+import { rpcPubblica } from './sessione.js?v=4ce0e02e69'
 
 // La bozza resta in questa scheda del browser mentre si accede: se la pagina si ricarica (per esempio passando
 // all'app della posta per il codice), si ritrova com'era.

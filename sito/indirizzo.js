@@ -16,6 +16,17 @@ function metaTedesca(nome, tedesco) {
   return parti.length === 2 && tedesco ? parti.indexOf(tedesco.trim()) : -1
 }
 
+// Le vie tedesche finiscono quasi sempre così ("Romstraße", "Bergweg", "Lauben" no: lì si guarda il comune).
+const VIA_TEDESCA = /(straße|strasse|weg|gasse|platz|steig|promenade|allee|ring|zeile)$/i
+
+/** Quale metà di una via doppia è tedesca, dalla desinenza; -1 se non si capisce. */
+function viaTedesca(nome) {
+  const parti = String(nome ?? '').split(' - ').map((s) => s.trim())
+  if (parti.length !== 2) return -1
+  const tedesche = parti.map((p) => VIA_TEDESCA.test(p))
+  return tedesche[0] !== tedesche[1] ? tedesche.indexOf(true) : -1
+}
+
 /**
  * La metà di un nome doppio nella lingua della pagina; il nome com'è se non è doppio. ordine: quale metà è tedesca
  * nelle altre parti dello stesso indirizzo, per quando questa non ha il nome tedesco.
@@ -39,7 +50,9 @@ export function leggiLuogo(luogo, inTedesco, lang = 'it') {
   const comuneDoppio = p.city ?? p.town ?? p.village ?? ''
   const comuneTedesco = d.city ?? d.town ?? d.village
   // L'ordine delle lingue di questo indirizzo, da via o comune, per le parti senza nome tedesco.
-  const ordine = [metaTedesca(p.street, d.street), metaTedesca(comuneDoppio, comuneTedesco), metaTedesca(p.name, d.name)].find((m) => m >= 0) ?? -1
+  // Senza la ricerca in tedesco dello stesso luogo, la desinenza della via.
+  const ordine = [metaTedesca(p.street, d.street), metaTedesca(comuneDoppio, comuneTedesco), metaTedesca(p.name, d.name), viaTedesca(p.street)]
+    .find((m) => m >= 0) ?? -1
   const scegli = (k) => nellaLingua(p[k], d[k], lang, ordine)
   const comune = nellaLingua(comuneDoppio, comuneTedesco, lang, ordine)
   const frazione = scegli('district') || scegli('locality')
@@ -48,7 +61,9 @@ export function leggiLuogo(luogo, inTedesco, lang = 'it') {
   const nome = p.name && p.type !== 'street' ? scegli('name') : ''
   const strada = via ? [via, p.housenumber].filter(Boolean).join(' ') : (p.type === 'street' ? scegli('name') : '')
   const indirizzo = [strada || (nome && !frazione ? nome : ''), frazione && frazione !== comune ? frazione : ''].filter(Boolean).join(', ')
-  const provincia = nellaLingua(p.county ?? '', d.county, lang, ordine)
+  // La provincia ha il suo ordine ("Bolzano - Bozen" anche dove le vie sono "Romstraße - Via Roma"): solo se si sa.
+  const provinciaDoppia = String(p.county ?? '').includes(' - ') && metaTedesca(p.county, d.county) < 0
+  const provincia = provinciaDoppia ? '' : nellaLingua(p.county ?? '', d.county, lang)
   const [lng, lat] = luogo.geometry?.coordinates ?? []
   return {
     indirizzo,
@@ -71,11 +86,16 @@ async function leggi(url, chiedi) {
 
 const chiave = (f) => `${f.properties?.osm_type}${f.properties?.osm_id}`
 
-/** Fino a sei luoghi in Italia per "testo". Errore 'network', 'too_many' (troppe ricerche di fila) o 'failed'. */
-export async function cercaIndirizzo(testo, lang = 'it', chiedi = fetch) {
+/**
+ * Fino a "quanti" luoghi in Italia per "testo"; vicino: { lat, lng } per avere prima i luoghi intorno (la mappa).
+ * Errore 'network', 'too_many' (troppe ricerche di fila) o 'failed'.
+ */
+export async function cercaIndirizzo(testo, lang = 'it', chiedi = fetch, { quanti = 6, vicino = null } = {}) {
   const q = String(testo ?? '').trim()
   if (q.length < 3) return []
-  const indirizzo = (tedesco) => `${PHOTON}/api/?q=${encodeURIComponent(q)}&limit=6&bbox=${ITALIA}&lang=${tedesco ? 'de' : 'default'}`
+  const bias = vicino ? `&lat=${vicino.lat.toFixed(4)}&lon=${vicino.lng.toFixed(4)}` : ''
+  // In tedesco gli stessi luoghi possono arrivare più in basso nell'elenco: se ne chiedono di più, per ritrovarli.
+  const indirizzo = (tedesco) => `${PHOTON}/api/?q=${encodeURIComponent(q)}&limit=${tedesco ? quanti * 3 : quanti}&bbox=${ITALIA}${bias}&lang=${tedesco ? 'de' : 'default'}`
   const [luoghi, inTedesco] = await Promise.all([leggi(indirizzo(false), chiedi), leggi(indirizzo(true), chiedi).catch(() => [])])
   const tedeschi = new Map(inTedesco.map((f) => [chiave(f), f]))
   return luoghi

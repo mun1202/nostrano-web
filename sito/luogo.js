@@ -1,27 +1,34 @@
-// "Indirizzo del maso" in tre passi: cerca, conferma, fatto. Un solo riquadro al posto di comune, indirizzo e
-// coordinate: lo usano il pannello admin (scheda del maso) e "Chiedi il tuo link" del sito.
-//   cerca     una casella e "Cerca" (Photon, web/sito/indirizzo.js); i luoghi trovati come righe da toccare. Se non
-//             si trova: "Metti il punto sulla mappa".
-//   controlla il luogo scelto sulla piccola mappa (web/sito/punto.js): il segnaposto si sposta solo se serve; "Conferma".
-//   fatto     una riga con l'indirizzo e "Cambia".
-// cambia(luogo) arriva alla conferma: { indirizzo, comune, comuni, lat, lng }. Senza cartina si salta la mappa.
-import { esc } from './comune.js?v=da1cc59c62'
-import { cercaIndirizzo, luogoDelPunto } from './indirizzo.js?v=da1cc59c62'
-import { mappaPunto } from './punto.js?v=da1cc59c62'
+// "Indirizzo del maso": un solo riquadro al posto di comune, indirizzo e coordinate. Lo usano il pannello admin (scheda
+// del maso) e "Chiedi il tuo link" del sito.
+//   scegli  si scrive e la ricerca parte da sola (Photon, web/sito/indirizzo.js) dopo una breve pausa; i luoghi
+//           compaiono sotto la casella. La mappa (web/sito/punto.js) è sempre lì: il luogo scelto ci va con il
+//           segnaposto, e si può anche toccare il maso direttamente. "Conferma l'indirizzo".
+//   fatto   una riga con l'indirizzo e "Cambia".
+// cambia(luogo) arriva alla conferma: { indirizzo, comune, comuni, lat, lng }. Senza cartina non c'è la mappa.
+import { esc } from './comune.js?v=4ce0e02e69'
+import { cercaIndirizzo, luogoDelPunto } from './indirizzo.js?v=4ce0e02e69'
+import { mappaPunto } from './punto.js?v=4ce0e02e69'
 
-// Il centro dell'Alto Adige, per mettere il punto a mano quando non c'è ancora niente.
-const PARTENZA = { lat: 46.62, lng: 11.33 }
+// La pausa dopo l'ultima lettera prima di cercare: a ogni lettera sarebbero troppe richieste per Photon.
+const PAUSA = 450
+// Spostando il segnaposto di poco l'indirizzo trovato resta; più in là è un altro posto, e si cerca da lì.
+const VICINO = 300
+// Pochi luoghi: l'elenco non deve coprire la mappa.
+const QUANTI = 4
+// Senza mappa la ricerca preferisce i luoghi intorno all'Alto Adige, dove sono oggi i masi.
+const ZONA = { lat: 46.62, lng: 11.33 }
 
 const STILE = `
 .luogo { display: grid; gap: 10px; }
-.luogo-cerca { display: flex; gap: 8px; }
-.luogo-cerca input { flex: 1; min-width: 0; }
-.luogo-trovati { display: grid; gap: 6px; }
-.luogo-trovato { padding: 10px 12px; border: 1px solid var(--line-strong, #d4d4d8); border-radius: 12px; background: #fff;
-  color: var(--ink, #18181b); font: inherit; font-size: 14px; font-weight: 500; text-align: left; cursor: pointer; }
-.luogo-trovato:hover { border-color: var(--ink, #18181b); }
+.luogo-campo { position: relative; }
+.luogo-campo input { width: 100%; }
+.luogo-trovati { display: grid; gap: 4px; margin: 6px 0 0; padding: 0; list-style: none; }
+.luogo-trovati:empty { display: none; }
+.luogo-trovato { width: 100%; padding: 10px 12px; border: 1px solid var(--line-strong, #d4d4d8); border-radius: 12px;
+  background: #fff; color: var(--ink, #18181b); font: inherit; font-size: 14px; font-weight: 500; text-align: left; cursor: pointer; }
+.luogo-trovato:hover, .luogo-trovato:focus-visible { border-color: var(--ink, #18181b); outline: 0; }
 .luogo-nota { margin: 0; color: var(--muted, #71717a); font-size: 13px; }
-.luogo-scelto { margin: 0; font-size: 15px; font-weight: 600; }
+.luogo-nota:empty { display: none; }
 .luogo-mappa { height: 240px; overflow: hidden; border: 1px solid var(--line, #e4e4e7); border-radius: 12px; }
 .luogo-azioni { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .luogo-fatto { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--line, #e4e4e7);
@@ -41,19 +48,41 @@ function aggiungiStile() {
 
 const SPUNTA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>'
 
+/** Metri tra due punti, abbastanza per dire "vicino". */
+function distanza(a, b) {
+  const r = Math.PI / 180
+  const x = (b.lng - a.lng) * r * Math.cos(((a.lat + b.lat) / 2) * r)
+  const y = (b.lat - a.lat) * r
+  return Math.hypot(x, y) * 6371000
+}
+
+let progressivo = 0
+
 /**
- * contenitore: dove disegnarlo. testi: i testi nella lingua della pagina (vedi TESTI_LUOGO in web/sito/testi.js).
- * classi: { primario, secondario, link } dei bottoni della pagina. cartina: { tessere, font, libreria } o null.
+ * contenitore: dove disegnarlo. testi: i testi nella lingua della pagina (luogo in web/sito/testi.js).
+ * classi: { primario, link } dei bottoni della pagina. cartina: { tessere, font, libreria } o null.
  * iniziale: il luogo che c'è già (si parte da "fatto"). cambia(luogo): alla conferma.
  */
 export function sceltaLuogo({ contenitore, testi: T, lang = 'it', classi, cartina = null, iniziale = null, cambia = () => {} }) {
   aggiungiStile()
-  const s = { fase: iniziale ? 'fatto' : 'cerca', scelto: iniziale, trovati: null, messaggio: '', aMano: false, attesa: false }
+  const id = `luogo-${++progressivo}`
+  const s = { fase: iniziale ? 'fatto' : 'scegli', scelto: iniziale ? { ...iniziale } : null, trovati: [], attesa: false }
+  // L'ultimo indirizzo confermato: "Annulla" ci torna.
+  let confermato = iniziale ? { ...iniziale } : null
+  const giaCercati = new Map()
   let mappa = null
+  let timer = null
+  let ultima = 0
 
+  const $ = (sel) => contenitore.querySelector(sel)
   const togliMappa = () => {
     mappa?.then((m) => m.togli()).catch(() => {})
     mappa = null
+  }
+  const nota = (testo) => { if ($('.luogo-nota')) $('.luogo-nota').textContent = testo }
+  const pronto = () => {
+    const b = $('[data-luogo="conferma"]')
+    if (b) b.disabled = !s.scelto || s.attesa
   }
 
   function disegna() {
@@ -65,131 +94,149 @@ export function sceltaLuogo({ contenitore, testi: T, lang = 'it', classi, cartin
         <button type="button" class="${classi.link}" data-luogo="cambia">${esc(T.cambia)}</button></div></div>`
       return
     }
-    if (s.fase === 'controlla') {
-      const titolo = s.aMano ? T.puntoMappa : s.scelto.etichetta
-      contenitore.innerHTML = `<div class="luogo">
-        <p class="luogo-scelto">${esc(titolo)}</p>
-        <div class="luogo-mappa"></div>
-        <p class="luogo-nota">${esc(s.aMano ? T.controllaAMano : T.controlla)}</p>
-        <div class="luogo-azioni">
-          <button type="button" class="${classi.primario}" data-luogo="conferma" ${s.attesa ? 'disabled' : ''}>${esc(s.attesa ? T.cercoIndirizzo : T.conferma)}</button>
-          <button type="button" class="${classi.link}" data-luogo="indietro">${esc(T.indietro)}</button>
-        </div>
-        ${s.messaggio ? `<p class="luogo-nota" role="alert">${esc(s.messaggio)}</p>` : ''}
-      </div>`
-      mappa = mappaPunto({
-        contenitore: contenitore.querySelector('.luogo-mappa'),
-        cartina,
-        lang,
-        punto: s.scelto,
-        zoom: s.aMano && !s.scelto.indirizzo ? 9 : 16,
-        sposta: (p) => Object.assign(s.scelto, p),
-      })
-      // Senza mappa (niente WebGL) vale il punto trovato: si conferma e basta.
-      mappa.catch(() => { contenitore.querySelector('.luogo-mappa')?.remove() })
-      return
-    }
-    const trovati = s.trovati?.length
-      ? `<div class="luogo-trovati">${s.trovati.map((r, i) => `<button type="button" class="luogo-trovato" data-luogo="scegli" data-i="${i}">${esc(r.etichetta)}</button>`).join('')}</div>`
-      : ''
     contenitore.innerHTML = `<div class="luogo">
-      <div class="luogo-cerca">
-        <input type="search" enterkeyhint="search" autocomplete="off" aria-label="${esc(T.etichetta)}" placeholder="${esc(T.esempio)}">
-        <button type="button" class="${classi.secondario}" data-luogo="cerca">${esc(T.cerca)}</button>
+      <div class="luogo-campo">
+        <input type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="${id}-elenco"
+          enterkeyhint="search" autocomplete="off" aria-label="${esc(T.etichetta)}" placeholder="${esc(T.esempio)}">
+        <ul class="luogo-trovati" id="${id}-elenco" role="listbox" aria-label="${esc(T.etichetta)}"></ul>
       </div>
-      ${s.messaggio ? `<p class="luogo-nota" role="status">${esc(s.messaggio)}</p>` : ''}
-      ${trovati}
-      ${cartina ? `<button type="button" class="${classi.link}" data-luogo="a-mano">${esc(T.aMano)}</button>` : ''}
+      <p class="luogo-nota" aria-live="polite">${esc(cartina ? T.aiuto : T.aiutoSenzaMappa)}</p>
+      ${cartina ? '<div class="luogo-mappa"></div>' : ''}
+      <div class="luogo-azioni">
+        <button type="button" class="${classi.primario}" data-luogo="conferma" disabled>${esc(T.conferma)}</button>
+        ${confermato ? `<button type="button" class="${classi.link}" data-luogo="annulla">${esc(T.annulla)}</button>` : ''}
+      </div>
     </div>`
+    pronto()
+    if (!cartina) return
+    mappa = mappaPunto({ contenitore: $('.luogo-mappa'), cartina, lang, punto: s.scelto, sposta: spostato })
+    // Senza mappa (niente WebGL) si sceglie dall'elenco e basta.
+    mappa.catch(() => { $('.luogo-mappa')?.remove() })
   }
 
-  async function cerca() {
-    const input = contenitore.querySelector('input')
-    const testo = input.value.trim()
-    if (testo.length < 3) return input.focus()
-    s.messaggio = T.cerco
-    s.trovati = null
-    disegna()
-    contenitore.querySelector('input').value = testo
-    try {
-      s.trovati = await cercaIndirizzo(testo, lang)
-      s.messaggio = s.trovati.length ? '' : T.nessuno
-    } catch (e) {
-      s.messaggio = e.message === 'too_many' ? T.troppe : T.errore
+  function elenco() {
+    const ul = $('.luogo-trovati')
+    if (!ul) return
+    ul.innerHTML = s.trovati.map((r, i) => `<li><button type="button" class="luogo-trovato" role="option" data-luogo="scegli" data-i="${i}">${esc(r.etichetta)}</button></li>`).join('')
+    $('input')?.setAttribute('aria-expanded', String(s.trovati.length > 0))
+  }
+
+  /** Dove guarda la mappa (o la zona dei masi): la ricerca dà prima i luoghi lì intorno. */
+  async function vicino() {
+    try { return (await mappa)?.centro() ?? ZONA } catch { return ZONA }
+  }
+
+  async function cerca(testo) {
+    const mia = ++ultima
+    if (testo.length < 3) {
+      s.trovati = []
+      elenco()
+      return
     }
-    disegna()
-    contenitore.querySelector('input').value = testo
+    try {
+      if (!giaCercati.has(testo)) {
+        nota(T.cerco)
+        giaCercati.set(testo, await cercaIndirizzo(testo, lang, fetch, { quanti: QUANTI, vicino: await vicino() }))
+      }
+      // Nel frattempo si è scritto ancora: questa risposta non serve più.
+      if (mia !== ultima) return
+      s.trovati = giaCercati.get(testo)
+      nota(s.trovati.length ? '' : T.nessuno)
+    } catch (e) {
+      if (mia !== ultima) return
+      s.trovati = []
+      nota(e.message === 'too_many' ? T.troppe : T.errore)
+    }
+    elenco()
+  }
+
+  function scegli(r) {
+    s.scelto = { ...r }
+    s.trovati = []
+    elenco()
+    $('input').value = r.etichetta
+    nota(cartina ? T.controlla : '')
+    mappa?.then((m) => m.vai(r)).catch(() => {})
+    pronto()
+  }
+
+  /** Il segnaposto messo o spostato sulla mappa. */
+  function spostato(p) {
+    if (s.scelto && !s.scelto.aMano && distanza(s.scelto, p) < VICINO) {
+      Object.assign(s.scelto, p)
+    } else {
+      s.scelto = { ...p, aMano: true, indirizzo: '', comune: '' }
+      nota(T.puntoAMano)
+    }
+    pronto()
   }
 
   function conferma(luogo) {
-    s.scelto = luogo
+    const { aMano, ...pulito } = luogo
+    s.scelto = pulito
+    confermato = { ...pulito }
     s.fase = 'fatto'
-    s.aMano = false
-    s.messaggio = ''
     disegna()
-    cambia(luogo)
+    cambia(pulito)
   }
 
-  async function confermaPunto() {
+  async function confermaScelto() {
     // Il punto messo a mano: l'indirizzo si chiede a Photon da lì.
-    if (!s.aMano) return conferma({ ...s.scelto })
+    if (!s.scelto.aMano) return conferma(s.scelto)
     s.attesa = true
-    disegna()
+    pronto()
+    nota(T.cercoIndirizzo)
     let luogo = null
-    try { luogo = await luogoDelPunto(s.scelto, lang) } catch { /* resta il punto senza indirizzo */ }
+    try { luogo = await luogoDelPunto(s.scelto, lang) } catch { /* resta senza indirizzo */ }
     s.attesa = false
-    if (!luogo?.comune) {
-      s.messaggio = T.nessunIndirizzo
-      return disegna()
-    }
+    pronto()
+    if (!luogo?.comune) return nota(T.nessunIndirizzo)
     conferma(luogo)
   }
 
+  contenitore.addEventListener('input', (e) => {
+    if (e.target.tagName !== 'INPUT') return
+    clearTimeout(timer)
+    const testo = e.target.value.trim()
+    timer = setTimeout(() => cerca(testo), PAUSA)
+  })
+  contenitore.addEventListener('keydown', (e) => {
+    if (e.target.tagName !== 'INPUT') return
+    // Invio sceglie il primo luogo (o cerca subito), senza mandare il modulo intorno; freccia giù va all'elenco.
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      clearTimeout(timer)
+      if (s.trovati.length) scegli(s.trovati[0])
+      else cerca(e.target.value.trim())
+    } else if (e.key === 'ArrowDown' && s.trovati.length) {
+      e.preventDefault()
+      $('.luogo-trovato')?.focus()
+    }
+  })
   contenitore.addEventListener('click', (e) => {
     const b = e.target.closest('[data-luogo]')
     if (!b) return
     switch (b.dataset.luogo) {
-      case 'cerca': return cerca()
-      case 'scegli': {
-        const r = s.trovati?.[Number(b.dataset.i)]
-        if (!r) return
-        if (!cartina) return conferma(r)
-        s.scelto = { ...r }
-        s.aMano = false
-        s.fase = 'controlla'
-        s.messaggio = ''
+      case 'scegli': return s.trovati[Number(b.dataset.i)] && scegli(s.trovati[Number(b.dataset.i)])
+      case 'conferma': return s.scelto && !s.attesa && confermaScelto()
+      case 'annulla':
+        s.scelto = { ...confermato }
+        s.fase = 'fatto'
         return disegna()
-      }
-      case 'a-mano':
-        s.scelto = { lat: (s.scelto ?? PARTENZA).lat, lng: (s.scelto ?? PARTENZA).lng, indirizzo: '', comune: '' }
-        s.aMano = true
-        s.fase = 'controlla'
-        s.messaggio = ''
-        return disegna()
-      case 'conferma': return confermaPunto()
-      case 'indietro':
-        s.fase = 'cerca'
-        s.messaggio = ''
-        disegna()
-        return contenitore.querySelector('input')?.focus()
       case 'cambia':
-        s.fase = 'cerca'
-        s.trovati = null
-        s.messaggio = ''
+        s.fase = 'scegli'
+        s.trovati = []
         disegna()
-        return contenitore.querySelector('input')?.focus()
+        return $('input')?.focus()
     }
-  })
-  // Invio nella casella cerca, senza mandare il modulo intorno.
-  contenitore.addEventListener('keydown', (e) => {
-    if (e.key !== 'Enter' || e.target.tagName !== 'INPUT') return
-    e.preventDefault()
-    cerca()
   })
 
   disegna()
   return {
     get luogo() { return s.fase === 'fatto' ? s.scelto : null },
-    togli: togliMappa,
+    togli() {
+      clearTimeout(timer)
+      togliMappa()
+    },
   }
 }
