@@ -45,6 +45,10 @@ const it = {
 
   // Testata e piè di pagina.
   principale: 'Principale',
+  sezioni: 'Sezioni del sito',
+  menuEsplora: 'Esplora',
+  menuRichieste: 'Richieste',
+  menuProfilo: 'Profilo',
   lingua: 'Lingua',
   perProduttori: 'Per i produttori',
   marchioTesto: "I masi dell'Alto Adige che vendono direttamente. Le schede le aggiornano i produttori: se trovi un errore, segnalacelo dalla scheda del maso.",
@@ -454,6 +458,10 @@ const de = {
   daVerificare: 'zu prüfen',
 
   principale: 'Hauptmenü',
+  sezioni: 'Bereiche der Website',
+  menuEsplora: 'Entdecken',
+  menuRichieste: 'Anfragen',
+  menuProfilo: 'Profil',
   lingua: 'Sprache',
   perProduttori: 'Für Höfe',
   marchioTesto: 'Die Höfe in Südtirol mit Direktverkauf. Die Profile pflegen die Höfe selbst: Wenn du einen Fehler findest, melde ihn uns über das Profil des Hofs.',

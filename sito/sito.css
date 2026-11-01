@@ -58,6 +58,35 @@ button, a, [role="option"] { touch-action: manipulation; }
 /* La pagina del maso resta stretta come una scheda di Airbnb: galleria piena, testi leggibili. */
 .farm-page .wrap { max-width: 1280px; }
 
+/* Sul telefono il menu in basso, come le schede dell'app: preferiti e profilo non servono più anche in alto. Sulla
+   scheda del maso non c'è, perché lì in basso stanno Indicazioni e Chiama. */
+:root { --sopra-menu: 0px; }
+.menu-basso { display: none; }
+@media (max-width: 759px) {
+  :root:has(.menu-basso) { --sopra-menu: calc(56px + env(safe-area-inset-bottom)); }
+  body:has(> .menu-basso) { padding-bottom: var(--sopra-menu); }
+  body:has(> .menu-basso) .top nav .account-btn.solo-icona, body:has(> .menu-basso) .top nav .account { display: none; }
+  .menu-basso {
+    position: fixed; right: 0; bottom: 0; left: 0; z-index: 24;
+    display: flex; padding: 0 4px env(safe-area-inset-bottom);
+    border-top: 1px solid var(--line);
+    background: rgb(255 255 255 / 0.92);
+    -webkit-backdrop-filter: saturate(1.8) blur(14px);
+    backdrop-filter: saturate(1.8) blur(14px);
+    view-transition-name: menu-basso;
+  }
+  .menu-basso a {
+    position: relative; flex: 1 1 0; min-width: 0; height: 56px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    color: var(--muted); font-size: 11px; font-weight: 500; line-height: 1.2; text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .menu-basso a[aria-current="page"] { color: var(--ink); font-weight: 600; }
+  .menu-basso a:active .icon { transform: scale(0.92); }
+  .menu-basso .icon { width: 22px; height: 22px; transition: transform 120ms ease; }
+  .menu-basso .account-dot { position: absolute; top: 7px; left: calc(50% + 7px); }
+}
+
 /* Barra in alto ---------------------------------------------------------------------------- */
 .top {
   position: sticky;
@@ -1466,16 +1495,18 @@ html:has(dialog[open]) { overflow: hidden; }
 .cartina { position: relative; height: clamp(420px, calc(100svh - var(--top) - 190px), 760px); margin-top: 8px; overflow: hidden; border: 1px solid var(--line); border-radius: 18px; background: #f5f4ef; }
 @media (max-width: 759px) {
   /* Sul telefono: a tutto schermo sotto i filtri fissi, e la pagina sotto non scorre (si torna con "Elenco"). */
-  .cartina { position: fixed; top: var(--sotto-filtri, 120px); right: 0; bottom: 0; left: 0; z-index: 15; height: auto; margin: 0; border-width: 1px 0 0; border-radius: 0; }
+  .cartina { position: fixed; top: var(--sotto-filtri, 120px); right: 0; bottom: var(--sopra-menu); left: 0; z-index: 15; height: auto; margin: 0; border-width: 1px 0 0; border-radius: 0; }
   /* Solo html: con overflow anche sul body intestazione e filtri smetterebbero di restare attaccati in alto. */
   html.in-mappa { overflow: hidden; overscroll-behavior: none; }
   html.in-mappa #risultati { min-height: 100svh; }
   /* Sopra il bottone "Elenco". */
-  .cartina .cartina-scheda { bottom: calc(80px + env(safe-area-inset-bottom)); }
+  .cartina .cartina-scheda { bottom: 104px; }
+  /* Sulla mappa il bottone sale un po' per lasciare leggibile l'attribuzione, che è obbligatoria. */
+  html.in-mappa .cambia-vista { bottom: calc(var(--sopra-menu) + 44px); }
 }
 /* Il bottone in basso, come nell'app: dall'elenco alla mappa e indietro. Solo sul telefono. */
 .cambia-vista {
-  position: fixed; bottom: calc(20px + env(safe-area-inset-bottom)); left: 50%; z-index: 26;
+  position: fixed; bottom: calc(var(--sopra-menu) + 20px); left: 50%; z-index: 26;
   gap: 8px; height: 46px; padding: 0 20px; border-radius: 999px; box-shadow: 0 6px 20px rgb(24 24 27 / 0.25);
   transform: translateX(-50%);
 }
