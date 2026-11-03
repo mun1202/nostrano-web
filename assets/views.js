@@ -1,6 +1,6 @@
 // Le parti della pagina, come HTML. Ogni testo che arriva dal database o dai clienti passa da esc().
-import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=a3899e5322'
-import { WEEK, addDays, dayRanges, formatDay, formatInstant, minuteNowRome, openDays, toClock, todayRome, weekday, weekdayName } from './days.js?v=a3899e5322'
+import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=2425474b33'
+import { WEEK, addDays, dayRanges, formatDay, formatInstant, minuteNowRome, openDays, toClock, todayRome, weekday, weekdayName } from './days.js?v=2425474b33'
 
 export const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
@@ -740,13 +740,15 @@ export function access(s) {
     </form>`
 }
 
+// Con l'email il maso sta nell'account: si esce solo dal browser ("Esci da questo browser", nel riquadro dell'accesso)
+// e si rientra con un codice. "Esci dall'area produttore" resta per chi entra solo con il link.
 export function footer(s) {
   return `
     <section id="s-access">${access(s)}</section>
     <p class="muted small">${t(s.lang, 'personal')}</p>
     <p class="muted small">${t(s.lang, 'appHint')}</p>
     <div class="stack">
-      <button class="link danger" data-action="leave">${t(s.lang, 'leave')}</button>
+      ${s.accountEmail ? '' : `<button class="link danger" data-action="leave">${t(s.lang, 'leave')}</button>`}
       ${s.farm.is_demo ? `<button class="link" data-action="reset">${t(s.lang, 'reset')}</button>` : ''}
     </div>`
 }
