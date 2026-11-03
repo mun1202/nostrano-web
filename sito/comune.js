@@ -147,8 +147,13 @@ export const slugDi = (s) => String(s ?? '').replace(/([a-z])([A-Z])/g, '$1-$2')
   .normalize('NFD').replace(/\p{Diacritic}/gu, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
 
 // Ricerca in tre passi come nell'app (nostrano/Model/SearchFilters.swift): Dove, Quando, Cosa. ---------------
-// "r" è la ricerca: { comune, km, quando, giorno, minuto, q, prodotti, categorie, bio, h24, carta, negozio,
+// "r" è la ricerca: { comune, luogo, km, quando, giorno, minuto, q, prodotti, categorie, bio, h24, carta, negozio,
 // disponibili, ordine }. Le stesse regole servono al generatore (pagine dei paesi e dei prodotti) e al browser.
+// "luogo" è una città o un paese scelto nel passo Dove ({ nome, lat, lng }, anche dove non ci sono masi): le distanze
+// partono da lì, come da "Vicino a te".
+
+// Il luogo nell'indirizzo ("luogo=Verona&vicino=45.4384,10.9917"): solo punti in Italia, come la ricerca di Photon.
+const ITALIA = { ovest: 6.6, sud: 35.4, est: 18.6, nord: 47.1 }
 
 // Le categorie nell'ordine dell'app (ProductCategory.allCases); i filtri veloci usano CATEGORIE.
 export const ORDINE_CATEGORIE = ['verdura', 'frutta', 'uova', 'carne', 'latticini', 'miele', 'vino', 'pane', 'altro']
@@ -158,7 +163,7 @@ export const ORDINI = ['vicini', 'aperti', 'nome', 'aggiornati']
 const SI_NO = ['bio', 'h24', 'carta', 'negozio', 'disponibili']
 
 export const RICERCA_VUOTA = Object.freeze({
-  comune: '', km: 0, quando: 'sempre', giorno: '', minuto: 600, q: '', prodotti: [], categorie: [],
+  comune: '', luogo: null, km: 0, quando: 'sempre', giorno: '', minuto: 600, q: '', prodotti: [], categorie: [],
   bio: false, h24: false, carta: false, negozio: false, disponibili: false, preferiti: false, ordine: 'vicini',
 })
 export const nuovaRicerca = (r = {}) => ({ ...RICERCA_VUOTA, prodotti: [], categorie: [], ...r })
@@ -256,8 +261,8 @@ export function centroComune(farms, comuneScelto) {
   return { lat: suoi.reduce((s, f) => s + f.lat, 0) / suoi.length, lng: suoi.reduce((s, f) => s + f.lng, 0) / suoi.length }
 }
 
-/** Da dove si misurano le distanze: il comune scelto, la posizione di chi visita o il centro della zona. */
-export const origine = (r, farms, posizione, zona) => (r.comune && centroComune(farms, r.comune)) || posizione || zona
+/** Da dove si misurano le distanze: il luogo o il comune scelto, la posizione di chi visita o il centro della zona. */
+export const origine = (r, farms, posizione, zona) => r.luogo || (r.comune && centroComune(farms, r.comune)) || posizione || zona
 
 export function ordina(elenco, r, c, da) {
   const vicino = (a, b) => distanza(da, a) - distanza(da, b)
@@ -313,6 +318,7 @@ export function comuniPresenti(farms, c) {
 
 // Riassunti delle tre parti, come whereLabel, whenLabel e whatLabel nell'app.
 export function riassuntoDove(r, c) {
+  if (r.luogo) return r.km ? c.T.entroKmDa(r.km, r.luogo.nome) : c.T.vicinoA(r.luogo.nome)
   if (r.comune) return comune(r.comune, c.lang)
   return r.km ? c.T.entroKm(r.km) : c.T.vicinoATe
 }
@@ -349,6 +355,11 @@ export function leggiRicerca(params, comuni = []) {
   const r = nuovaRicerca()
   const scelto = params.get('comune')
   if (scelto) r.comune = comuni.find((m) => slugDi(m) === scelto || m === scelto) ?? ''
+  const [lat, lng] = (params.get('vicino') ?? '').split(',').map(Number)
+  const nomeLuogo = (params.get('luogo') ?? '').trim().slice(0, 80)
+  if (!r.comune && nomeLuogo && lat >= ITALIA.sud && lat <= ITALIA.nord && lng >= ITALIA.ovest && lng <= ITALIA.est) {
+    r.luogo = { nome: nomeLuogo, lat, lng }
+  }
   const km = Number(params.get('km'))
   if (DISTANZE.includes(km)) r.km = km
   const quando = params.get('quando') ?? (params.has('aperti') ? 'ora' : '')
@@ -369,6 +380,10 @@ export function leggiRicerca(params, comuni = []) {
 export function scriviRicerca(r) {
   const u = new URLSearchParams()
   if (r.comune) u.set('comune', slugDi(r.comune))
+  if (r.luogo) {
+    u.set('luogo', r.luogo.nome)
+    u.set('vicino', `${r.luogo.lat.toFixed(4)},${r.luogo.lng.toFixed(4)}`)
+  }
   if (r.km) u.set('km', String(r.km))
   if (r.quando === 'giorno' && r.giorno) {
     const ore = String(Math.floor(r.minuto / 60)).padStart(2, '0')

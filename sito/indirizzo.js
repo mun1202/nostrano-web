@@ -111,3 +111,39 @@ export async function luogoDelPunto({ lat, lng }, lang = 'it', chiedi = fetch) {
   const f = luoghi.find((x) => x.properties?.countrycode === 'IT')
   return f ? { ...leggiLuogo(f, inTedesco.find((x) => chiave(x) === chiave(f)), lang), lat, lng } : null
 }
+
+// Solo città, paesi e frazioni con un nome: per «Vicino a…» nel passo Dove l'indirizzo preciso non serve.
+const LUOGHI = ['city', 'town', 'village'].map((t) => `&osm_tag=place:${t}`).join('')
+
+/**
+ * Città e paesi d'Italia per il passo Dove della ricerca: [{ nome, zona, lat, lng }], "zona" è la provincia o la
+ * regione per distinguere i paesi con lo stesso nome. vicino: { lat, lng } per avere prima quelli intorno. Errori come
+ * cercaIndirizzo.
+ */
+export async function cercaLuoghi(testo, lang = 'it', chiedi = fetch, { quanti = 5, vicino = null } = {}) {
+  const q = String(testo ?? '').trim()
+  if (q.length < 3) return []
+  const bias = vicino ? `&lat=${vicino.lat.toFixed(4)}&lon=${vicino.lng.toFixed(4)}` : ''
+  const url = (tedesco) => `${PHOTON}/api/?q=${encodeURIComponent(q)}&limit=${tedesco ? quanti * 3 : quanti + 3}&bbox=${ITALIA}${bias}${LUOGHI}&lang=${tedesco ? 'de' : 'default'}`
+  const [luoghi, inTedesco] = await Promise.all([leggi(url(false), chiedi), leggi(url(true), chiedi).catch(() => [])])
+  const tedeschi = new Map(inTedesco.map((f) => [chiave(f), f]))
+  const visti = new Set()
+  const fuori = []
+  for (const f of luoghi) {
+    const p = f.properties ?? {}
+    const d = tedeschi.get(chiave(f))?.properties ?? {}
+    const [lng, lat] = f.geometry?.coordinates ?? []
+    if (p.countrycode !== 'IT' || !p.name || !Number.isFinite(lat) || !Number.isFinite(lng)) continue
+    const ordine = [metaTedesca(p.name, d.name), metaTedesca(p.county, d.county)].find((m) => m >= 0) ?? -1
+    const nome = nellaLingua(p.name, d.name, lang, ordine)
+    const provincia = nellaLingua(p.county ?? '', d.county, lang, ordine).replace(/^Provincia (autonoma )?di /, '')
+    const regione = nellaLingua(p.state ?? '', d.state, lang)
+    const zona = provincia && provincia !== nome ? provincia : regione
+    // Lo stesso paese può arrivare due volte (il comune e la frazione omonima).
+    const k = `${nome}|${zona}`
+    if (visti.has(k)) continue
+    visti.add(k)
+    fuori.push({ nome, zona, lat, lng })
+  }
+  return fuori.slice(0, quanti)
+}

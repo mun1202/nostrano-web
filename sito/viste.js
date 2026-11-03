@@ -5,7 +5,7 @@ import {
   dataEstesa, esc, fasce, fasceTesto, filtriAttivi, foto, giorniA, giorniDa, giorno, icona, linkMaso, maiuscola, nomeProdotto,
   normalizza, novita, oraScelta, orario, prezzo, prodottiPresenti, riassunto, riassuntoCosa, riassuntoDove,
   riassuntoQuando, stato, titolo,
-} from './comune.js?v=2425474b33'
+} from './comune.js?v=c00ddbb2af'
 
 // Home ---------------------------------------------------------------------------------------------
 
@@ -50,6 +50,7 @@ export const conteggio = (trovati, totale, apertiOra, c) =>
 
 /** La riga sopra l'elenco: da dove si misurano le distanze. */
 export function daDove(r, posizioneVera, c) {
+  if (r.luogo) return `${icona('pin')} ${esc(c.T.dalLuogo(r.luogo.nome))}`
   if (r.comune) return `${icona('pin')} ${esc(c.T.dalCentroDi(comune(r.comune, c.lang)))}`
   return posizioneVera
     ? `${icona('locate')} ${esc(c.T.dallaPosizione)}`
@@ -59,7 +60,7 @@ export function daDove(r, posizioneVera, c) {
 // Ricerca in tre passi ---------------------------------------------------------------------------
 
 const PASSI = ['dove', 'quando', 'cosa']
-const scelto = (r, passo) => (passo === 'dove' ? r.comune || r.km : passo === 'quando' ? r.quando !== 'sempre'
+const scelto = (r, passo) => (passo === 'dove' ? r.comune || r.luogo || r.km : passo === 'quando' ? r.quando !== 'sempre'
   : r.prodotti.length || r.categorie.length || r.q.trim() || r.bio || r.h24)
 const valore = (r, passo, c) => (passo === 'dove' ? riassuntoDove(r, c) : passo === 'quando' ? riassuntoQuando(r, c) : riassuntoCosa(r, c))
 
@@ -106,8 +107,8 @@ export function contenutoPasso(passo, r, c, farms, ui = {}) {
     return `
           <label class="field">${icona('search')}<span class="sr">${esc(c.T.cercaComune)}</span>
             <input type="search" data-k="cerca-comune" placeholder="${esc(c.T.cercaComune)}" value="${esc(ui.comune ?? '')}" autocomplete="off" enterkeyhint="search"></label>
-          <div class="chip-row"><button class="chip" type="button" data-k="vicino" data-dove="vicino" aria-pressed="${!r.comune}">${icona('locate')}${esc(c.T.vicinoATe)}</button></div>
-          <div class="towns" data-elenco="comuni">${ui.comune ? elencoDove(farms, r, c, ui.comune) : ''}</div>
+          <div class="chip-row"><button class="chip" type="button" data-k="vicino" data-dove="vicino" aria-pressed="${!r.comune && !r.luogo}">${icona('locate')}${esc(c.T.vicinoATe)}</button>${r.luogo ? `<button class="chip" type="button" data-k="luogo-scelto" data-togli-luogo aria-pressed="true">${icona('pin')}${esc(r.luogo.nome)}</button>` : ''}</div>
+          <div class="towns" data-elenco="comuni">${ui.comune ? elencoDove(farms, r, c, ui.comune, ui.luoghi) : ''}</div>
           <h3 class="step-sub">${esc(c.T.distanzaMassima)}</h3>
           <div class="segmented" role="group" aria-label="${esc(c.T.distanzaMassima)}">
             ${[0, ...DISTANZE].map((km) => `<button type="button" data-k="km-${km}" data-km="${km}" aria-pressed="${r.km === km}">${esc(km ? `${km} km` : c.T.tutte)}</button>`).join('')}
@@ -164,12 +165,20 @@ export function masiDiNome(farms, c, testo = '') {
     .slice(0, 6)
 }
 
-/** Sotto il campo di Dove: i comuni con quel nome, poi i masi con quel nome (un tocco apre la loro pagina). */
-export function elencoDove(farms, r, c, testo) {
+/**
+ * Sotto il campo di Dove: i comuni con quel nome, poi i masi con quel nome (un tocco apre la loro pagina). Se nessun
+ * comune dei masi ha quel nome, città e paesi d'Italia (luoghi: { testo, stato: 'cerco' | 'fatto' | 'errore',
+ * elenco }), per vedere i masi vicino a un posto dove non ce ne sono.
+ */
+export function elencoDove(farms, r, c, testo, luoghi = null) {
   const comuni = comuniDi(farms, c, testo)
   const masi = masiDiNome(farms, c, testo)
-  if (!comuni.length && !masi.length) return `<p class="muted">${esc(c.T.nessunComune)}</p>`
-  return comuni.map(({ codice, n }) => `<button class="chip town" type="button" data-k="comune-${esc(codice)}" data-comune="${esc(codice)}" aria-pressed="${r.comune === codice}">${esc(comune(codice, c.lang))}<small>${n}</small></button>`).join('')
+  const altri = comuni.length || !luoghi || luoghi.testo !== testo.trim() ? '' : luoghi.stato === 'cerco'
+    ? `<p class="muted" role="status">${esc(c.T.cercoLuoghi)}</p>`
+    : luoghi.stato === 'errore' ? `<p class="muted" role="status">${esc(c.T.luoghiNonTrovati)}</p>`
+    : luoghi.elenco.length ? `<div class="dove-luoghi"><h3 class="step-sub">${esc(c.T.luoghi)}</h3>${luoghi.elenco.map((l, i) => `<button class="chip town" type="button" data-k="luogo-${i}" data-luogo="${i}" aria-pressed="${r.luogo?.nome === l.nome && r.luogo?.lat === l.lat}">${icona('pin')}${esc(l.nome)}<small>${esc(l.zona)}</small></button>`).join('')}</div>` : ''
+  if (!comuni.length && !masi.length && !altri) return `<p class="muted">${esc(c.T.nessunComune)}</p>`
+  return altri + comuni.map(({ codice, n }) => `<button class="chip town" type="button" data-k="comune-${esc(codice)}" data-comune="${esc(codice)}" aria-pressed="${r.comune === codice}">${esc(comune(codice, c.lang))}<small>${n}</small></button>`).join('')
     + (masi.length ? `<div class="dove-masi"><h3 class="step-sub">${esc(c.T.masiConNome)}</h3>${masi.map((f) => `<a class="chip town" href="${esc(linkMaso(f.slug, c))}">${icona('store')}${esc(f.name)}<small>${esc(comune(f.municipality, c.lang))}</small></a>`).join('')}</div>` : '')
 }
 

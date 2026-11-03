@@ -2,11 +2,11 @@
 // account, Esci), il pannello "Accedi" (email → codice di 6 cifre → fatto) e il pallino quando un maso ha cambiato
 // lo stato di una richiesta dall'ultima visita. Al primo accesso i preferiti del browser si uniscono a quelli
 // dell'account; dopo, quelli dell'account valgono su ogni dispositivo. La sessione la tiene sessione.js.
-import { esc, icona } from './comune.js?v=2425474b33'
-import { foglio, mostraErrore } from './browser.js?v=2425474b33'
-import { preferiti } from './preferiti.js?v=2425474b33'
-import { apriSessione, puoRicordare } from './sessione.js?v=2425474b33'
-import { TESTI } from './testi.js?v=2425474b33'
+import { esc, icona } from './comune.js?v=c00ddbb2af'
+import { foglio, mostraErrore } from './browser.js?v=c00ddbb2af'
+import { preferiti } from './preferiti.js?v=c00ddbb2af'
+import { apriSessione, puoRicordare } from './sessione.js?v=c00ddbb2af'
+import { TESTI } from './testi.js?v=c00ddbb2af'
 
 const T = TESTI[document.documentElement.lang === 'de' ? 'de' : 'it']
 const $ = (id) => document.getElementById(id)

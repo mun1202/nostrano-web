@@ -6,16 +6,17 @@
 import {
   aperto, categoria, esc, giorno, icona, leggiRicerca, nuovaRicerca, ordina, origine, passa, riassunto, riassuntoCosa,
   riassuntoDove, riassuntoQuando, scheda, scriviRicerca, stato, statoScheda, stessaRicerca,
-} from './comune.js?v=2425474b33'
-import { adesso, aggiornaDom, barra, foglio, frammento, ogniMinuto, pagina } from './browser.js?v=2425474b33'
+} from './comune.js?v=c00ddbb2af'
+import { adesso, aggiornaDom, barra, foglio, frammento, ogniMinuto, pagina } from './browser.js?v=c00ddbb2af'
 import {
-  chips, daDove, elencoDove, ordinaMercati, pannello, passiFinestra, passiTelefono, quandoMercato,
+  chips, comuniDi, daDove, elencoDove, ordinaMercati, pannello, passiFinestra, passiTelefono, quandoMercato,
   scelteFinestra,
-} from './viste.js?v=2425474b33'
-import { mostraCuori, preferiti, toccaCuore } from './preferiti.js?v=2425474b33'
-import { account } from './accedi.js?v=2425474b33'
-import { suggerisci } from './suggerisci.js?v=2425474b33'
-import { creaCartina } from './cartina.js?v=2425474b33'
+} from './viste.js?v=c00ddbb2af'
+import { mostraCuori, preferiti, toccaCuore } from './preferiti.js?v=c00ddbb2af'
+import { account } from './accedi.js?v=c00ddbb2af'
+import { suggerisci } from './suggerisci.js?v=c00ddbb2af'
+import { creaCartina } from './cartina.js?v=c00ddbb2af'
+import { cercaLuoghi } from './indirizzo.js?v=c00ddbb2af'
 
 const $ = (id) => document.getElementById(id)
 const { dati, c } = pagina(document.body.dataset.base ?? './')
@@ -192,7 +193,7 @@ function riassunti({ anima = false } = {}) {
     const el = document.querySelector(`#barra [data-valore="${p}"]`)
     if (!el) continue
     cambiaTesto(el, testo, anima)
-    const vuoto = p === 'dove' ? !r.comune && !r.km : p === 'quando' ? r.quando === 'sempre' : testo === T.tuttiIProdotti
+    const vuoto = p === 'dove' ? !r.comune && !r.luogo && !r.km : p === 'quando' ? r.quando === 'sempre' : testo === T.tuttiIProdotti
     el.classList.toggle('set', !vuoto)
   }
   const mini = $('mini-ricerca')
@@ -202,13 +203,46 @@ function riassunti({ anima = false } = {}) {
   }
 }
 
+const mostraElencoDove = () => {
+  const elenco = corpo.querySelector('[data-elenco="comuni"]')
+  if (elenco) elenco.innerHTML = elencoDove(FARMS, bozza, c, ui.comune, ui.luoghi)
+}
+
+// Città e paesi (Photon) quando il testo non è il comune di un maso: dopo una pausa, non a ogni lettera.
+let attesaLuoghi = 0
+function cercaLuoghiDopo(testo) {
+  clearTimeout(attesaLuoghi)
+  const t = testo.trim()
+  if (t.length < 3 || comuniDi(FARMS, c, t).length) {
+    ui.luoghi = null
+    return
+  }
+  if (ui.luoghi?.testo === t) return
+  ui.luoghi = { testo: t, stato: 'cerco', elenco: [] }
+  attesaLuoghi = setTimeout(() => {
+    cercaLuoghi(t, c.lang, fetch, { vicino: dati.zona })
+      .then((elenco) => { if (ui.luoghi?.testo === t) ui.luoghi = { testo: t, stato: 'fatto', elenco } })
+      .catch(() => { if (ui.luoghi?.testo === t) ui.luoghi = { testo: t, stato: 'errore', elenco: [] } })
+      .finally(mostraElencoDove)
+  }, 450)
+}
+
 /** Una scelta dentro un passo della ricerca, sulla bozza della finestra. */
 function cambia(s, el, ui) {
   const d = el.dataset
   if (d.dove) {
     s.comune = ''
+    s.luogo = null
     if (!posizione) chiediPosizione()
-  } else if (d.comune) s.comune = s.comune === d.comune ? '' : d.comune
+  } else if (d.comune) {
+    s.comune = s.comune === d.comune ? '' : d.comune
+    s.luogo = null
+  } else if (d.luogo !== undefined) {
+    const l = ui.luoghi?.elenco[Number(d.luogo)]
+    if (!l) return false
+    // Un posto lontano dai masi: le distanze partono da lì, e con un raggio corto non resterebbe nessuno.
+    Object.assign(s, { luogo: { nome: l.nome, lat: l.lat, lng: l.lng }, comune: '', km: 0 })
+  } else if (d.togliLuogo !== undefined) s.luogo = null
   else if (d.km !== undefined) s.km = Number(d.km)
   else if (d.quando) {
     s.quando = d.quando
@@ -237,7 +271,7 @@ function cambia(s, el, ui) {
 const finestra = $('ricerca')
 const corpo = $('ricerca-corpo')
 const largo = matchMedia('(min-width: 760px)')
-const ui = { comune: '', tutti: false }
+const ui = { comune: '', tutti: false, luoghi: null }
 let bozza = nuovaRicerca()
 let passo = 'dove'
 
@@ -362,7 +396,7 @@ function ricerca() {
     if (el.dataset.apri) return vaiAPasso(el.dataset.apri, { tastiera, fuoco: 'scelte' })
     if (!cambia(bozza, el, ui)) return
     // Scelto dove, si passa da soli a Quando; scelto quando (tranne "Scegli giorno e ora"), a Cosa.
-    const avanti = el.dataset.dove || (el.dataset.comune && bozza.comune) ? 'quando'
+    const avanti = el.dataset.dove || el.dataset.luogo || (el.dataset.comune && bozza.comune) ? 'quando'
       : el.dataset.quando && el.dataset.quando !== 'giorno' ? 'cosa' : null
     if (avanti) vaiAPasso(avanti, { tastiera, fuoco: tastiera ? 'scelte' : 'passo', anima: true })
     else rendiFinestra({ anima: true })
@@ -370,7 +404,8 @@ function ricerca() {
   corpo.addEventListener('input', (e) => {
     if (e.target.dataset.k === 'cerca-comune') {
       ui.comune = e.target.value
-      corpo.querySelector('[data-elenco="comuni"]').innerHTML = elencoDove(FARMS, bozza, c, ui.comune)
+      cercaLuoghiDopo(ui.comune)
+      mostraElencoDove()
     } else if (e.target.dataset.k === 'testo') {
       bozza.q = e.target.value
       riassuntiBozza()
@@ -391,8 +426,9 @@ function ricerca() {
     }
     if (e.key !== 'Enter' || !e.target.matches('input')) return
     e.preventDefault()
-    // Invio nel campo dei comuni sceglie il primo comune della lista (o apre il primo maso); nel campo di testo cerca.
-    if (e.target.dataset.k === 'cerca-comune') corpo.querySelector('[data-elenco="comuni"] [data-comune], [data-elenco="comuni"] a')?.click()
+    // Invio nel campo dei comuni sceglie il primo comune della lista (o il primo luogo, o apre il primo maso); nel
+    // campo di testo cerca.
+    if (e.target.dataset.k === 'cerca-comune') corpo.querySelector('[data-elenco="comuni"] [data-comune], [data-elenco="comuni"] [data-luogo], [data-elenco="comuni"] a')?.click()
     else mostraRisultati()
   })
   largo.addEventListener('change', () => {
