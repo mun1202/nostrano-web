@@ -162,7 +162,8 @@ export async function askAi(text) {
     throw new ApiError('network', 0)
   }
   const data = await response.json().catch(() => ({}))
-  if (!response.ok) throw new ApiError(data?.error || 'ai_failed', response.status)
+  // 404: la funzione non è ancora pubblicata su Supabase. Non è un errore del maso: si dice che non è attiva.
+  if (!response.ok) throw new ApiError(data?.error || (response.status === 404 ? 'ai_off' : 'ai_failed'), response.status)
   return data
 }
 

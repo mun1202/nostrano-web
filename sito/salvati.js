@@ -2,11 +2,11 @@
 // la home con il filtro "Preferiti"). Senza account stanno nel browser; con l'account anche sul server (accedi.js), e
 // quando arrivano la pagina si rifà. Un cuore tolto lascia la scheda finché la pagina non si rifà: un tocco per
 // sbaglio si rimedia toccando di nuovo, come nella home.
-import { esc, icona, scheda } from './comune.js?v=96fa523173'
-import { barra, pagina } from './browser.js?v=96fa523173'
-import { account, sessioneSito } from './accedi.js?v=96fa523173'
-import { mostraCuori, preferiti, toccaCuore } from './preferiti.js?v=96fa523173'
-import { suggerisci } from './suggerisci.js?v=96fa523173'
+import { esc, icona, scheda } from './comune.js?v=ffdd04c6a0'
+import { barra, pagina } from './browser.js?v=ffdd04c6a0'
+import { account, sessioneSito } from './accedi.js?v=ffdd04c6a0'
+import { mostraCuori, preferiti, toccaCuore } from './preferiti.js?v=ffdd04c6a0'
+import { suggerisci } from './suggerisci.js?v=ffdd04c6a0'
 
 const { dati, c } = pagina('../')
 const T = c.T
