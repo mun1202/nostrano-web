@@ -16,6 +16,18 @@ const COMUNI = {
 export const comune = (slug, lang) => COMUNI[slug]?.[lang === 'de' ? 1 : 0] ?? slug
 export const comuneInTutteLeLingue = (slug) => COMUNI[slug] ?? [slug]
 
+// I nomi inglesi dei prodotti del catalogo comune (ProductCatalog in nostrano/Model/Product.swift). Un prodotto che
+// non c'è qui, scritto dall'admin, resta con il nome italiano. I nomi dei comuni in inglese sono quelli italiani.
+export const PRODOTTI_EN = {
+  mele: 'Apples', pere: 'Pears', castagne: 'Chestnuts', uva: 'Table grapes', fragole: 'Strawberries',
+  succoMela: 'Apple juice', confetture: 'Jams', patate: 'Potatoes', zucca: 'Pumpkins', cavoli: 'Cabbages',
+  insalata: 'Salad', erbe: 'Fresh herbs', pomodori: 'Tomatoes', uova: 'Eggs', speck: 'Speck',
+  kaminwurz: 'Smoked sausages', manzo: 'Beef', pollo: 'Chicken', formaggio: 'Alpine cheese', burro: 'Butter',
+  yogurt: 'Yoghurt', latte: 'Fresh milk', miele: 'Blossom honey', mieleCastagno: 'Chestnut honey', lagrein: 'Lagrein',
+  santaMaddalena: 'Santa Maddalena', pinotBianco: 'Pinot Blanc', vinoNuovo: 'New wine', paneSegale: 'Rye bread',
+  schuettelbrot: 'Schüttelbrot',
+}
+
 export const CATEGORIE = ['frutta', 'verdura', 'uova', 'latticini', 'carne', 'miele', 'vino', 'pane']
 
 export const esc = (s) =>
@@ -112,7 +124,7 @@ export function prezzo(p, c) {
 
 // Con la maiuscola anche se l'admin l'ha scritto minuscolo ("arance" → "Arance").
 export const nomeProdotto = (kind, c) => {
-  const nome = c.kinds[kind]?.[c.lang] ?? kind
+  const nome = (c.lang === 'en' ? PRODOTTI_EN[kind] : null) ?? c.kinds[kind]?.[c.lang] ?? c.kinds[kind]?.it ?? kind
   return nome.charAt(0).toLocaleUpperCase(c.lang) + nome.slice(1)
 }
 
@@ -221,12 +233,12 @@ export function passaQuando(f, r, ora) {
   return true
 }
 
-// Nome del maso, comune e prodotti nelle due lingue, come matchesText nell'app; qui anche senza accenti.
+// Nome del maso, comune e prodotti nelle tre lingue, come matchesText nell'app; qui anche senza accenti.
 function passaTesto(f, q, c) {
   const testo = normalizza(String(q ?? '').trim())
   if (!testo) return true
   const pagliaio = [f.name, ...comuneInTutteLeLingue(f.municipality)]
-  for (const p of f.products) pagliaio.push(c.kinds[p.kind]?.it ?? p.kind, c.kinds[p.kind]?.de ?? p.kind, p.detail ?? '')
+  for (const p of f.products) pagliaio.push(c.kinds[p.kind]?.it ?? p.kind, c.kinds[p.kind]?.de ?? p.kind, PRODOTTI_EN[p.kind] ?? '', p.detail ?? '')
   return pagliaio.some((x) => normalizza(x).includes(testo))
 }
 
@@ -488,7 +500,7 @@ export function quantita(n, unit, c) {
 }
 
 /** Il nome di una riga di una richiesta: quello copiato all'invio, nella lingua della pagina. */
-export const nomeRiga = (r, c) => (c.lang === 'de' ? r.name_de || r.name_it : r.name_it) || nomeProdotto(r.kind, c)
+export const nomeRiga = (r, c) => (c.lang === 'de' ? r.name_de || r.name_it : c.lang === 'en' ? PRODOTTI_EN[r.kind] || r.name_it : r.name_it) || nomeProdotto(r.kind, c)
 
 /** "12 uova", "2 kg mele", "1 vasetto confetture": come RequestLine.summary. */
 export function rigaInBreve(r, c) {

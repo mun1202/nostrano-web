@@ -2,13 +2,13 @@
 // account, Esci), il pannello "Accedi" (email → codice di 6 cifre → fatto) e il pallino quando un maso ha cambiato
 // lo stato di una richiesta dall'ultima visita. Al primo accesso i preferiti del browser si uniscono a quelli
 // dell'account; dopo, quelli dell'account valgono su ogni dispositivo. La sessione la tiene sessione.js.
-import { esc, icona } from './comune.js?v=ffdd04c6a0'
-import { foglio, mostraErrore } from './browser.js?v=ffdd04c6a0'
-import { preferiti } from './preferiti.js?v=ffdd04c6a0'
-import { apriSessione, puoRicordare } from './sessione.js?v=ffdd04c6a0'
-import { TESTI } from './testi.js?v=ffdd04c6a0'
+import { esc, icona } from './comune.js?v=5ff07696f2'
+import { foglio, mostraErrore } from './browser.js?v=5ff07696f2'
+import { preferiti } from './preferiti.js?v=5ff07696f2'
+import { apriSessione, puoRicordare } from './sessione.js?v=5ff07696f2'
+import { TESTI, linguaDi } from './testi.js?v=5ff07696f2'
 
-const T = TESTI[document.documentElement.lang === 'de' ? 'de' : 'it']
+const T = TESTI[linguaDi(document.documentElement.lang)]
 const $ = (id) => document.getElementById(id)
 // Il codice dura 10 minuti (supabase/config.toml, otp_expiry); un nuovo invio dopo 60 secondi.
 const DURATA_CODICE = 600

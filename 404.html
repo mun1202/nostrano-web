@@ -16,7 +16,7 @@
   <link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
   <link rel="manifest" href="/assets/manifest-it.webmanifest">
   <link rel="apple-touch-icon" href="/assets/icon-180.png">
-  <link rel="stylesheet" href="/sito/sito.css?v=ffdd04c6a0">
+  <link rel="stylesheet" href="/sito/sito.css?v=5ff07696f2">
 </head>
 <body>
   <header class="top">
@@ -35,22 +35,29 @@
       <p class="muted">Vielleicht ist er umgezogen oder verkauft nicht mehr direkt.</p>
       <a class="btn" href="/de/">Alle Höfe ansehen</a>
     </div>
+    <div class="not-found" data-caso="maso-en" lang="en" hidden>
+      <h1>This farm is no longer listed here</h1>
+      <p class="muted">It may have moved or stopped selling directly.</p>
+      <a class="btn" href="/en/">See all farms</a>
+    </div>
     <div class="not-found" data-caso="link" hidden>
       <h1>Pagina non trovata</h1>
       <p class="muted">Controlla il link che hai ricevuto su WhatsApp.</p>
       <p class="muted" lang="de">Seite nicht gefunden. Prüfe den Link, den du auf WhatsApp bekommen hast.</p>
+      <p class="muted" lang="en">Page not found. Check the link you received on WhatsApp.</p>
     </div>
     <div class="not-found" data-caso="altro">
       <h1>Pagina non trovata</h1>
       <p class="muted">Questo indirizzo non porta a nessuna pagina di Il mio contadino.</p>
       <p class="muted" lang="de">Seite nicht gefunden: Diese Adresse führt zu keiner Seite von Il mio contadino.</p>
-      <p><a class="btn" href="/it/">Vai ai masi</a> <a class="btn" href="/de/" lang="de">Zu den Höfen</a></p>
+      <p class="muted" lang="en">Page not found: this address doesn’t lead to any page of Il mio contadino.</p>
+      <p><a class="btn" href="/it/">Vai ai masi</a> <a class="btn" href="/de/" lang="de">Zu den Höfen</a> <a class="btn" href="/en/" lang="en">Go to the farms</a></p>
     </div>
   </main>
   <script>
     // Cosa vede chi sbaglia indirizzo: un maso che non c'è più, un link personale sbagliato o un'altra pagina.
     const percorso = location.pathname
-    const maso = percorso.match(/\/(it|de)\/produttori\//)
+    const maso = percorso.match(/\/(it|de|en)\/produttori\//)
     const caso = maso ? `maso-${maso[1]}` : /\/(modifica|admin)(\/|$)/.test(percorso) ? 'link' : 'altro'
     for (const el of document.querySelectorAll('[data-caso]')) el.hidden = el.dataset.caso !== caso
     if (maso) document.documentElement.lang = maso[1]

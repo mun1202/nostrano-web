@@ -1,14 +1,14 @@
 // "Suggerisci un maso", su ogni pagina con il piè di pagina: come "Segnala un maso" nell'app (suggestion_create),
 // con lo stesso accesso anonimo chiesto solo al momento dell'invio. Il pannello lo scrive il generatore
 // (web/genera/pagine.mjs) con indirizzo del progetto e chiave publishable; i bottoni hanno data-suggerisci.
-import { chiamaAnonimo, foglio, mostraErrore } from './browser.js?v=ffdd04c6a0'
-import { sceltaLuogo } from './luogo.js?v=ffdd04c6a0'
-import { TESTI } from './testi.js?v=ffdd04c6a0'
+import { chiamaAnonimo, foglio, mostraErrore } from './browser.js?v=5ff07696f2'
+import { sceltaLuogo } from './luogo.js?v=5ff07696f2'
+import { TESTI, linguaDi } from './testi.js?v=5ff07696f2'
 
 export function suggerisci() {
   const pannello = document.getElementById('suggerisci')
   if (!pannello) return
-  const T = TESTI[document.documentElement.lang === 'de' ? 'de' : 'it']
+  const T = TESTI[linguaDi(document.documentElement.lang)]
   const $ = (id) => document.getElementById(id)
   const modulo = $('suggerisci-modulo')
   const errore = $('suggerisci-errore')
@@ -16,7 +16,7 @@ export function suggerisci() {
   const progetto = { url: pannello.dataset.url, key: pannello.dataset.key }
   const email = pannello.dataset.email ?? ''
   const contatto = modulo.elements.contatto
-  const lang = document.documentElement.lang === 'de' ? 'de' : 'it'
+  const lang = linguaDi(document.documentElement.lang)
   // "Chiedi il tuo link": è il produttore a scrivere, e senza numero non sapremmo dove mandarglielo.
   let dalMaso = false
   // "Dove sta il maso": il luogo confermato (cerca, conferma, fatto: web/sito/luogo.js).

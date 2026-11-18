@@ -5,7 +5,7 @@ import {
   dataEstesa, esc, fasce, fasceTesto, filtriAttivi, foto, giorniA, giorniDa, giorno, icona, linkMaso, maiuscola, nomeProdotto,
   normalizza, novita, oraScelta, orario, prezzo, prodottiPresenti, riassunto, riassuntoCosa, riassuntoDove,
   riassuntoQuando, stato, titolo,
-} from './comune.js?v=ffdd04c6a0'
+} from './comune.js?v=5ff07696f2'
 
 // Home ---------------------------------------------------------------------------------------------
 
@@ -326,7 +326,8 @@ export function orariMaso(f, c) {
     .sort((a, b) => a.tra - b.tra)
     .map(({ e, tra }) => {
       const motivo = c.lang === 'de' ? e.reason_de || e.reason_it : e.reason_it
-      const perche = motivo ? ` (${esc(motivo)})` : ''
+      // Il motivo lo scrive il maso in italiano o in tedesco: sulla pagina inglese resta nella sua lingua.
+      const perche = motivo ? ` (${c.lang === 'en' ? `<span lang="it">${esc(motivo)}</span>` : esc(motivo)})` : ''
       const r = e.ranges ?? []
       return `<li>${icona('calendar')}<span>${esc(maiuscola(dataEstesa(giorno(c.ora, tra), c)))}: ${esc(r.length ? fasceTesto(r, c) : c.T.chiusoEccezione)}${perche}</span></li>`
     }).join('')

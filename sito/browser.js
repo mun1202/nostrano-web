@@ -1,6 +1,6 @@
 // Parti del sito pubblico che servono solo nel browser: l'ora di adesso, il contesto della pagina, la barra in alto.
-import { oraDi } from './comune.js?v=ffdd04c6a0'
-import { TESTI } from './testi.js?v=ffdd04c6a0'
+import { oraDi } from './comune.js?v=5ff07696f2'
+import { TESTI, linguaDi } from './testi.js?v=5ff07696f2'
 
 // Ora di Roma. Per le prove, con "?ora=2026-10-30T10:00" nell'indirizzo il sito fa finta che sia quell'ora.
 export function adesso() {
@@ -15,7 +15,7 @@ export function adesso() {
 /** I dati che il generatore ha messo nella pagina e il contesto per le regole di comune.js. */
 export function pagina(base) {
   const dati = JSON.parse(document.getElementById('dati').textContent)
-  const lang = document.documentElement.lang === 'de' ? 'de' : 'it'
+  const lang = linguaDi(document.documentElement.lang)
   return { dati, c: { lang, T: TESTI[lang], kinds: dati.kinds, ora: adesso(), base } }
 }
 

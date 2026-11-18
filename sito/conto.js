@@ -1,13 +1,13 @@
 // "Il tuo account", /it/account/ e /de/account/: l'email, da quando c'è l'account, Esci ed "Elimina account".
 // Prima di eliminare, una domanda che dice che cosa si cancella (con i numeri dell'account, da account_info).
 // account_delete cancella tutto sul server, senza chiavi segrete nel browser; poi qui si esce e basta.
-import { dataEstesa, esc, giornoDellaData, icona, oraDi } from './comune.js?v=ffdd04c6a0'
-import { barra, mostraErrore } from './browser.js?v=ffdd04c6a0'
-import { account, sessioneSito } from './accedi.js?v=ffdd04c6a0'
-import { suggerisci } from './suggerisci.js?v=ffdd04c6a0'
-import { TESTI } from './testi.js?v=ffdd04c6a0'
+import { dataEstesa, esc, giornoDellaData, icona, oraDi } from './comune.js?v=5ff07696f2'
+import { barra, mostraErrore } from './browser.js?v=5ff07696f2'
+import { account, sessioneSito } from './accedi.js?v=5ff07696f2'
+import { suggerisci } from './suggerisci.js?v=5ff07696f2'
+import { TESTI, linguaDi } from './testi.js?v=5ff07696f2'
 
-const lang = document.documentElement.lang === 'de' ? 'de' : 'it'
+const lang = linguaDi(document.documentElement.lang)
 const T = TESTI[lang]
 const c = { lang, T, kinds: {} }
 const $ = (id) => document.getElementById(id)
