@@ -790,6 +790,42 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/come-funziona/"/>
   </url>
   <url>
+    <loc>https://ilmiocontadino.com/it/privacy/</loc>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/privacy/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/privacy/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/privacy/"/>
+  </url>
+  <url>
+    <loc>https://ilmiocontadino.com/de/privacy/</loc>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/privacy/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/privacy/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/privacy/"/>
+  </url>
+  <url>
+    <loc>https://ilmiocontadino.com/it/note-legali/</loc>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/note-legali/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/note-legali/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/note-legali/"/>
+  </url>
+  <url>
+    <loc>https://ilmiocontadino.com/de/note-legali/</loc>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/note-legali/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/note-legali/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/note-legali/"/>
+  </url>
+  <url>
+    <loc>https://ilmiocontadino.com/it/contatti/</loc>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/contatti/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/contatti/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/contatti/"/>
+  </url>
+  <url>
+    <loc>https://ilmiocontadino.com/de/contatti/</loc>
+    <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/it/contatti/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/de/contatti/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ilmiocontadino.com/it/contatti/"/>
+  </url>
+  <url>
     <loc>https://ilmiocontadino.com/per-i-produttori/</loc>
     <xhtml:link rel="alternate" hreflang="it" href="https://ilmiocontadino.com/per-i-produttori/"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://ilmiocontadino.com/per-i-produttori/de/"/>
