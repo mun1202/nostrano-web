@@ -1,13 +1,13 @@
 // Pagina del produttore: si apre dal link personale https://ilmiocontadino.com/modifica/<token>.
 // Fa le stesse cose dell'area produttore dell'app, con le stesse funzioni del database.
-import { ROOT, accountEmail, linkCode, removeUploaded, rpc, sendCode, shrink, signOut, upload, verifyCode } from './api.js?v=c00ddbb2af'
-import { errorText, initialLanguage, municipalityCode, municipalityName, municipalityOf, parseAmount, rememberLanguage, t } from './i18n.js?v=c00ddbb2af'
-import { sceltaLuogo } from '../sito/luogo.js?v=c00ddbb2af'
-import { TESTI } from '../sito/testi.js?v=c00ddbb2af'
-import { WEEK, addDays, fromClock, todayRome } from './days.js?v=c00ddbb2af'
-import * as views from './views.js?v=c00ddbb2af'
-import * as notify from './notify.js?v=c00ddbb2af'
-import { icon } from './icons.js?v=c00ddbb2af'
+import { ROOT, accountEmail, linkCode, askAi, removeUploaded, rpc, sendCode, shrink, signOut, upload, verifyCode } from './api.js?v=7d17cdfd25'
+import { errorText, initialLanguage, municipalityCode, municipalityName, municipalityOf, parseAmount, rememberLanguage, t } from './i18n.js?v=7d17cdfd25'
+import { sceltaLuogo } from '../sito/luogo.js?v=7d17cdfd25'
+import { TESTI } from '../sito/testi.js?v=7d17cdfd25'
+import { WEEK, addDays, fromClock, todayRome } from './days.js?v=7d17cdfd25'
+import * as views from './views.js?v=7d17cdfd25'
+import * as notify from './notify.js?v=7d17cdfd25'
+import { icon } from './icons.js?v=7d17cdfd25'
 
 const root = document.querySelector('#app')
 const nav = document.querySelector('#nav')
@@ -41,7 +41,7 @@ function pageSections() {
 
 const s = {
   lang: initialLanguage(), farm: null, area: null, requests: [], catalog: [], route: currentRoute(),
-  proposing: null, day: null, month: null, editing: null, customOpen: false, appLink: null, busy: false, message: null,
+  proposing: null, ai: { text: '', busy: false, proposal: null }, day: null, month: null, editing: null, customOpen: false, appLink: null, busy: false, message: null,
   push: null, pushHelp: false, accountEmail: accountEmail(), access: freshAccess(),
 }
 
@@ -269,6 +269,22 @@ function saveHours(form) {
   save({ opening_hours: hours }, t(s.lang, 'hoursSaved'))
 }
 
+/** Manda la frase all'IA e mostra cosa propone: si salva solo con «Applica». */
+async function askAiProposal() {
+  const text = s.ai.text.trim()
+  if (text.length < 2 || s.ai.busy) return
+  s.ai = { text, busy: true, proposal: null }
+  renderSection('products')
+  try {
+    const proposal = await askAi(text)
+    s.ai = { text, busy: false, proposal: proposal.empty ? { changes: [], notFound: [], message: '' } : proposal }
+  } catch (error) {
+    s.ai.busy = false
+    toast(errorText(s.lang, error), true)
+  }
+  renderSection('products')
+}
+
 function toggleClosedToday() {
   const today = todayRome()
   const closed = s.farm.hours_exceptions.some((e) => e.day === today && e.ranges.length === 0)
@@ -360,6 +376,14 @@ root.addEventListener('click', (event) => {
       return addProduct(root.querySelector('[data-ref="add-kind"]').value)
     case 'edit-product':
       return openEditor(kind)
+    case 'ai-apply': {
+      const changes = new Map(s.ai.proposal.changes.map((c) => [c.kind, c]))
+      s.ai = { text: '', busy: false, proposal: null }
+      return save({ products: productList().map((p) => (changes.has(p.kind) ? { ...p, ...changes.get(p.kind) } : p)) }, t(s.lang, 'saved'))
+    }
+    case 'ai-cancel':
+      s.ai.proposal = null
+      return renderSection('products')
     case 'cancel-edit':
       s.editing = null
       return renderSection('products')
@@ -484,7 +508,9 @@ function updatePreview(form) {
 
 root.addEventListener('input', (event) => {
   const { form, name } = event.target
-  if (name === 'text') {
+  if (name === 'ai-text') {
+    s.ai.text = event.target.value
+  } else if (name === 'text') {
     form.querySelector('.counter').textContent = `${event.target.value.length}/140`
     // L'anteprima a destra cambia mentre si scrive.
     const preview = root.querySelector('[data-preview-notice]')
@@ -532,6 +558,8 @@ root.addEventListener('submit', (event) => {
     }
     case 'notice':
       return save({ notice_text: String(data.get('text')).trim(), notice_until: data.get('until') }, t(s.lang, 'noticePublished'))
+    case 'ai':
+      return askAiProposal()
     case 'product': {
       const product = productFromForm(form)
       if (!product) return toast(t(s.lang, 'badPrice'), true)

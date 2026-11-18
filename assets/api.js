@@ -149,6 +149,23 @@ export async function rpc(name, args = {}) {
   return data
 }
 
+/** Chiede all'IA le modifiche ai prodotti da una frase libera. Non salva niente: restituisce una proposta. */
+export async function askAi(text) {
+  let response
+  try {
+    response = await fetch(`${url}/functions/v1/producer-ai`, {
+      method: 'POST',
+      headers: { apikey: key, Authorization: `Bearer ${await accessToken()}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
+    })
+  } catch {
+    throw new ApiError('network', 0)
+  }
+  const data = await response.json().catch(() => ({}))
+  if (!response.ok) throw new ApiError(data?.error || 'ai_failed', response.status)
+  return data
+}
+
 /** Carica un file in Supabase Storage e restituisce l'indirizzo pubblico. */
 export async function upload(bucket, path, file) {
   let response

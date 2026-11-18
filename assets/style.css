@@ -568,3 +568,6 @@ button.light { background: #fff; color: var(--ink); }
 .photo-tag { position: absolute; top: 8px; left: 8px; background: #fff; color: var(--ink); }
 .photo-actions { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; }
 .photo-add { display: inline-flex; align-self: flex-start; cursor: pointer; }
+
+/* IA del produttore: elenco delle modifiche proposte */
+ul.plain { margin: 0; padding-left: 18px; }

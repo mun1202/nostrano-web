@@ -6,17 +6,17 @@
 import {
   aperto, categoria, esc, giorno, icona, leggiRicerca, nuovaRicerca, ordina, origine, passa, riassunto, riassuntoCosa,
   riassuntoDove, riassuntoQuando, scheda, scriviRicerca, stato, statoScheda, stessaRicerca,
-} from './comune.js?v=c00ddbb2af'
-import { adesso, aggiornaDom, barra, foglio, frammento, ogniMinuto, pagina } from './browser.js?v=c00ddbb2af'
+} from './comune.js?v=7d17cdfd25'
+import { adesso, aggiornaDom, barra, foglio, frammento, ogniMinuto, pagina } from './browser.js?v=7d17cdfd25'
 import {
   chips, comuniDi, daDove, elencoDove, ordinaMercati, pannello, passiFinestra, passiTelefono, quandoMercato,
   scelteFinestra,
-} from './viste.js?v=c00ddbb2af'
-import { mostraCuori, preferiti, toccaCuore } from './preferiti.js?v=c00ddbb2af'
-import { account } from './accedi.js?v=c00ddbb2af'
-import { suggerisci } from './suggerisci.js?v=c00ddbb2af'
-import { creaCartina } from './cartina.js?v=c00ddbb2af'
-import { cercaLuoghi } from './indirizzo.js?v=c00ddbb2af'
+} from './viste.js?v=7d17cdfd25'
+import { mostraCuori, preferiti, toccaCuore } from './preferiti.js?v=7d17cdfd25'
+import { account } from './accedi.js?v=7d17cdfd25'
+import { suggerisci } from './suggerisci.js?v=7d17cdfd25'
+import { creaCartina } from './cartina.js?v=7d17cdfd25'
+import { cercaLuoghi } from './indirizzo.js?v=7d17cdfd25'
 
 const $ = (id) => document.getElementById(id)
 const { dati, c } = pagina(document.body.dataset.base ?? './')

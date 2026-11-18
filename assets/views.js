@@ -1,6 +1,6 @@
 // Le parti della pagina, come HTML. Ogni testo che arriva dal database o dai clienti passa da esc().
-import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=c00ddbb2af'
-import { WEEK, addDays, dayRanges, formatDay, formatInstant, minuteNowRome, openDays, toClock, todayRome, weekday, weekdayName } from './days.js?v=c00ddbb2af'
+import { CATEGORY_CODES, UNIT_CODES, categoryName, formatAmount, municipalityName, priceText, t, unitName } from './i18n.js?v=7d17cdfd25'
+import { WEEK, addDays, dayRanges, formatDay, formatInstant, minuteNowRome, openDays, toClock, todayRome, weekday, weekdayName } from './days.js?v=7d17cdfd25'
 
 export const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
@@ -529,12 +529,43 @@ export function defaultUnit(s, kind) {
   return s.catalog.find((k) => k.kind === kind)?.default_unit ?? 'pezzo'
 }
 
+/** «Scrivi cosa è cambiato»: la frase libera e, dopo, la proposta dell'IA da confermare. Solo per il maso, non per l'admin. */
+function aiBox(s) {
+  if (s.admin || !s.farm.products.length) return ''
+  const ai = s.ai
+  const proposal = ai.proposal
+  const line = (c) => {
+    const parts = []
+    if (c.available !== undefined) parts.push(t(s.lang, c.available ? 'aiAvailable' : 'aiFinished'))
+    if (c.price_min !== undefined) parts.push(priceText(s.lang, c))
+    if (c.detail !== undefined) parts.push(`«${esc(c.detail)}»`)
+    return `<li><strong>${esc(productName(s, c.kind))}</strong>: ${parts.join(' · ')}</li>`
+  }
+  return `
+    <form data-form="ai" class="card stack ai">
+      <label class="stack small">${t(s.lang, 'aiLabel')}
+        <textarea name="ai-text" rows="2" maxlength="500" placeholder="${esc(t(s.lang, 'aiPlaceholder'))}" ${ai.busy ? 'disabled' : ''}>${esc(ai.text)}</textarea>
+      </label>
+      ${proposal ? `
+        <div class="stack small" role="status">
+          ${proposal.message ? `<p>${esc(proposal.message)}</p>` : ''}
+          ${proposal.changes.length ? `<ul class="plain">${proposal.changes.map(line).join('')}</ul>` : `<p class="muted">${t(s.lang, 'aiNothing')}</p>`}
+          ${proposal.notFound.length ? `<p class="muted">${t(s.lang, 'aiNotFound', proposal.notFound.map(esc).join(', '))}</p>` : ''}
+          <div class="row">
+            ${proposal.changes.length ? `<button type="button" data-action="ai-apply">${t(s.lang, 'aiApply')}</button>` : ''}
+            <button type="button" class="secondary" data-action="ai-cancel">${t(s.lang, 'aiCancel')}</button>
+          </div>
+        </div>` : `<button class="secondary" ${ai.busy ? 'disabled' : ''}>${t(s.lang, ai.busy ? 'aiBusy' : 'aiAsk')}</button>`}
+    </form>`
+}
+
 export function products(s) {
   const sold = new Set(s.farm.products.map((p) => p.kind))
   const shared = s.catalog.filter((k) => k.shared && !sold.has(k.kind))
   const groups = [...new Set(shared.map((k) => k.category))]
   return `
     <h2>${t(s.lang, 'products')}</h2>
+    ${aiBox(s)}
     <div class="card list">
       ${s.farm.products.length ? s.farm.products.map((p) => {
         const name = esc(productName(s, p.kind))
