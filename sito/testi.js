@@ -289,6 +289,9 @@ const it = {
   appTitolo: `${NOME} per iPhone`,
   appTesto: "Con l'app ricevi un avviso appena il maso risponde alle tue richieste e quando tornano i prodotti che aspetti.",
   appBottone: "Scarica l'app per iPhone",
+  appTitoloAndroid: `${NOME} per Android`,
+  appTitoloTelefono: `L'app ${NOME}`,
+  appBottoneAndroid: "Scarica l'app per Android",
   // Account, facoltativo: accesso con email e codice di 6 cifre, niente password.
   accedi: 'Accedi',
   accediPerche: "Con l'account mandi le richieste ai masi e ritrovi i preferiti su ogni dispositivo. È facoltativo: per guardare e cercare non serve.",
@@ -696,6 +699,9 @@ const de = {
   appTitolo: `${NOME} fürs iPhone`,
   appTesto: 'Mit der App bekommst du Bescheid, sobald der Hof auf deine Anfragen antwortet und wenn Produkte, auf die du wartest, wieder da sind.',
   appBottone: 'App fürs iPhone laden',
+  appTitoloAndroid: `${NOME} für Android`,
+  appTitoloTelefono: `Die App ${NOME}`,
+  appBottoneAndroid: 'App für Android laden',
   // Konto, freiwillig: Anmeldung mit E-Mail und 6-stelligem Code, ohne Passwort.
   accedi: 'Anmelden',
   accediPerche: 'Mit einem Konto schickst du Anfragen an die Höfe und findest deine Favoriten auf jedem Gerät. Es ist freiwillig: Zum Ansehen und Suchen brauchst du keins.',

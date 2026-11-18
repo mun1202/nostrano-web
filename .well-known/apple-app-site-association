@@ -1,0 +1,17 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": [
+          "G2277C849S.MuSePixel.nostrano"
+        ],
+        "components": [
+          {
+            "/": "/modifica/*",
+            "comment": "Il link personale del maso"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+# Generato da web/genera/costruisci.mjs: non modificarlo qui.
+# Apple e Google leggono questi file senza password e li vogliono come JSON.
+Satisfy Any
+Require all granted
+ForceType application/json
+<IfModule mod_headers.c>
+  Header set Cache-Control "public, max-age=3600"
+</IfModule>

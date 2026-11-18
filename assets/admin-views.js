@@ -1,8 +1,8 @@
 // Le schermate del pannello admin, come HTML. Solo in italiano: lo usa chi gestisce Il mio contadino.
-import { esc } from './views.js?v=7d17cdfd25'
-import { CATEGORY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=7d17cdfd25'
-import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=7d17cdfd25'
-import { icon } from './icons.js?v=7d17cdfd25'
+import { esc } from './views.js?v=96fa523173'
+import { CATEGORY_CODES, UNIT_CODES, categoryName, municipalityName, priceText, unitName } from './i18n.js?v=96fa523173'
+import { WEEK, formatDay, toClock, todayRome, weekdayName } from './days.js?v=96fa523173'
+import { icon } from './icons.js?v=96fa523173'
 
 const ROOT = window.NOSTRANO_ROOT ?? '/'
 const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1)

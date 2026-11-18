@@ -5,7 +5,7 @@ import {
   dataEstesa, esc, fasce, fasceTesto, filtriAttivi, foto, giorniA, giorniDa, giorno, icona, linkMaso, maiuscola, nomeProdotto,
   normalizza, novita, oraScelta, orario, prezzo, prodottiPresenti, riassunto, riassuntoCosa, riassuntoDove,
   riassuntoQuando, stato, titolo,
-} from './comune.js?v=7d17cdfd25'
+} from './comune.js?v=96fa523173'
 
 // Home ---------------------------------------------------------------------------------------------
 
