@@ -438,7 +438,7 @@ export function scheda(f, i, c, { da, prodotto = '', entra = false, ricerca = nu
         <h3><span class="farm-name">${esc(f.name)}</span>${f.is_organic ? `<span class="tag bio">${esc(c.T.bio)}</span>` : ''}</h3>
         ${ora.riga}
         <p class="meta">${esc(comune(f.municipality, c.lang))} · ${km(distanza(da, f), c)}${
-          f.last_checked_at && giorniDa(f.last_checked_at, c.ora) > 60 ? ` · <span class="stale">${esc(c.T.daVerificare)}</span>` : ''}</p>
+          f.last_checked_at && giorniDa(f.last_checked_at, c.ora) > 90 ? ` · <span class="stale">${esc(c.T.daVerificare)}</span>` : ''}</p>
         ${ultima}
       </div>
     </a>

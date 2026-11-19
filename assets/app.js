@@ -1,13 +1,13 @@
 // Pagina del produttore: si apre dal link personale https://ilmiocontadino.com/modifica/<token>.
 // Fa le stesse cose dell'area produttore dell'app, con le stesse funzioni del database.
-import { ROOT, accountEmail, linkCode, askAi, removeUploaded, rpc, sendCode, shrink, signOut, upload, verifyCode } from './api.js?v=5ff07696f2'
-import { errorText, initialLanguage, municipalityCode, municipalityName, municipalityOf, parseAmount, rememberLanguage, t } from './i18n.js?v=5ff07696f2'
-import { sceltaLuogo } from '../sito/luogo.js?v=5ff07696f2'
-import { TESTI } from '../sito/testi.js?v=5ff07696f2'
-import { WEEK, addDays, fromClock, todayRome } from './days.js?v=5ff07696f2'
-import * as views from './views.js?v=5ff07696f2'
-import * as notify from './notify.js?v=5ff07696f2'
-import { icon } from './icons.js?v=5ff07696f2'
+import { ROOT, accountEmail, linkCode, askAi, removeUploaded, rpc, sendCode, shrink, signOut, upload, verifyCode } from './api.js?v=ae20827c34'
+import { errorText, initialLanguage, municipalityCode, municipalityName, municipalityOf, parseAmount, rememberLanguage, t } from './i18n.js?v=ae20827c34'
+import { sceltaLuogo } from '../sito/luogo.js?v=ae20827c34'
+import { TESTI } from '../sito/testi.js?v=ae20827c34'
+import { WEEK, addDays, fromClock, todayRome } from './days.js?v=ae20827c34'
+import * as views from './views.js?v=ae20827c34'
+import * as notify from './notify.js?v=ae20827c34'
+import { icon } from './icons.js?v=ae20827c34'
 
 const root = document.querySelector('#app')
 const nav = document.querySelector('#nav')

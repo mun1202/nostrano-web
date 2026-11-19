@@ -5,7 +5,7 @@ import {
   dataEstesa, esc, fasce, fasceTesto, filtriAttivi, foto, giorniA, giorniDa, giorno, icona, linkMaso, maiuscola, nomeProdotto,
   normalizza, novita, oraScelta, orario, prezzo, prodottiPresenti, riassunto, riassuntoCosa, riassuntoDove,
   riassuntoQuando, stato, titolo,
-} from './comune.js?v=5ff07696f2'
+} from './comune.js?v=ae20827c34'
 
 // Home ---------------------------------------------------------------------------------------------
 
@@ -351,7 +351,8 @@ export function bloccoMercati(f, markets, c, link = () => null) {
 
 export function aggiornata(f, c) {
   const giorni = giorniDa(f.last_checked_at, c.ora)
-  const vecchia = giorni > 60
+  // Come nelle app e nella specifica: oltre 90 giorni dall'ultimo controllo.
+  const vecchia = giorni > 90
   return `<span id="aggiornata"${vecchia ? ' class="stale"' : ''}>${icona(vecchia ? 'clock' : 'check')}${esc(vecchia ? c.T.vecchia : c.T.aggiornata(c.T.fa(giorni)))}</span>`
 }
 
