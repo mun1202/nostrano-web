@@ -89,7 +89,7 @@
     <section class="wrap" id="risultati" aria-labelledby="conteggio">
       <!-- Senza masi «0 masi» e «Usa la tua posizione» non dicono niente: resta solo il riquadro vuoto. -->
       <div class="results-head">
-        <p class="count" id="conteggio" aria-live="polite">21 farms <span>· 4 open now</span></p>
+        <p class="count" id="conteggio" aria-live="polite">21 farms <span>· 5 open now</span></p>
         <div class="tools">
           <select class="sort" id="ordine" aria-label="Sort">
             <option value="vicini">Nearest</option>
@@ -125,7 +125,7 @@
       </div>
       <div class="farm-body">
         <h3><span class="farm-name">Weinhof Leitenbichl</span></h3>
-        <p class="status"><span class="dot"></span>Opens at 9:00</p>
+        <p class="status"><span class="dot"></span>Opens at 14:00</p>
         <p class="meta">Bolzano · 1.5 km</p>
         <p class="farm-line">Santa Maddalena, lagrein, table grapes</p>
       </div>
@@ -140,7 +140,7 @@
       </div>
       <div class="farm-body">
         <h3><span class="farm-name">Maso Ventolino</span></h3>
-        <p class="status"><span class="dot"></span>Opens at 8:00</p>
+        <p class="status"><span class="dot"></span>Opens at 15:00</p>
         <p class="meta">Bolzano · 2.5 km</p>
         <p class="farm-line">Apple juice, arance</p>
       </div>
@@ -260,7 +260,7 @@
       </div>
       <div class="farm-body">
         <h3><span class="farm-name">Maso Prà dei Gelsi</span><span class="tag bio">Organic</span></h3>
-        <p class="status"><span class="dot"></span>Opens at 9:00</p>
+        <p class="status"><span class="dot"></span>Opens at 14:00</p>
         <p class="meta">Appiano · 6 km</p>
         <p class="farm-line">Pinot Blanc, lagrein, table grapes</p>
       </div>
@@ -290,7 +290,7 @@
       </div>
       <div class="farm-body">
         <h3><span class="farm-name">Orto di Vadena</span><span class="tag bio">Organic</span></h3>
-        <p class="status"><span class="dot"></span>Opens at 8:00</p>
+        <p class="status"><span class="dot"></span>Opens at 15:30</p>
         <p class="meta">Vadena · 10 km</p>
         <p class="farm-line">Salad, cabbages, pumpkins, fresh herbs</p>
       </div>
@@ -335,7 +335,7 @@
       </div>
       <div class="farm-body">
         <h3><span class="farm-name">Mühlsteinhof</span></h3>
-        <p class="status"><span class="dot"></span>Opens at 7:00</p>
+        <p class="status"><span class="dot"></span>Opens on Tuesday at 7:00</p>
         <p class="meta">Nalles · 12 km</p>
         <p class="farm-line">Rye bread, schüttelbrot, eggs</p>
       </div>
@@ -380,7 +380,7 @@
       </div>
       <div class="farm-body">
         <h3><span class="farm-name">Maso Fontanella</span></h3>
-        <p class="status"><span class="dot"></span>Opens at 8:00</p>
+        <p class="status"><span class="dot"></span>Opens at 15:00</p>
         <p class="meta">Merano · 23 km</p>
         <p class="farm-line">Apples, chestnuts, apple juice</p>
       </div>
@@ -391,11 +391,11 @@
       <div class="farm-photo">
         <img src="https://images.unsplash.com/photo-1506976785307-8732e854ad03?auto=format&amp;fit=crop&amp;w=560&amp;q=75" alt="" width="560" height="420" loading="lazy" decoding="async"
           style="view-transition-name: foto-hof-zur-linde" onload="this.classList.add('ok')">
-        <span class="photo-status"><span class="dot"></span>Closed</span>
+        <span class="photo-status open"><span class="dot"></span>Open</span>
       </div>
       <div class="farm-body">
         <h3><span class="farm-name">Hof zur Linde</span></h3>
-        <p class="status"><span class="dot"></span>Opens at 7:00</p>
+        <p class="status open"><span class="dot"></span>Open until 20:00</p>
         <p class="meta">Merano · 25 km</p>
         <p class="farm-line">Eggs, chicken, potatoes</p>
       </div>
@@ -464,10 +464,7 @@
           <p class="sub">Where you’ll find several farms together, one morning a week.</p>
         </div>
       </div>
-      <ul class="markets" id="mercati"><li class="market" data-slug="mercato-appiano">
-      <img src="https://images.unsplash.com/photo-1704931266595-f31bc7ed6c01?auto=format&amp;fit=crop&amp;w=160&amp;q=75" alt="" loading="lazy" width="64" height="64">
-      <div><h3><a href="./mercati/mercato-appiano/">Mercato contadino di Appiano</a></h3><p data-quando><span class="today">Today from 8:30</span></p><p>San Michele, Piazza Municipio · 4 farms</p></div>
-    </li><li class="market" data-slug="mercato-bolzano">
+      <ul class="markets" id="mercati"><li class="market" data-slug="mercato-bolzano">
       <img src="https://images.unsplash.com/photo-1774597998524-2d540f7c6c8e?auto=format&amp;fit=crop&amp;w=160&amp;q=75" alt="" loading="lazy" width="64" height="64">
       <div><h3><a href="./mercati/mercato-bolzano/">Mercato contadino di Bolzano</a></h3><p data-quando>Tomorrow · 8:00–13:00</p><p>Piazza della Vittoria · 6 farms</p></div>
     </li><li class="market" data-slug="mercato-merano">
@@ -476,6 +473,9 @@
     </li><li class="market" data-slug="mercato-laives">
       <img src="https://images.unsplash.com/photo-1785631829830-c59bb848d6de?auto=format&amp;fit=crop&amp;w=160&amp;q=75" alt="" loading="lazy" width="64" height="64">
       <div><h3><a href="./mercati/mercato-laives/">Mercato contadino di Laives</a></h3><p data-quando>Thursday · 15:00–18:30</p><p>Piazza Planta · 3 farms</p></div>
+    </li><li class="market" data-slug="mercato-appiano">
+      <img src="https://images.unsplash.com/photo-1704931266595-f31bc7ed6c01?auto=format&amp;fit=crop&amp;w=160&amp;q=75" alt="" loading="lazy" width="64" height="64">
+      <div><h3><a href="./mercati/mercato-appiano/">Mercato contadino di Appiano</a></h3><p data-quando>Friday · 8:30–12:00</p><p>San Michele, Piazza Municipio · 4 farms</p></div>
     </li></ul>
     </section>
 
